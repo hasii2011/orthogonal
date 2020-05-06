@@ -6,10 +6,13 @@ import logging.config
 import json
 
 import networkx as nx
-from orthogonal.topologyShapeMetric import TSM
 import matplotlib.pyplot as plt
 
 import unittest
+
+from orthogonal.topologyShapeMetric.Compaction import Compaction
+from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
+from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 JSON_LOGGING_CONFIG_FILENAME = "testLoggingConfig.json"
 
@@ -38,21 +41,21 @@ class TestGML(unittest.TestCase):
 
     def test_01(self):
         G = nx.Graph(nx.read_gml("test_data/case1.gml"))
-        compact: TSM.Compaction = self.generate(G, {node: eval(node) for node in G})
+        compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1.png")
 
     def test_02(self):
         G = nx.Graph(nx.read_gml("test_data/case1_biconnected.gml"))
-        compact: TSM.Compaction = self.generate(G, {node: eval(node) for node in G})
+        compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1_biconnected.png")
 
     def test_03(self):
         G = nx.Graph(nx.read_gml("test_data/case2.gml"))
-        compact: TSM.Compaction = self.generate(G, {node: eval(node) for node in G})
+        compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case2.png")
@@ -62,14 +65,14 @@ class TestGML(unittest.TestCase):
 
     def test_04(self):
         G = nx.Graph(nx.read_gml("test_data/case2_biconnected.gml"))
-        compact: TSM.Compaction = self.generate(G, {node: eval(node) for node in G})
+        compact: Compaction = self.generate(G, {node: eval(node) for node in G})
         compact.draw()
         plt.savefig("case2_biconnected.png")
 
     def testSimple(self):
 
         G = nx.Graph(nx.read_gml("test_data/simple.gml"))
-        compact: TSM.Compaction = self.generate(G, {node: eval(node) for node in G})
+        compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         for flowKey in compact.flow_dict.keys():
             valueDict = compact.flow_dict[flowKey]
@@ -80,10 +83,11 @@ class TestGML(unittest.TestCase):
         compact.draw(with_labels=True)
         plt.savefig("simple.png")
 
-    def generate(self, G, pos=None) -> TSM.Compaction:
-        planar = TSM.Planarization(G, pos)
-        orthogonal = TSM.Orthogonalization(planar)
-        compact: TSM.Compaction = TSM.Compaction(orthogonal)
+    def generate(self, G, pos=None) -> Compaction:
+
+        planar:     Planarization     = Planarization(G, pos)
+        orthogonal: Orthogonalization = Orthogonalization(planar)
+        compact:    Compaction        = Compaction(orthogonal)
 
         return compact
 
