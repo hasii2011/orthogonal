@@ -4,7 +4,7 @@ import math as m
 
 import networkx as nx
 
-from orthogonal.dcel import DCEL
+from orthogonal.dcel import Dcel
 
 
 def convert_pos_to_embdeding(G, pos):
@@ -125,7 +125,7 @@ class Planarization:
 
         self.G = G.copy()
         self.pos = pos # is only used to find the ext_face now.
-        self.dcel = DCEL.Dcel(G, self.embedding)
+        self.dcel = Dcel.Dcel(G, self.embedding)
         self.ext_face = self.get_external_face()
 
     def copy(self):
