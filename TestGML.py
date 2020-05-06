@@ -40,21 +40,21 @@ class TestGML(unittest.TestCase):
         self.logger: Logger = TestGML.clsLogger
 
     def test_01(self):
-        G = nx.Graph(nx.read_gml("test_data/case1.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case1.gml"))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1.png")
 
     def test_02(self):
-        G = nx.Graph(nx.read_gml("test_data/case1_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case1_biconnected.gml"))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1_biconnected.png")
 
     def test_03(self):
-        G = nx.Graph(nx.read_gml("test_data/case2.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case2.gml"))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
@@ -64,14 +64,14 @@ class TestGML(unittest.TestCase):
             self.logger.info(f'flowKey: {flowKey} - value: {compact.flow_dict[flowKey]}')
 
     def test_04(self):
-        G = nx.Graph(nx.read_gml("test_data/case2_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case2_biconnected.gml"))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
         compact.draw()
         plt.savefig("case2_biconnected.png")
 
     def testSimple(self):
 
-        G = nx.Graph(nx.read_gml("test_data/simple.gml"))
+        G = nx.Graph(nx.read_gml("testdata/simple.gml"))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         for flowKey in compact.flow_dict.keys():

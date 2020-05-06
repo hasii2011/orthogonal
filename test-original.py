@@ -11,19 +11,19 @@ def generate(G, pos=None):
 
 class TestGML(unittest.TestCase):
     def test_01(self):
-        G = nx.Graph(nx.read_gml("test_data/case1.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case1.gml"))
         generate(G, {node: eval(node) for node in G})
 
     def test_02(self):
-        G = nx.Graph(nx.read_gml("test_data/case1_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case1_biconnected.gml"))
         generate(G, {node: eval(node) for node in G})
 
     def test_03(self):
-        G = nx.Graph(nx.read_gml("test_data/case2.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case2.gml"))
         generate(G, {node: eval(node) for node in G})
 
     def test_04(self):
-        G = nx.Graph(nx.read_gml("test_data/case2_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case2_biconnected.gml"))
         generate(G, {node: eval(node) for node in G})
 
 
