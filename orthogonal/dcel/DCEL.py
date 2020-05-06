@@ -1,58 +1,10 @@
 
+
 import networkx as nx
 
-from orthogonal.dcel.GraphElement import GraphElement
+from orthogonal.dcel.Face import Face
 from orthogonal.dcel.Hedge import Hedge
-
-
-class Vertex(GraphElement):
-    def __init__(self, name):
-        super().__init__(name)
-        self.inc = None  # 'the first outgoing incident half-edge'
-        self.x = None
-        self.y = None
-
-    def surround_faces(self):  # clockwise, duplicated
-        for he in self.surround_half_edges():
-            yield he.inc
-
-    def surround_half_edges(self):  # clockwise
-        yield self.inc
-        he = self.inc.pred.twin
-        while he is not self.inc:
-            yield he
-            he = he.pred.twin
-
-
-class Face(GraphElement):
-    def __init__(self, name):
-        super().__init__(name)
-        self.inc = None  # the first half-edge incident to the face from left
-        self.nodes_id = []
-
-    def __len__(self):
-        return len(self.nodes_id)
-
-    def __repr__(self):
-        return f'FaceView{repr(self.nodes_id)}'
-
-    def update_nodes(self):
-        self.nodes_id = [vertex.id for vertex in self.surround_vertices()]
-
-    def surround_faces(self):  # clockwise, duplicated!!
-        for he in self.surround_half_edges():
-            yield he.twin.inc
-
-    def surround_half_edges(self):  # clockwise
-        yield self.inc
-        he = self.inc.succ
-        while he is not self.inc:
-            yield he
-            he = he.succ
-
-    def surround_vertices(self):
-        for he in self.surround_half_edges():
-            yield he.ori
+from orthogonal.dcel.Vertex import Vertex
 
 
 class Dcel:
@@ -85,7 +37,7 @@ class Dcel:
         for he in self.half_edge_dict.values():
             if not he.inc:
                 face_id = f'f{len(self.face_dict)}'
-                face = Face(face_id)
+                face: Face = Face(face_id)
                 face.inc = he
                 self.face_dict[face_id] = face
 
