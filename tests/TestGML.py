@@ -110,8 +110,8 @@ class TestGML(TestCase):
         positionDictionary: Dict[str, Tuple] = {}
         for node in G:
             self.logger.info(f'node: {node}')
-            x = G.nodes[node]['graphics']['x']
-            y = G.nodes[node]['graphics']['y']
+            x: int = G.nodes[node]['graphics']['x']
+            y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)
 
         compact: Compaction = self.generate(G, positionDictionary)

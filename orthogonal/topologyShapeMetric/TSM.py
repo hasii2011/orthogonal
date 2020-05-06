@@ -25,6 +25,8 @@ def convert_pos_to_embedding(G, pos):
 def number_of_cross(G, pos, print_it=False):
     """
     Not accurate, may be equal to actual number or double
+    This static method is deprecated.  It has been moved to it single usage class as
+    Planarization.numberOfCrossings(..)
     """
     def is_cross(pa, pb, pc, pd):
         def xmul(v1, v2):

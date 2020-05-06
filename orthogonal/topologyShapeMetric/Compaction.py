@@ -1,4 +1,7 @@
 
+from logging import Logger
+from logging import getLogger
+
 import networkx as nx
 
 import copy
@@ -10,12 +13,14 @@ from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 class Compaction:
     """
     Assign minimum lengths to the segments of the edges of the orthogonal representation.
-    Never reverse orthogonalize in this class.
+    Never reverse orthogonal in this class.
 
     """
     def __init__(self, orthogonalization: Orthogonalization):
 
-        self.ortho = orthogonalization
+        self.logger: Logger = getLogger(__name__)
+
+        self._orthogonalization: Orthogonalization = orthogonalization
         if orthogonalization.flow_network.cost == 0:
             self.planar = orthogonalization.planar
             self.flow_dict = orthogonalization.flow_dict
@@ -177,7 +182,7 @@ class Compaction:
         for face in self.planar.dfs_face_order():
             for i, u in enumerate(face.nodes_id):
                 if not pos:
-                    pos[u] = (0, 0) # initial point
+                    pos[u] = (0, 0)  # initial point
                 if u in pos:  # has found a start point
                     new_loop = face.nodes_id[i:] + face.nodes_id[:i]
                     for u, v in zip(new_loop, new_loop[1:]):
@@ -199,5 +204,5 @@ class Compaction:
         for u, v in self.planar.G.edges:
             assert self.pos[u][0] == self.pos[v][0] or self.pos[u][1] == self.pos[v][1]
 
-    def draw(self, **kwds):
-        nx.draw(self.planar.G, self.pos, **kwds)
+    def draw(self, **keywords):
+        nx.draw(self.planar.G, self.pos, **keywords)
