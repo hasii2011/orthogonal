@@ -4,7 +4,7 @@ import math as m
 import networkx as nx
 
 
-def convert_pos_to_embdeding(G, pos):
+def convert_pos_to_embedding(G, pos):
     """
         Only straight line in G.
     """
@@ -13,12 +13,9 @@ def convert_pos_to_embdeding(G, pos):
         neigh_pos = {
             neigh: (pos[neigh][0]-pos[node][0], pos[neigh][1]-pos[node][1]) for neigh in G[node]
         }
-        neighes_sorted = sorted(G.adj[node],
-                                key=lambda v: m.atan2(
-                                    neigh_pos[v][1], neigh_pos[v][0])
-                                )  # counter clockwise
+        neighbors_sorted = sorted(G.adj[node], key=lambda v: m.atan2(neigh_pos[v][1], neigh_pos[v][0]))  # counter clockwise
         last = None
-        for neigh in neighes_sorted:
+        for neigh in neighbors_sorted:
             emd.add_half_edge_ccw(node, neigh, last)
             last = neigh
     emd.check_structure()
@@ -26,9 +23,9 @@ def convert_pos_to_embdeding(G, pos):
 
 
 def number_of_cross(G, pos, print_it=False):
-    '''
-    not accurate, may be equal to actual number or double
-    '''
+    """
+    Not accurate, may be equal to actual number or double
+    """
     def is_cross(pa, pb, pc, pd):
         def xmul(v1, v2):
             return v1[0] * v2[1] - v1[1] * v2[0]
@@ -49,5 +46,3 @@ def number_of_cross(G, pos, print_it=False):
                     if print_it:
                         print(a, b, c, d)
     return count
-
-

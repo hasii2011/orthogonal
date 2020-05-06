@@ -3,7 +3,7 @@ import math as m
 
 import networkx as nx
 
-from orthogonal.topologyShapeMetric.TSM import convert_pos_to_embdeding
+from orthogonal.topologyShapeMetric.TSM import convert_pos_to_embedding
 from orthogonal.topologyShapeMetric.TSM import number_of_cross
 
 from orthogonal.doublyConnectedEdgeList.Dcel import Dcel
@@ -23,7 +23,7 @@ class Planarization:
             pos = nx.combinatorial_embedding_to_pos(self.embedding)
         else:
             assert number_of_cross(G, pos) == 0
-            self.embedding = convert_pos_to_embdeding(G, pos)
+            self.embedding = convert_pos_to_embedding(G, pos)
 
         self.G = G.copy()
         self.pos = pos  # is only used to find the ext_face now.
