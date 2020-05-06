@@ -34,42 +34,41 @@ class Compaction:
         self.pos = self.layout()
 
     def bend_point_processor(self):
-            '''Create dummy nodes for bends.
-            '''
-            bends = {}  # left to right
-            for he in self.planar.dcel.half_edge_dict.values():
-                lf, rf = he.twin.inc, he.inc
-                flow = self.flow_dict[lf.id][rf.id][he.id]
-                if flow > 0:
-                    bends[he.id] = flow
+        """
+        Create dummy nodes for bends.
+        """
+        bends = {}  # left to right
+        for he in self.planar.dcel.half_edge_dict.values():
+            lf, rf = he.twin.inc, he.inc
+            flow = self.flow_dict[lf.id][rf.id][he.id]
+            if flow > 0:
+                bends[he.id] = flow
 
-            idx = 0
-            for he_id, n_bends in bends.items():
-                # Q: what if there are bends on both (u, v) and (v, u)?
-                # A: Impossible, not a min cost
-                he = self.planar.dcel.half_edge_dict[he_id]
-                u, v = he.get_points()
-                lf_id, rf_id = he.twin.inc.id, he.inc.id
+        idx = 0
+        for he_id, n_bends in bends.items():
+            # Q: what if there are bends on both (u, v) and (v, u)?
+            # A: Impossible, not a min cost
+            he = self.planar.dcel.half_edge_dict[he_id]
+            u, v = he.get_points()
+            lf_id, rf_id = he.twin.inc.id, he.inc.id
 
-                self.planar.G.remove_edge(u, v)
-                self.flow_dict[u][rf_id][u, f'b{idx}'] = self.flow_dict[u][rf_id].pop((u, v))
+            self.planar.G.remove_edge(u, v)
+            self.flow_dict[u][rf_id][u, f'b{idx}'] = self.flow_dict[u][rf_id].pop((u, v))
 
+            for i in range(n_bends):
+                cur_node = f'b{idx}'
+                pre_node = f'b{idx-1}' if i > 0 else u
+                nxt_node = f'b{idx+1}' if i < n_bends - 1 else v
+                self.planar.G.add_edge(pre_node, cur_node)
+                self.planar.dcel.add_node_between(
+                    pre_node, v, cur_node
+                )
+                self.flow_dict.setdefault(cur_node, {}).setdefault(lf_id, {})[cur_node, pre_node] = 1
+                self.flow_dict.setdefault(cur_node, {}).setdefault(rf_id, {})[cur_node, nxt_node] = 3
+                idx += 1
 
-
-                for i in range(n_bends):
-                    cur_node = f'b{idx}'
-                    pre_node = f'b{idx-1}' if i > 0 else u
-                    nxt_node = f'b{idx+1}' if i < n_bends - 1 else v
-                    self.planar.G.add_edge(pre_node, cur_node)
-                    self.planar.dcel.add_node_between(
-                        pre_node, v, cur_node
-                    )
-                    self.flow_dict.setdefault(cur_node, {}).setdefault(lf_id, {})[cur_node, pre_node] = 1
-                    self.flow_dict.setdefault(cur_node, {}).setdefault(rf_id, {})[cur_node, nxt_node] = 3
-                    idx += 1
-
-                self.flow_dict[v][lf_id][v, f'b{idx-1}'] = self.flow_dict[v][lf_id].pop((v, u))
-                self.planar.G.add_edge(f'b{idx-1}', v)
+            self.flow_dict[v][lf_id][v, f'b{idx-1}'] = self.flow_dict[v][lf_id].pop((v, u))
+            self.planar.G.add_edge(f'b{idx-1}', v)
 
     def face_side_processor(self):
         '''
