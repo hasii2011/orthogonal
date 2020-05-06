@@ -1,47 +1,22 @@
+
 import networkx as nx
 
-
-class GraphElement():
-    def __init__(self, name):
-        self.id = name
-
-    def __hash__(self):
-        return hash(self.id)
-
-
-class Hedge(GraphElement):
-    def __init__(self, name):
-        super().__init__(name)
-        self.inc = None # the incident face'
-        self.twin = None
-        self.ori  = None
-        self.pred = None
-        self.succ = None
-
-    def get_points(self):
-        return self.ori.id, self.twin.ori.id
-
-    def set_all(self, twin, ori, pred, succ, inc):
-        self.twin = twin
-        self.ori = ori
-        self.pred = pred
-        self.succ = succ
-        self.inc = inc
+from orthogonal.dcel.GraphElement import GraphElement
+from orthogonal.dcel.Hedge import Hedge
 
 
 class Vertex(GraphElement):
     def __init__(self, name):
         super().__init__(name)
-        self.inc = None # 'the first outgoing incident half-edge'
+        self.inc = None  # 'the first outgoing incident half-edge'
         self.x = None
         self.y = None
 
-    def surround_faces(self): # clockwise, duplicated
+    def surround_faces(self):  # clockwise, duplicated
         for he in self.surround_half_edges():
             yield he.inc
 
-
-    def surround_half_edges(self): # clockwise
+    def surround_half_edges(self):  # clockwise
         yield self.inc
         he = self.inc.pred.twin
         while he is not self.inc:
@@ -52,7 +27,7 @@ class Vertex(GraphElement):
 class Face(GraphElement):
     def __init__(self, name):
         super().__init__(name)
-        self.inc = None # the first half-edge incident to the face from left
+        self.inc = None  # the first half-edge incident to the face from left
         self.nodes_id = []
 
     def __len__(self):
@@ -64,11 +39,11 @@ class Face(GraphElement):
     def update_nodes(self):
         self.nodes_id = [vertex.id for vertex in self.surround_vertices()]
 
-    def surround_faces(self): # clockwise, duplicated!!
+    def surround_faces(self):  # clockwise, duplicated!!
         for he in self.surround_half_edges():
             yield he.twin.inc
 
-    def surround_half_edges(self): # clockwise
+    def surround_half_edges(self):  # clockwise
         yield self.inc
         he = self.inc.succ
         while he is not self.inc:
