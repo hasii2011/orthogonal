@@ -3,7 +3,7 @@ import networkx as nx
 
 import copy
 
-from orthogonal.topologyShapeMetric.TSM import Flow_net
+from orthogonal.topologyShapeMetric.FlowNet import Flow_net
 
 
 class Compaction:
@@ -108,10 +108,11 @@ class Compaction:
         return edge_side
 
     def tidy_rectangle_compaction(self):
-        '''
+        """
         Doing the compaction of TSM algorithm.
         Compute every edge's length, and store them in self.planar.G.edges[u, v]['len']
-        '''
+        """
+
         def build_flow(target_side):
             hv_flow = Flow_net()
             for he_id, side in self.edge_side.items():

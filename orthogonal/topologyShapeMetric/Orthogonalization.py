@@ -1,5 +1,8 @@
 
-from orthogonal.topologyShapeMetric.TSM import Flow_net
+
+import collections as coll
+
+from orthogonal.topologyShapeMetric.FlowNet import Flow_net
 
 
 class Orthogonalization:
