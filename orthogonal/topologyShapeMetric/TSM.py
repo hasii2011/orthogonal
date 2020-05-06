@@ -36,7 +36,8 @@ def number_of_cross(G, pos, print_it=False):
         ca = (pa[0] - pc[0], pa[1] - pc[1])
         cb = (pb[0] - pc[0], pb[1] - pc[1])
         cd = (pd[0] - pc[0], pd[1] - pc[1])
-        return xmul(ca, cd) >= 0 and xmul(cd, cb) >= 0 and f(pa, pb, pc) * f(pa, pb, pd) < 0
+        # return xmul(ca, cd) >= 0 and xmul(cd, cb) >= 0 and f(pa, pb, pc) * f(pa, pb, pd) < 0  # PyCharm Optimization
+        return xmul(ca, cd) >= 0 > f(pa, pb, pc) * f(pa, pb, pd) and xmul(cd, cb) >= 0
     count = 0
     for a, b in G.edges:
         for c, d in G.edges:
