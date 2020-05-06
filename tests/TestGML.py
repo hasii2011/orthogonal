@@ -1,25 +1,27 @@
 
 from logging import Logger
 from logging import getLogger
+from logging import config
 import logging.config
 
-import json
+from json import load as jsonLoad
 
 from os import sep as osSep
+
+from pkg_resources import resource_filename
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
-import unittest
-
-from pkg_resources import resource_filename
+from unittest import TestCase
+from unittest import main as unitTestMain
 
 from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 
-class TestGML(unittest.TestCase):
+class TestGML(TestCase):
 
     RESOURCES_PACKAGE_NAME: str = 'tests.testdata'
     RESOURCES_PATH:         str = f'tests{osSep}testdata'
@@ -34,9 +36,9 @@ class TestGML(unittest.TestCase):
         """"""
         fqFileName: str = TestGML.retrieveResourcePath(TestGML.JSON_LOGGING_CONFIG_FILENAME)
         with open(fqFileName, 'r') as loggingConfigurationFile:
-            configurationDictionary = json.load(loggingConfigurationFile)
+            configurationDictionary = jsonLoad(loggingConfigurationFile)
 
-        logging.config.dictConfig(configurationDictionary)
+        config.dictConfig(configurationDictionary)
         logging.logProcesses = False
         logging.logThreads = False
 
@@ -57,12 +59,12 @@ class TestGML(unittest.TestCase):
         plt.savefig("case1.png")
 
     def testCase1BiConnected(self):
-        fqFileName: str = TestGML.retrieveResourcePath("case1_biconnected.gml")
+        fqFileName: str = TestGML.retrieveResourcePath("case1BiConnected.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
-        plt.savefig("case1_biconnected.png")
+        plt.savefig("case1BiConnected.png")
 
     def testCase2(self):
         fqFileName: str = TestGML.retrieveResourcePath("case2.gml")
@@ -76,11 +78,11 @@ class TestGML(unittest.TestCase):
             self.logger.info(f'flowKey: {flowKey} - value: {compact.flow_dict[flowKey]}')
 
     def testCase2BiConnected(self):
-        fqFileName: str = TestGML.retrieveResourcePath("case2_biconnected.gml")
+        fqFileName: str = TestGML.retrieveResourcePath("case2BiConnected.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
         compact.draw()
-        plt.savefig("case2_biconnected.png")
+        plt.savefig("case2BiConnected.png")
 
     def testSimple(self):
 
@@ -126,4 +128,5 @@ class TestGML(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    res = unittest.main(verbosity=3, exit=False)
+    res = unitTestMain(verbosity=3, exit=False)
+    print(f'The results are in !!:  {res}')

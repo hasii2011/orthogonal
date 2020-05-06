@@ -15,7 +15,7 @@ class TestGML(unittest.TestCase):
         generate(G, {node: eval(node) for node in G})
 
     def test_02(self):
-        G = nx.Graph(nx.read_gml("testdata/case1_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case1BiConnected.gml"))
         generate(G, {node: eval(node) for node in G})
 
     def test_03(self):
@@ -23,7 +23,7 @@ class TestGML(unittest.TestCase):
         generate(G, {node: eval(node) for node in G})
 
     def test_04(self):
-        G = nx.Graph(nx.read_gml("testdata/case2_biconnected.gml"))
+        G = nx.Graph(nx.read_gml("testdata/case2BiConnected.gml"))
         generate(G, {node: eval(node) for node in G})
 
 
