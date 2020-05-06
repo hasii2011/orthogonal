@@ -1,4 +1,4 @@
 #!/usr/local/bin/bash
 
 
-rm *.png
+rm tests/*.png

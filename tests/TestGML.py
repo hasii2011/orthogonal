@@ -5,26 +5,35 @@ import logging.config
 
 import json
 
+from os import sep as osSep
+
 import networkx as nx
 import matplotlib.pyplot as plt
 
 import unittest
 
+from pkg_resources import resource_filename
+
 from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
-JSON_LOGGING_CONFIG_FILENAME = "testLoggingConfig.json"
-
 
 class TestGML(unittest.TestCase):
+
+    RESOURCES_PACKAGE_NAME: str = 'tests.testdata'
+    RESOURCES_PATH:         str = f'tests{osSep}testdata'
+
+    RESOURCE_ENV_VAR:       str = 'RESOURCEPATH'
+    JSON_LOGGING_CONFIG_FILENAME = "testLoggingConfig.json"
 
     clsLogger: Logger = None
 
     @classmethod
     def setUpLogging(cls):
         """"""
-        with open(JSON_LOGGING_CONFIG_FILENAME, 'r') as loggingConfigurationFile:
+        fqFileName: str = TestGML.retrieveResourcePath(TestGML.JSON_LOGGING_CONFIG_FILENAME)
+        with open(fqFileName, 'r') as loggingConfigurationFile:
             configurationDictionary = json.load(loggingConfigurationFile)
 
         logging.config.dictConfig(configurationDictionary)
@@ -39,22 +48,25 @@ class TestGML(unittest.TestCase):
     def setUp(self):
         self.logger: Logger = TestGML.clsLogger
 
-    def test_01(self):
-        G = nx.Graph(nx.read_gml("testdata/case1.gml"))
+    def testCase1(self):
+        fqFileName: str = TestGML.retrieveResourcePath("case1.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1.png")
 
-    def test_02(self):
-        G = nx.Graph(nx.read_gml("testdata/case1_biconnected.gml"))
+    def testCase1BiConnected(self):
+        fqFileName: str = TestGML.retrieveResourcePath("case1_biconnected.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
         plt.savefig("case1_biconnected.png")
 
-    def test_03(self):
-        G = nx.Graph(nx.read_gml("testdata/case2.gml"))
+    def testCase2(self):
+        fqFileName: str = TestGML.retrieveResourcePath("case2.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         compact.draw()
@@ -63,15 +75,17 @@ class TestGML(unittest.TestCase):
         for flowKey in compact.flow_dict.keys():
             self.logger.info(f'flowKey: {flowKey} - value: {compact.flow_dict[flowKey]}')
 
-    def test_04(self):
-        G = nx.Graph(nx.read_gml("testdata/case2_biconnected.gml"))
+    def testCase2BiConnected(self):
+        fqFileName: str = TestGML.retrieveResourcePath("case2_biconnected.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
         compact.draw()
         plt.savefig("case2_biconnected.png")
 
     def testSimple(self):
 
-        G = nx.Graph(nx.read_gml("testdata/simple.gml"))
+        fqFileName: str = TestGML.retrieveResourcePath("simple.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         for flowKey in compact.flow_dict.keys():
@@ -90,6 +104,25 @@ class TestGML(unittest.TestCase):
         compact:    Compaction        = Compaction(orthogonal)
 
         return compact
+
+    @classmethod
+    def retrieveResourcePath(cls, bareFileName: str) -> str:
+
+        # Use this method in Python 3.9
+        # from importlib_resources import files
+        # configFilePath: str  = files('org.pyut.resources').joinpath(Pyut.JSON_LOGGING_CONFIG_FILENAME)
+
+        try:
+            fqFileName: str = resource_filename(TestGML.RESOURCES_PACKAGE_NAME, bareFileName)
+        except (ValueError, Exception):
+            #
+            # Maybe we are in an app
+            #
+            from os import environ
+            pathToResources: str = environ.get(f'{TestGML.RESOURCE_ENV_VAR}')
+            fqFileName:      str = f'{pathToResources}/{TestGML.RESOURCES_PATH}/{bareFileName}'
+
+        return fqFileName
 
 
 if __name__ == '__main__':
