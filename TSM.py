@@ -4,9 +4,7 @@ import math as m
 
 import networkx as nx
 
-import DCEL
-
-import matplotlib.pyplot as plt
+from orthogonal.dcel import DCEL
 
 
 def convert_pos_to_embdeding(G, pos):
