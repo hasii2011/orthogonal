@@ -3,7 +3,7 @@ import networkx as nx
 
 import copy
 
-from orthogonal.topologyShapeMetric.FlowNet import Flow_net
+from orthogonal.topologyShapeMetric.FlowNet import FlowNet
 
 
 class Compaction:
@@ -114,7 +114,7 @@ class Compaction:
         """
 
         def build_flow(target_side):
-            hv_flow = Flow_net()
+            hv_flow = FlowNet()
             for he_id, side in self.edge_side.items():
                 if side == target_side:
                     he = self.planar.dcel.half_edge_dict[he_id]

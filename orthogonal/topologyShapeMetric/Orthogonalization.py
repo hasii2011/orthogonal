@@ -2,7 +2,7 @@
 
 import collections as coll
 
-from orthogonal.topologyShapeMetric.FlowNet import Flow_net
+from orthogonal.topologyShapeMetric.FlowNet import FlowNet
 
 
 class Orthogonalization:
@@ -20,7 +20,7 @@ class Orthogonalization:
         self.flow_dict = self.tamassia_orthogonalization()
 
     def face_determination(self):
-        flow_network = Flow_net()
+        flow_network = FlowNet()
 
         for vertex in self.planar.dcel.vertex_dict.values():
             flow_network.add_v(vertex.id)

@@ -4,7 +4,7 @@ import collections as coll
 import networkx as nx
 
 
-class Flow_net(nx.MultiDiGraph):
+class FlowNet(nx.MultiDiGraph):
     def add_v2f(self, v, f, key):
         self.add_edge(v, f, key=key, lowerbound=1, capacity=4, weight=0)
 
