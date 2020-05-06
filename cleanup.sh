@@ -1,4 +1,6 @@
 #!/usr/local/bin/bash
 
 
-rm -v *.png
+rm -rf dist build
+rm -rf orthogonal.egg-info
+rm  *.png > /dev/null 2>&1
