@@ -4,7 +4,7 @@ import math as m
 
 import networkx as nx
 
-from orthogonal.dcel import Dcel
+from orthogonal.doublyConnectedEdgeList import Dcel
 
 
 def convert_pos_to_embdeding(G, pos):

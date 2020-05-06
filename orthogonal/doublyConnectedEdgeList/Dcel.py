@@ -2,9 +2,9 @@
 
 import networkx as nx
 
-from orthogonal.dcel.Face import Face
-from orthogonal.dcel.Hedge import Hedge
-from orthogonal.dcel.Vertex import Vertex
+from orthogonal.doublyConnectedEdgeList.Face import Face
+from orthogonal.doublyConnectedEdgeList.Hedge import Hedge
+from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
 
 
 class Dcel:

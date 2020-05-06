@@ -1,5 +1,5 @@
 
-from orthogonal.dcel.GraphElement import GraphElement
+from orthogonal.doublyConnectedEdgeList.GraphElement import GraphElement
 
 
 class Vertex(GraphElement):
