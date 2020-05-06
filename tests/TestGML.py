@@ -7,6 +7,8 @@ import logging.config
 from json import load as jsonLoad
 
 from os import sep as osSep
+from typing import Dict
+from typing import Tuple
 
 from pkg_resources import resource_filename
 
@@ -88,6 +90,8 @@ class TestGML(TestCase):
 
         fqFileName: str = TestGML.retrieveResourcePath("simple.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
+        for node in G:
+            self.logger.info(f'node: {node}')
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         for flowKey in compact.flow_dict.keys():
@@ -98,6 +102,22 @@ class TestGML(TestCase):
 
         compact.draw(with_labels=True)
         plt.savefig("simple.png")
+
+    def testTranslationGraph(self):
+        fqFileName: str = TestGML.retrieveResourcePath("translationGraph.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
+        self.logger.info(f'Nodes: {G.nodes}')
+        positionDictionary: Dict[str, Tuple] = {}
+        for node in G:
+            self.logger.info(f'node: {node}')
+            x = G.nodes[node]['graphics']['x']
+            y = G.nodes[node]['graphics']['y']
+            positionDictionary[node] = (x, y)
+
+        compact: Compaction = self.generate(G, positionDictionary)
+
+        compact.draw(with_labels=True)
+        plt.savefig("translationGraph.png")
 
     def generate(self, G, pos=None) -> Compaction:
 

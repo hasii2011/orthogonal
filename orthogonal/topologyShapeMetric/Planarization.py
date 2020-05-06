@@ -1,5 +1,7 @@
 
 import math as m
+from logging import Logger
+from logging import getLogger
 
 import networkx as nx
 
@@ -15,8 +17,11 @@ class Planarization:
     """
 
     def __init__(self, G, pos=None):
-        assert nx.number_of_selfloops(G) == 0
-        assert nx.is_connected(G)
+
+        assert nx.number_of_selfloops(G) == 0, 'Number of self loops is greater than zero'
+        assert nx.is_connected(G), 'Graph is not connected'
+
+        self.logger: Logger = getLogger(__name__)
         if pos is None:
             is_planar, self.embedding = nx.check_planarity(G)
             assert is_planar

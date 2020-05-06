@@ -3,6 +3,7 @@
 import collections as coll
 
 from orthogonal.topologyShapeMetric.FlowNet import FlowNet
+from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 
 class Orthogonalization:
@@ -10,7 +11,8 @@ class Orthogonalization:
     Works on a planar embedding, changes shape of the graph.
     """
 
-    def __init__(self, planar):
+    def __init__(self, planar: Planarization):
+
         assert max(pair[1] for pair in planar.G.degree) <= 4
         assert planar.G.number_of_nodes() > 1
 
@@ -33,8 +35,7 @@ class Orthogonalization:
                 flow_network.add_v2f(vertex.id, he.inc.id, he.id)
 
         for he in self.planar.dcel.half_edge_dict.values():
-            flow_network.add_f2f(he.twin.inc.id, he.inc.id, he.id) # lf -> rf
-
+            flow_network.add_f2f(he.twin.inc.id, he.inc.id, he.id)  # lf -> rf
 
         return flow_network
 
@@ -77,13 +78,12 @@ class Orthogonalization:
                                                   for key in keys]
                     x = var_dict[v][f1][he1_id]
                     y = var_dict[v][f2][he2_id]
-                    p = pulp.LpVariable(
-                        x.name + "%temp", None, None, pulp.LpInteger)
+                    p = pulp.LpVariable(x.name + "%temp", None, None, pulp.LpInteger)
                     prob.addConstraint(x - y <= p)
                     prob.addConstraint(y - x <= p)
                     objs.append(weight_of_corner * p)
 
-        # non symmetrics cost
+        # non symmetric cost
         if weight_of_sym != 0:
             if sym_pairs:
                 for u, v in sym_pairs:
@@ -135,10 +135,10 @@ class Orthogonalization:
             # code here works only when nodes are represented by str, likes '(1, 2)'
             for var in prob.variables():
                 if 'temp' not in var.name:
-                    l = var.name.split('%')
-                    if len(l) == 3:
+                    lVar = var.name.split('%')
+                    if len(lVar) == 3:
                         # u, v, he_id = map(trans, l) # change str to tuple !!!!!!!!!
-                        u, v, he_id = [item.replace('_', ' ') for item in l]
+                        u, v, he_id = [item.replace('_', ' ') for item in lVar]
                         he_id = eval(he_id)
                         self.flow_dict[u][v][he_id] = int(var.varValue)
             return pulp.value(prob.objective)

@@ -4,22 +4,24 @@ import networkx as nx
 import copy
 
 from orthogonal.topologyShapeMetric.FlowNet import FlowNet
+from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 
 
 class Compaction:
-    '''
+    """
     Assign minimum lengths to the segments of the edges of the orthogonal representation.
-    Never reverse ortho in this class.
-    '''
+    Never reverse orthogonalize in this class.
 
-    def __init__(self, ortho):
-        self.ortho = ortho
-        if ortho.flow_network.cost == 0:
-            self.planar = ortho.planar
-            self.flow_dict = ortho.flow_dict
+    """
+    def __init__(self, orthogonalization: Orthogonalization):
+
+        self.ortho = orthogonalization
+        if orthogonalization.flow_network.cost == 0:
+            self.planar = orthogonalization.planar
+            self.flow_dict = orthogonalization.flow_dict
         else:
-            self.planar = ortho.planar.copy()
-            self.flow_dict = copy.deepcopy(ortho.flow_dict)
+            self.planar = orthogonalization.planar.copy()
+            self.flow_dict = copy.deepcopy(orthogonalization.flow_dict)
 
         self.bend_point_processor()
         self.edge_side = self.face_side_processor()

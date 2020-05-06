@@ -18,7 +18,12 @@
             "handlers": ["consoleHandler"],
             "propagate": "False"
         },
-        "test": {
+        "orthogonal": {
+            "level": "INFO",
+            "handlers": ["consoleHandler"],
+            "propagate": "False"
+        },
+        "tests": {
             "level": "INFO",
             "handlers": ["consoleHandler"],
             "propagate": "False"
