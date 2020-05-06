@@ -1,9 +1,5 @@
-
-from logging import Logger
-from logging import getLogger
-
 import networkx as nx
-import TSM
+from orthogonal.topologyShapeMetric import TSM
 import unittest
 
 

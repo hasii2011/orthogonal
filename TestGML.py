@@ -6,7 +6,7 @@ import logging.config
 import json
 
 import networkx as nx
-import TSM
+from orthogonal.topologyShapeMetric import TSM
 import matplotlib.pyplot as plt
 
 import unittest
