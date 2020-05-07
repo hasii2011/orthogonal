@@ -80,8 +80,8 @@ class TestGML(TestBase):
         compact.draw(with_labels=True)
         plt.savefig("simple.png")
 
-    def testTranslationGraph(self):
-        fqFileName: str = TestGML.retrieveResourcePath("translationGraph.gml")
+    def testTranslationGraphSimple(self):
+        fqFileName: str = TestGML.retrieveResourcePath("translationGraphSimple.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
         self.logger.info(f'Nodes: {G.nodes}')
         positionDictionary: Dict[str, Tuple] = {}
@@ -94,7 +94,7 @@ class TestGML(TestBase):
         compact: Compaction = self.generate(G, positionDictionary)
 
         compact.draw(with_labels=True)
-        plt.savefig("translationGraph.png")
+        plt.savefig("translationGraphSimple.png")
 
     def generate(self, G, pos=None) -> Compaction:
 
