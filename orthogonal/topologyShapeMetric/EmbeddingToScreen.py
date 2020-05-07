@@ -1,4 +1,5 @@
 from typing import Dict
+from typing import List
 from typing import Tuple
 
 from logging import Logger
@@ -18,6 +19,10 @@ class EmbeddingToScreen:
         self.logger: Logger = getLogger(__name__)
 
         self._screenSize: Tuple[int, int] = screenSize
+
+        self._xIntervalList:     List[int] = []
+        self._yUpIntervalList:   List[int] = []
+        self._yDownIntervalList: List[int] = []
 
     def convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS) -> EmbeddedCoordinates:
 
@@ -59,3 +64,6 @@ class EmbeddingToScreen:
 
         return smallestY
 
+    def _computeXIntervals(self, biggestX: int):
+
+        self._xIntervalList[0] = 0

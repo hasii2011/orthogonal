@@ -96,6 +96,20 @@ class TestGML(TestBase):
         compact.draw(with_labels=True)
         plt.savefig("translationGraphSimple.png")
 
+    def testTranslationGraphComplex(self):
+        fqFileName: str = TestGML.retrieveResourcePath("translationGraphComplex.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
+        positionDictionary: Dict[str, Tuple] = {}
+        for node in G:
+            self.logger.info(f'node: {node}')
+            x: int = G.nodes[node]['graphics']['x']
+            y: int = G.nodes[node]['graphics']['y']
+            positionDictionary[node] = (x, y)
+
+        compact: Compaction = self.generate(G, positionDictionary)
+        compact.draw(with_labels=True)
+        plt.savefig("translationGraphComplex.png")
+
     def generate(self, G, pos=None) -> Compaction:
 
         planar:     Planarization     = Planarization(G, pos)
