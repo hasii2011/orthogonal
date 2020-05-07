@@ -1,10 +1,14 @@
-
+from typing import Dict
 from typing import Tuple
 
 from logging import Logger
 from logging import getLogger
 
-from orthogonal.topologyShapeMetric.Planarization import POSITIONS
+from orthogonal.topologyShapeMetric.EmbeddedCoordinates import EmbeddedCoordinates
+
+NODE_NAME = str
+POSITION  = Tuple[int, int]
+POSITIONS = Dict[NODE_NAME, POSITION]
 
 
 class EmbeddingToScreen:
@@ -15,5 +19,43 @@ class EmbeddingToScreen:
 
         self._screenSize: Tuple[int, int] = screenSize
 
-    def convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS):
-        pass
+    def convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS) -> EmbeddedCoordinates:
+
+        biggestX:  int = self._findFarthestRight(nodePositions)
+        biggestY:  int = self._findFarthestUp(nodePositions)
+        smallestY: int = self._findFarthestDown(nodePositions)
+
+        self.logger.info(f'biggestX: {biggestX} biggestY: {biggestY} smallestY: {smallestY}')
+
+        return EmbeddedCoordinates(biggestX=biggestX, biggestY=biggestY, smallestY=smallestY)
+
+    def _findFarthestRight(self, nodePositions: POSITIONS) -> int:
+
+        biggestX: int = 0
+        for node in nodePositions:
+            currentX, currentY = nodePositions[node]
+            if currentX > biggestX:
+                biggestX = currentX
+
+        return biggestX
+
+    def _findFarthestUp(self, nodePositions: POSITIONS) -> int:
+
+        biggestY: int = 0
+        for node in nodePositions:
+            currentX, currentY = nodePositions[node]
+            if currentY > biggestY:
+                biggestY = currentY
+
+        return biggestY
+
+    def _findFarthestDown(self, nodePositions: POSITIONS) -> int:
+
+        smallestY: int = 0
+        for node in nodePositions:
+            currentX, currentY = nodePositions[node]
+            if currentY < smallestY:
+                smallestY = currentY
+
+        return smallestY
+
