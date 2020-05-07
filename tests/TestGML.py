@@ -1,52 +1,29 @@
 
 from logging import Logger
 from logging import getLogger
-from logging import config
-import logging.config
 
-from json import load as jsonLoad
-
-from os import sep as osSep
 from typing import Dict
 from typing import Tuple
-
-from pkg_resources import resource_filename
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from unittest import TestCase
 from unittest import main as unitTestMain
 
 from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
+from tests.TestBase import TestBase
 
-class TestGML(TestCase):
 
-    RESOURCES_PACKAGE_NAME: str = 'tests.testdata'
-    RESOURCES_PATH:         str = f'tests{osSep}testdata'
-
-    RESOURCE_ENV_VAR:       str = 'RESOURCEPATH'
-    JSON_LOGGING_CONFIG_FILENAME = "testLoggingConfig.json"
+class TestGML(TestBase):
 
     clsLogger: Logger = None
 
     @classmethod
-    def setUpLogging(cls):
-        """"""
-        fqFileName: str = TestGML.retrieveResourcePath(TestGML.JSON_LOGGING_CONFIG_FILENAME)
-        with open(fqFileName, 'r') as loggingConfigurationFile:
-            configurationDictionary = jsonLoad(loggingConfigurationFile)
-
-        config.dictConfig(configurationDictionary)
-        logging.logProcesses = False
-        logging.logThreads = False
-
-    @classmethod
     def setUpClass(cls):
-        TestGML.setUpLogging()
+        TestBase.setUpLogging()
         TestGML.clsLogger = getLogger(__name__)
 
     def setUp(self):
@@ -126,25 +103,6 @@ class TestGML(TestCase):
         compact:    Compaction        = Compaction(orthogonal)
 
         return compact
-
-    @classmethod
-    def retrieveResourcePath(cls, bareFileName: str) -> str:
-
-        # Use this method in Python 3.9
-        # from importlib_resources import files
-        # configFilePath: str  = files('org.pyut.resources').joinpath(Pyut.JSON_LOGGING_CONFIG_FILENAME)
-
-        try:
-            fqFileName: str = resource_filename(TestGML.RESOURCES_PACKAGE_NAME, bareFileName)
-        except (ValueError, Exception):
-            #
-            # Maybe we are in an app
-            #
-            from os import environ
-            pathToResources: str = environ.get(f'{TestGML.RESOURCE_ENV_VAR}')
-            fqFileName:      str = f'{pathToResources}/{TestGML.RESOURCES_PATH}/{bareFileName}'
-
-        return fqFileName
 
 
 if __name__ == '__main__':

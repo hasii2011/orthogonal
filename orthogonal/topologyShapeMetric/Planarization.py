@@ -7,8 +7,6 @@ from typing import Tuple
 
 import networkx as nx
 
-from orthogonal.topologyShapeMetric.TSM import convert_pos_to_embedding
-
 from orthogonal.doublyConnectedEdgeList.Dcel import Dcel
 
 
