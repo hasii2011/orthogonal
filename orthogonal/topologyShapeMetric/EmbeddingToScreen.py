@@ -6,6 +6,7 @@ from logging import Logger
 from logging import getLogger
 
 from orthogonal.topologyShapeMetric.EmbeddedCoordinates import EmbeddedCoordinates
+from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
 NODE_NAME = str
 POSITION  = Tuple[int, int]
@@ -14,13 +15,13 @@ POSITIONS = Dict[NODE_NAME, POSITION]
 
 class EmbeddingToScreen:
 
-    def __init__(self, screenSize: Tuple[int, int]):
+    def __init__(self, screenSize: ScreenSize):
 
         self.logger: Logger = getLogger(__name__)
 
-        self._screenSize: Tuple[int, int] = screenSize
+        self._screenSize: ScreenSize = screenSize
 
-        self._xIntervalList:     List[int] = []
+        self._xIntervalList:     Dict[str, int] = {}
         self._yUpIntervalList:   List[int] = []
         self._yDownIntervalList: List[int] = []
 
@@ -66,4 +67,8 @@ class EmbeddingToScreen:
 
     def _computeXIntervals(self, biggestX: int):
 
-        self._xIntervalList[0] = 0
+        self._xIntervalList['0'] = 0
+        xInterval: int = self._screenSize.width // biggestX
+        for x in range(1, biggestX + 1):
+            self.logger.info(f'xInterval: {xInterval}')
+            self._xIntervalList[str(x)] = (x * xInterval) - 1
