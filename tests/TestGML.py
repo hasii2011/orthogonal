@@ -91,6 +91,7 @@ class TestGML(TestBase):
             y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)
 
+        plt.xkcd()
         compact: Compaction = self.generate(G, positionDictionary)
 
         compact.draw(with_labels=True)
@@ -106,9 +107,26 @@ class TestGML(TestBase):
             y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)
 
+        plt.xkcd()
         compact: Compaction = self.generate(G, positionDictionary)
         compact.draw(with_labels=True)
+        self.logger.info(f'xlim: {plt.xlim()} xticks: {plt.xticks()}  axis: {plt.axis()}')
         plt.savefig("translationGraphComplex.png")
+
+    def testTranslationGraphMedium(self):
+        fqFileName: str = TestGML.retrieveResourcePath("translationGraphMedium.gml")
+        G = nx.Graph(nx.read_gml(fqFileName))
+        positionDictionary: Dict[str, Tuple] = {}
+        for node in G:
+            self.logger.info(f'node: {node}')
+            x: int = G.nodes[node]['graphics']['x']
+            y: int = G.nodes[node]['graphics']['y']
+            positionDictionary[node] = (x, y)
+
+        plt.xkcd()
+        compact: Compaction = self.generate(G, positionDictionary)
+        compact.draw(with_labels=True)
+        plt.savefig("translationGraphMedium.png")
 
     def generate(self, G, pos=None) -> Compaction:
 

@@ -1,7 +1,6 @@
 from logging import Logger
 from logging import getLogger
 
-from orthogonal.topologyShapeMetric.EmbeddedCoordinates import EmbeddedCoordinates
 from orthogonal.topologyShapeMetric.EmbeddingToScreen import EmbeddingToScreen
 from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 from tests.TestBase import TestBase
@@ -21,25 +20,47 @@ class TestEmbeddingToScreen(TestBase):
     def setUp(self):
         self.logger: Logger = TestEmbeddingToScreen.clsLogger
 
-        self._nodePositions: POSITIONS = {'Node0': (0, 0),
-                                          'Node5': (0, 1),
-                                          'Node1': (1, 0),
-                                          'Node4': (1, -1),
-                                          'Node3': (2, 0),
-                                          'Node2': (1, 1)
-                                          }
-
     def testSimple(self):
-        ets: EmbeddingToScreen = EmbeddingToScreen(ScreenSize(1000, 1000))
+        simplePositions: POSITIONS = {'Node0': (0, 0),
+                                      'Node5': (0, 1),
+                                      'Node1': (1, 0),
+                                      'Node4': (1, -1),
+                                      'Node3': (2, 0),
+                                      'Node2': (1, 1)
+                                      }
 
-        ec: EmbeddedCoordinates = ets.convertEmbeddingToScreenPosition(self._nodePositions)
+        ets: EmbeddingToScreen   = EmbeddingToScreen(ScreenSize(1000, 1000), simplePositions)
 
-        self.assertEqual(2, ec.biggestX)
-        self.assertEqual(1, ec.biggestY)
-        self.assertEqual(-1, ec.smallestY)
+        self.assertEqual(2, ets._maxX)
+        self.assertEqual(1, ets._maxY)
+        self.assertEqual(0, ets._minX)
+        self.assertEqual(-1, ets._minY)
+        self.assertEqual(2, ets._embeddedWidth)
+        self.assertEqual(2, ets._embeddedHeight)
 
-    def testComputeXIntervals(self):
+    def testComplex(self):
+        complexPositions: POSITIONS = {'Class0': (0, 0),
+                                       'Class1': (0, 1),
+                                       'Class4': (0, 2),
+                                       'Class2': (-1, 1),
+                                       'Class5': (-1, 2),
+                                       'Class9': (0, 2),
+                                       'Class8': (-1, 3),
+                                       'Class7': (-2, 2),
+                                       'Class6': (-1, 0),
+                                       'Class3': (1, 0)
+                                       }
+        ets: EmbeddingToScreen   = EmbeddingToScreen(ScreenSize(1000, 1000), complexPositions)
 
-        ets: EmbeddingToScreen = EmbeddingToScreen(ScreenSize(1000, 1000))
+        self.assertEqual(1, ets._maxX)
+        self.assertEqual(3, ets._maxY)
+        self.assertEqual(-2, ets._minX)
+        self.assertEqual(0, ets._minY)
+        self.assertEqual(3, ets._embeddedWidth)
+        self.assertEqual(3, ets._embeddedHeight)
 
-        ets._computeXIntervals(biggestX=2)
+    # def testComputeXIntervals(self):
+    #
+    #     ets: EmbeddingToScreen = EmbeddingToScreen(ScreenSize(1000, 1000))
+    #
+    #     ets._computeXIntervals(biggestX=2)

@@ -5,7 +5,6 @@ from typing import Tuple
 from logging import Logger
 from logging import getLogger
 
-from orthogonal.topologyShapeMetric.EmbeddedCoordinates import EmbeddedCoordinates
 from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
 NODE_NAME = str
@@ -15,55 +14,73 @@ POSITIONS = Dict[NODE_NAME, POSITION]
 
 class EmbeddingToScreen:
 
-    def __init__(self, screenSize: ScreenSize):
+    def __init__(self, screenSize: ScreenSize, nodePositions: POSITIONS):
 
-        self.logger: Logger = getLogger(__name__)
-
+        self.logger:      Logger = getLogger(__name__)
         self._screenSize: ScreenSize = screenSize
 
         self._xIntervalList:     Dict[str, int] = {}
         self._yUpIntervalList:   List[int] = []
         self._yDownIntervalList: List[int] = []
 
-    def convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS) -> EmbeddedCoordinates:
+        self._minX: int = 0
+        self._maxX: int = 0
+        self._minY: int = 0
+        self._maxY: int = 0
 
-        biggestX:  int = self._findFarthestRight(nodePositions)
-        biggestY:  int = self._findFarthestUp(nodePositions)
-        smallestY: int = self._findFarthestDown(nodePositions)
+        self._convertEmbeddingToScreenPosition(nodePositions)
 
-        self.logger.info(f'biggestX: {biggestX} biggestY: {biggestY} smallestY: {smallestY}')
+        self._embeddedWidth:  int = abs(self._minX - self._maxX)
+        self._embeddedHeight: int = abs(self._minY - self._maxY)
 
-        return EmbeddedCoordinates(biggestX=biggestX, biggestY=biggestY, smallestY=smallestY)
+    def _convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS):
 
-    def _findFarthestRight(self, nodePositions: POSITIONS) -> int:
+        self._maxX: int = self._findMaxX(nodePositions)
+        self._maxY: int = self._findMaxY(nodePositions)
+        self._minX: int = self._findMinX(nodePositions)
+        self._minY: int = self._findMinY(nodePositions)
 
-        biggestX: int = 0
+        self.logger.info(f'maxX: {self._maxX} maxY: {self._maxY} minX: {self._minX} minY: {self._minY}')
+
+    def _findMaxX(self, nodePositions: POSITIONS) -> int:
+
+        MaxX: int = 0
         for node in nodePositions:
             currentX, currentY = nodePositions[node]
-            if currentX > biggestX:
-                biggestX = currentX
+            if currentX > MaxX:
+                MaxX = currentX
 
-        return biggestX
+        return MaxX
 
-    def _findFarthestUp(self, nodePositions: POSITIONS) -> int:
+    def _findMaxY(self, nodePositions: POSITIONS) -> int:
 
-        biggestY: int = 0
+        maxY: int = 0
         for node in nodePositions:
             currentX, currentY = nodePositions[node]
-            if currentY > biggestY:
-                biggestY = currentY
+            if currentY > maxY:
+                maxY = currentY
 
-        return biggestY
+        return maxY
 
-    def _findFarthestDown(self, nodePositions: POSITIONS) -> int:
+    def _findMinX(self, nodePositions: POSITIONS) -> int:
 
-        smallestY: int = 0
+        minX: int = 0
         for node in nodePositions:
             currentX, currentY = nodePositions[node]
-            if currentY < smallestY:
-                smallestY = currentY
+            if currentX < minX:
+                minX = currentX
 
-        return smallestY
+        return minX
+
+    def _findMinY(self, nodePositions: POSITIONS) -> int:
+
+        minY: int = 0
+        for node in nodePositions:
+            currentX, currentY = nodePositions[node]
+            if currentY < minY:
+                minY = currentY
+
+        return minY
 
     def _computeXIntervals(self, biggestX: int):
 

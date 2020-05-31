@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class EmbeddedCoordinates:
-    biggestX:  int = 0
-    biggestY:  int = 0
-    smallestY: int = 0
+    maxX: int = 0
+    maxY: int = 0
+    minX: int = 0
+    minY: int = 0

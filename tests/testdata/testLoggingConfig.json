@@ -32,6 +32,11 @@
             "level": "INFO",
             "handlers": ["consoleHandler"],
             "propagate": "False"
+        },
+        "TestEmbeddingToScreen": {
+            "level": "INFO",
+            "handlers": ["consoleHandler"],
+            "propagate": "False"
         }
     }
 }
