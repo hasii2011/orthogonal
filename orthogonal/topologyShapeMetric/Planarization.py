@@ -1,9 +1,11 @@
 
-import math as m
-from logging import Logger
-from logging import getLogger
 from typing import Dict
 from typing import Tuple
+
+from logging import Logger
+from logging import getLogger
+
+import math as m
 
 import networkx as nx
 
