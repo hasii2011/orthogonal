@@ -30,8 +30,8 @@ class EmbeddingToScreen:
 
         self._convertEmbeddingToScreenPosition(nodePositions)
 
-        self._embeddedWidth:  int = abs(self._minX - self._maxX)
-        self._embeddedHeight: int = abs(self._minY - self._maxY)
+        self._embeddedWidth:  int = abs(self._minX - self._maxX) + 1
+        self._embeddedHeight: int = abs(self._minY - self._maxY) + 1
 
         self._layoutGrid: LayoutGrid = LayoutGrid(width=self._embeddedWidth, height=self._embeddedHeight, nodePositions=nodePositions)
 

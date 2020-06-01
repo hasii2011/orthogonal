@@ -38,8 +38,8 @@ class TestEmbeddingToScreen(TestBase):
         self.assertEqual(1, ets._maxY)
         self.assertEqual(0, ets._minX)
         self.assertEqual(-1, ets._minY)
-        self.assertEqual(2, ets._embeddedWidth)
-        self.assertEqual(2, ets._embeddedHeight)
+        self.assertEqual(3, ets._embeddedWidth)
+        self.assertEqual(3, ets._embeddedHeight)
 
     def testComplex(self):
         complexPositions: Positions = {'Class0': Position(0, 0),
@@ -59,8 +59,8 @@ class TestEmbeddingToScreen(TestBase):
         self.assertEqual(3, ets._maxY)
         self.assertEqual(-2, ets._minX)
         self.assertEqual(0, ets._minY)
-        self.assertEqual(3, ets._embeddedWidth)
-        self.assertEqual(3, ets._embeddedHeight)
+        self.assertEqual(4, ets._embeddedWidth)
+        self.assertEqual(4, ets._embeddedHeight)
 
     # def testComputeXIntervals(self):
     #

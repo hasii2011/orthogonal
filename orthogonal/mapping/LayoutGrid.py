@@ -19,8 +19,8 @@ class LayoutGrid:
 
         self.logger: Logger = getLogger(__name__)
 
-        self._gridWidth  = width + 1
-        self._gridHeight = height + 1
+        self._gridWidth  = width
+        self._gridHeight = height
 
         self._grid = {}
         for x in range(self._gridWidth):
