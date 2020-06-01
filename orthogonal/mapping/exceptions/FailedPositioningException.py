@@ -1,0 +1,3 @@
+
+class FailedPositioningException(Exception):
+    pass
