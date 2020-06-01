@@ -1,20 +1,20 @@
 from typing import Dict
 from typing import List
-from typing import Tuple
 
 from logging import Logger
 from logging import getLogger
 
-from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
+from orthogonal.mapping.LayoutGrid import LayoutGrid
+from orthogonal.mapping.EmbeddedTypes import Position
+from orthogonal.mapping.EmbeddedTypes import Positions
 
-NODE_NAME = str
-POSITION  = Tuple[int, int]
-POSITIONS = Dict[NODE_NAME, POSITION]
+
+from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
 
 class EmbeddingToScreen:
 
-    def __init__(self, screenSize: ScreenSize, nodePositions: POSITIONS):
+    def __init__(self, screenSize: ScreenSize, nodePositions: Positions):
 
         self.logger:      Logger = getLogger(__name__)
         self._screenSize: ScreenSize = screenSize
@@ -33,7 +33,9 @@ class EmbeddingToScreen:
         self._embeddedWidth:  int = abs(self._minX - self._maxX)
         self._embeddedHeight: int = abs(self._minY - self._maxY)
 
-    def _convertEmbeddingToScreenPosition(self, nodePositions: POSITIONS):
+        self._layoutGrid: LayoutGrid = LayoutGrid(width=self._embeddedWidth, height=self._embeddedHeight, nodePositions=nodePositions)
+
+    def _convertEmbeddingToScreenPosition(self, nodePositions: Positions):
 
         self._maxX: int = self._findMaxX(nodePositions)
         self._maxY: int = self._findMaxY(nodePositions)
@@ -42,43 +44,43 @@ class EmbeddingToScreen:
 
         self.logger.info(f'maxX: {self._maxX} maxY: {self._maxY} minX: {self._minX} minY: {self._minY}')
 
-    def _findMaxX(self, nodePositions: POSITIONS) -> int:
+    def _findMaxX(self, nodePositions: Positions) -> int:
 
-        MaxX: int = 0
-        for node in nodePositions:
-            currentX, currentY = nodePositions[node]
-            if currentX > MaxX:
-                MaxX = currentX
+        maxX: int = 0
+        for nodeName in nodePositions:
+            nodePosition: Position = nodePositions[nodeName]
+            if nodePosition.x > maxX:
+                maxX = nodePosition.x
 
-        return MaxX
+        return maxX
 
-    def _findMaxY(self, nodePositions: POSITIONS) -> int:
+    def _findMaxY(self, nodePositions: Positions) -> int:
 
         maxY: int = 0
         for node in nodePositions:
-            currentX, currentY = nodePositions[node]
-            if currentY > maxY:
-                maxY = currentY
+            nodePosition: Position = nodePositions[node]
+            if nodePosition.y > maxY:
+                maxY = nodePosition.y
 
         return maxY
 
-    def _findMinX(self, nodePositions: POSITIONS) -> int:
+    def _findMinX(self, nodePositions: Positions) -> int:
 
         minX: int = 0
         for node in nodePositions:
-            currentX, currentY = nodePositions[node]
-            if currentX < minX:
-                minX = currentX
+            nodePosition: Position = nodePositions[node]
+            if nodePosition.x < minX:
+                minX = nodePosition.x
 
         return minX
 
-    def _findMinY(self, nodePositions: POSITIONS) -> int:
+    def _findMinY(self, nodePositions: Positions) -> int:
 
         minY: int = 0
         for node in nodePositions:
-            currentX, currentY = nodePositions[node]
-            if currentY < minY:
-                minY = currentY
+            nodePosition: Position = nodePositions[node]
+            if nodePosition.y < minY:
+                minY = nodePosition.y
 
         return minY
 
