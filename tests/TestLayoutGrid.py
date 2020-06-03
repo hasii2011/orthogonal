@@ -2,6 +2,7 @@
 from logging import Logger
 from logging import getLogger
 
+from orthogonal.mapping.LayoutGrid import GridColumnType
 from orthogonal.mapping.LayoutGrid import LayoutGrid
 from tests.TestBase import TestBase
 
@@ -22,6 +23,24 @@ class TestLayoutGrid(TestBase):
     def setUp(self):
         self.logger: Logger = TestLayoutGrid.clsLogger
 
+    def testInitializeValidGrid(self):
+
+        layoutGrid: LayoutGrid = LayoutGrid(width=9, height=6)
+
+        self.assertTrue(len(layoutGrid._grid) == 9, 'Incorrect width')
+        col: GridColumnType = layoutGrid._grid[4]
+        self.assertTrue(len(col) == 6, 'Incorrect height')
+
+    def testNextGridPosition(self):
+        layoutGrid: LayoutGrid = LayoutGrid(width=9, height=6)
+
+        currentPosition:    Position = Position(3, 3)
+        actualNextPosition: Position = layoutGrid._nextGridPosition(currentGridPosition=currentPosition)
+
+        expectedPosition:   Position = Position(4, 3)
+
+        self.assertEqual(expectedPosition, actualNextPosition, 'Oops something is broken')
+
     def testSimple(self):
 
         simplePositions: Positions = {'Node0': Position(0, 0),
@@ -32,7 +51,9 @@ class TestLayoutGrid(TestBase):
                                       'Node2': Position(1, 1)
                                       }
 
-        layoutGrid: LayoutGrid = LayoutGrid(width=3, height=3, nodePositions=simplePositions)
+        layoutGrid: LayoutGrid = LayoutGrid(width=3, height=3)
+
+        layoutGrid.determineZeroZeroNodePosition(nodePositions=simplePositions)
 
         expectedZeroZeroPosition: Position = Position(0, 1)
         self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)
@@ -49,7 +70,9 @@ class TestLayoutGrid(TestBase):
                                        'Class4': Position(-1, 1),
                                        'Class3': Position(1, 0),
                                        }
-        layoutGrid: LayoutGrid = LayoutGrid(width=4, height=4, nodePositions=complexPositions)
+        layoutGrid: LayoutGrid = LayoutGrid(width=4, height=4)
+
+        layoutGrid.determineZeroZeroNodePosition(nodePositions=complexPositions)
 
         expectedZeroZeroPosition: Position = Position(1, 3)
         self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)

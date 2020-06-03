@@ -110,7 +110,7 @@ class TestGML(TestBase):
         plt.xkcd()
         compact: Compaction = self.generate(G, positionDictionary)
         compact.draw(with_labels=True)
-        self.logger.info(f'xlim: {plt.xlim()} xticks: {plt.xticks()}  axis: {plt.axis()}')
+
         plt.savefig("translationGraphComplex.png")
 
     def testTranslationGraphMedium(self):
