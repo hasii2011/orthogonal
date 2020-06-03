@@ -1,4 +1,5 @@
 
+from typing import Set
 from typing import cast
 
 from logging import Logger
@@ -49,18 +50,20 @@ class LayoutGrid:
         maxPos:           Position = Position(self._gridWidth - 1, self._gridHeight - 1)
 
         while potentialPos <= maxPos:
-            self.logger.info(f'Try: {potentialPos}')
-            potentialPos = self.nextGridPosition(currentGridPosition=potentialPos)
             try:
                 self.computeAGridPosition(potentialPos, nodePositions)
                 break   # No exception means we found where to put zero zero node
             except FailedPositioningException as fpe:
                 self.logger.error(f'{fpe}')
+            potentialPos = self.nextGridPosition(currentGridPosition=potentialPos)
 
         self.logger.info(f'All nodes positioned;  Zero Zero node at: {potentialPos}')
         self._zeroNodePosition: Position = potentialPos
 
     def computeAGridPosition(self, theGridPosition: Position, nodePositions: Positions):
+
+        self.logger.info(f'Check Zero Zero node at: {theGridPosition}')
+        inUsePositions: Set = set()
 
         for nodePosition in nodePositions:
 
@@ -69,15 +72,21 @@ class LayoutGrid:
                 self.logger.info(f'currP :{currP}')
 
                 x = theGridPosition.x + currP.x
-                y = theGridPosition.y + currP.y
-                self.logger.debug(f'grid x,y = ({x},{y})')
+                y = theGridPosition.y - currP.y
+                self.logger.info(f'grid x,y = ({x},{y})')
                 try:
                     aRow = self._grid[x]
                     aCell = aRow[y]
-                    self.logger.debug(f'aRow: {aRow} aCell: {aCell}')
+                    self.logger.info(f'currP: {currP} fits at {x},{y}')
+                    gridPos: Position = Position(x, y)
+                    if gridPos in inUsePositions:
+                        raise FailedPositioningException(f'grid position {gridPos} in use')
+                    else:
+                        inUsePositions.add(gridPos)
+                        self.logger.info(f'inUsePositions: {inUsePositions}')
                 except KeyError as e:
-                    self.logger.error(f'Potential Position: {theGridPosition} does not work')
-                    raise FailedPositioningException()
+                    self.logger.error(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
+                    raise FailedPositioningException(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
 
         self.logger.info(f'All nodes positioned;  Zero Zero node at: {theGridPosition}')
 

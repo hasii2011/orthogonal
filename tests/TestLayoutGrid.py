@@ -36,3 +36,39 @@ class TestLayoutGrid(TestBase):
 
         expectedZeroZeroPosition: Position = Position(0, 1)
         self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)
+
+    def testComplex(self):
+        complexPositions: Positions = {'Class0': Position(0, 0),
+                                       'Class1': Position(0, 1),
+                                       'Class2': Position(1, 1),
+                                       'Class6': Position(2, 1),
+                                       'Class5': Position(1, 2),
+                                       'Class7': Position(2, 2),
+                                       'Class8': Position(1, 3),
+                                       'Class9': Position(0, 2),
+                                       'Class4': Position(-1, 1),
+                                       'Class3': Position(1, 0),
+                                       }
+        layoutGrid: LayoutGrid = LayoutGrid(width=4, height=4, nodePositions=complexPositions)
+
+        expectedZeroZeroPosition: Position = Position(1, 3)
+        self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)
+
+    # def testLayoutFail(self):
+    #
+    #     complexPositions: Positions = {'Class0': Position(0, 0),
+    #                                    'Class1': Position(0, 1),
+    #                                    'Class4': Position(0, 2),
+    #                                    'Class2': Position(-1, 1),
+    #                                    'Class5': Position(-1, 2),
+    #                                    'Class9': Position(0, 2),      # This was a bug in the layout engine
+    #                                    'Class8': Position(-1, 3),
+    #                                    'Class7': Position(-2, 2),
+    #                                    'Class6': Position(-1, 0),
+    #                                    'Class3': Position(1, 0)
+    #                                    }
+    #
+    #     layoutGrid: LayoutGrid = LayoutGrid(width=4, height=4, nodePositions=complexPositions)
+    #
+    #     expectedZeroZeroPosition: Position = Position(2, 3)
+    #     self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)

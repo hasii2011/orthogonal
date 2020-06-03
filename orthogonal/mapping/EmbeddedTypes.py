@@ -7,8 +7,12 @@ from dataclasses import dataclass
 NodeName = str
 
 
-@dataclass()
+@dataclass(frozen=True)
 class Position:
+    """
+    This class is immutable;  frozen=true;  Python then creates a good
+    __hash__ method
+    """
 
     __slots__ = ['x', 'y']
 
