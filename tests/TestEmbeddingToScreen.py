@@ -1,5 +1,11 @@
+
 from logging import Logger
 from logging import getLogger
+
+from unittest import TestSuite
+from unittest import main as unitTestMain
+
+from tests.TestBase import TestBase
 
 from orthogonal.mapping.EmbeddedTypes import Positions
 from orthogonal.mapping.EmbeddedTypes import Position
@@ -7,8 +13,6 @@ from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.topologyShapeMetric.EmbeddingToScreen import EmbeddingToScreen
 
 from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
-
-from tests.TestBase import TestBase
 
 
 class TestEmbeddingToScreen(TestBase):
@@ -67,3 +71,17 @@ class TestEmbeddingToScreen(TestBase):
     #     ets: EmbeddingToScreen = EmbeddingToScreen(ScreenSize(1000, 1000))
     #
     #     ets._computeXIntervals(biggestX=2)
+
+
+def suite() -> TestSuite:
+    import unittest
+
+    testSuite: TestSuite = TestSuite()
+    # noinspection PyUnresolvedReferences
+    testSuite.addTest(unittest.makeSuite(TestEmbeddingToScreen))
+
+    return testSuite
+
+
+if __name__ == '__main__':
+    unitTestMain()

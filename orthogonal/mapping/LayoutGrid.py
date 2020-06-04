@@ -6,6 +6,8 @@ from typing import cast
 from logging import Logger
 from logging import getLogger
 
+from copy import deepcopy
+
 from orthogonal.mapping.exceptions.FailedPositioningException import FailedPositioningException
 from orthogonal.mapping.exceptions.UnSupportedOperationException import UnSupportedOperationException
 
@@ -14,6 +16,7 @@ from orthogonal.mapping.EmbeddedTypes import Positions
 
 
 GridColumnType = Dict[int, str]
+GridType       = Dict[int, GridColumnType]
 
 
 class LayoutGrid:
@@ -25,11 +28,11 @@ class LayoutGrid:
         self._gridWidth  = width
         self._gridHeight = height
 
-        self._grid: Dict[int, GridColumnType] = self._initializeValidGrid(self._gridWidth, self._gridHeight)
+        self._zeroNodePosition:   Position = cast(Position, None)
+        self._grid:               GridType = self._initializeValidGrid(self._gridWidth, self._gridHeight)
+        self._finalNodePositions: GridType = cast(GridType, None)
 
         self.logger.debug(f'{self._grid}')
-
-        self._zeroNodePosition: Position = cast(Position, None)
 
     @property
     def zeroNodePosition(self) -> Position:
@@ -59,15 +62,18 @@ class LayoutGrid:
         self.logger.debug(f'Check Zero Zero node at: {theGridPosition}')
         inUsePositions: Set = set()
 
-        for nodePosition in nodePositions:
+        gridCopy: GridType = deepcopy(self._grid)
 
-            currentGridPos: Position = nodePositions[nodePosition]
+        for nodeName in nodePositions:
+
+            currentGridPos: Position = nodePositions[nodeName]
 
             x = theGridPosition.x + currentGridPos.x
             y = theGridPosition.y - currentGridPos.y         # y is always up
             self.logger.debug(f'currentGridPos :{currentGridPos}  grid x,y = ({x},{y})')
             try:
-                aRow = self._grid[x]
+                # aRow = self._grid[x]
+                aRow = gridCopy[x]
                 # noinspection PyUnusedLocal
                 aCell = aRow[y]         # Only used to see if that key will generate a KeyError
                 self.logger.debug(f'currentGridPos: {currentGridPos} fits at {x},{y}')
@@ -76,12 +82,15 @@ class LayoutGrid:
                     raise FailedPositioningException(f'grid position {gridPos} in use')
                 else:
                     inUsePositions.add(gridPos)
+                    aRow[y] = nodeName
                     self.logger.debug(f'inUsePositions: {inUsePositions}')
             except KeyError:
                 self.logger.debug(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
                 raise FailedPositioningException(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
 
         self.logger.info(f'All nodes positioned;  Zero Zero node at: {theGridPosition}')
+        self._finalNodePositions = gridCopy
+        self.logger.info(f'finalNodePositions: {self._finalNodePositions}')
 
     def _nextGridPosition(self, currentGridPosition: Position) -> Position:
 

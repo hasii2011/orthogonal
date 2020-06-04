@@ -2,8 +2,12 @@
 from logging import Logger
 from logging import getLogger
 
+from unittest import TestSuite
+from unittest import main as unitTestMain
+
 from orthogonal.mapping.LayoutGrid import GridColumnType
 from orthogonal.mapping.LayoutGrid import LayoutGrid
+
 from tests.TestBase import TestBase
 
 
@@ -95,3 +99,17 @@ class TestLayoutGrid(TestBase):
     #
     #     expectedZeroZeroPosition: Position = Position(2, 3)
     #     self.assertEqual(expectedZeroZeroPosition, layoutGrid.zeroNodePosition)
+
+
+def suite() -> TestSuite:
+    import unittest
+
+    testSuite: TestSuite = TestSuite()
+    # noinspection PyUnresolvedReferences
+    testSuite.addTest(unittest.makeSuite(TestLayoutGrid))
+
+    return testSuite
+
+
+if __name__ == '__main__':
+    unitTestMain()

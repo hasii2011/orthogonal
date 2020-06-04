@@ -1,14 +1,15 @@
 
-from logging import Logger
-from logging import getLogger
-
 from typing import Dict
 from typing import Tuple
 
+from logging import Logger
+from logging import getLogger
+
+from unittest import TestSuite
+from unittest import main as unitTestMain
+
 import networkx as nx
 import matplotlib.pyplot as plt
-
-from unittest import main as unitTestMain
 
 from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
@@ -137,6 +138,15 @@ class TestGML(TestBase):
         return compact
 
 
+def suite() -> TestSuite:
+    import unittest
+
+    testSuite: TestSuite = TestSuite()
+    # noinspection PyUnresolvedReferences
+    testSuite.addTest(unittest.makeSuite(TestGML))
+
+    return testSuite
+
+
 if __name__ == '__main__':
-    res = unitTestMain(verbosity=3, exit=False)
-    print(f'The results are in !!:  {res}')
+    unitTestMain()

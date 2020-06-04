@@ -2,6 +2,9 @@ from logging import Logger
 from logging import getLogger
 from typing import Set
 
+from unittest import TestSuite
+from unittest import main as unitTestMain
+
 from tests.TestBase import TestBase
 
 
@@ -41,3 +44,17 @@ class TestSetOfPositions(TestBase):
         notInSet: Position = Position(7, 7)
 
         self.assertFalse(notInSet in aSet, 'But, but I am NOT in the set')
+
+
+def suite() -> TestSuite:
+    import unittest
+
+    testSuite: TestSuite = TestSuite()
+    # noinspection PyUnresolvedReferences
+    testSuite.addTest(unittest.makeSuite(TestSetOfPositions))
+
+    return testSuite
+
+
+if __name__ == '__main__':
+    unitTestMain()

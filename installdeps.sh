@@ -15,6 +15,7 @@ if [[ ${STATUS} -eq 0 ]] ; then
     pip3 install networkx
     pip3 install pulp
     pip3 install twine
+    pip3 install html-testRunner
 else
     echo "You are not in a virtual environment"
 
