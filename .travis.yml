@@ -1,0 +1,32 @@
+
+# os: osx
+
+# osx_image: xcode11.2
+notifications:
+  email:
+    recipients:
+      - humberto.a.sanchez.ii@gmail.com
+    on_success: change # default: change
+    on_failure: always # default: always
+
+language: python
+
+cache: pip
+
+services:
+  - xvfb
+
+python:
+  - "3.8.2"
+
+# command to install dependencies
+install:
+  - pip install wheel
+  - pip install matplotlib
+  - pip install networkx
+  - pip install pulp
+  - pip install twine
+  - pip install html-testRunner
+
+# command to run tests
+script: ${TRAVIS_BUILD_DIR}/runtests.sh
