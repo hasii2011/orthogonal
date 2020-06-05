@@ -47,3 +47,12 @@ class Position:
 
 
 Positions = Dict[NodeName, Position]
+
+
+@dataclass
+class ScreenCoordinates:
+
+    __slots__ = ['x', 'y']
+
+    x: int
+    y: int

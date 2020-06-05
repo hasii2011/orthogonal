@@ -7,19 +7,21 @@ from logging import getLogger
 from orthogonal.mapping.LayoutGrid import LayoutGrid
 from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddedTypes import Positions
+from orthogonal.mapping.EmbeddedTypes import ScreenCoordinates
 
 
 from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
-IntervalType = Dict[str, int]
+IntervalType = Dict[int, int]   # interval, screen coordinate
 
 
 class EmbeddingToScreen:
 
     def __init__(self, screenSize: ScreenSize, nodePositions: Positions):
 
-        self.logger:      Logger = getLogger(__name__)
-        self._screenSize: ScreenSize = screenSize
+        self.logger:         Logger     = getLogger(__name__)
+        self._screenSize:    ScreenSize = screenSize
+        self._nodePositions: Positions  = nodePositions
 
         self._xIntervals: IntervalType = {}
         self._yIntervals: IntervalType = {}
@@ -35,8 +37,15 @@ class EmbeddingToScreen:
         self._computeXIntervals(self._embeddedWidth - 1)
         self._computeYIntervals(self._embeddedHeight - 1)
 
-    def getScreenPosition(self, nodeName: str):
-        pass
+    def getScreenPosition(self, nodeName: str) -> ScreenCoordinates:
+
+        gridPos: Position = self._layoutGrid.layoutPositions[nodeName]
+
+        scrX: int = self._xIntervals[gridPos.x]
+        scrY: int = self._yIntervals[gridPos.y]
+        scrCoordinates: ScreenCoordinates = ScreenCoordinates(scrX, scrY)
+
+        return scrCoordinates
 
     def _determineGridSize(self, nodePositions: Positions):
 
@@ -98,11 +107,10 @@ class EmbeddingToScreen:
 
     def _computeIntervals(self, nbrOfPoints: int, maxValue: int) -> IntervalType:
 
-        intervals: IntervalType = {'0': 0}
+        intervals: IntervalType = {0: 0}
 
         interval:  int = nbrOfPoints // maxValue
         for x in range(1, maxValue + 1):
-            self.logger.info(f'interval: {interval}')
-            intervals[str(x)] = (x * interval) - 1
+            intervals[x] = (x * interval) - 1
 
         return intervals

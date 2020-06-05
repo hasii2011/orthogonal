@@ -11,12 +11,14 @@ from copy import deepcopy
 from orthogonal.mapping.exceptions.FailedPositioningException import FailedPositioningException
 from orthogonal.mapping.exceptions.UnSupportedOperationException import UnSupportedOperationException
 
+from orthogonal.mapping.EmbeddedTypes import NodeName
 from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddedTypes import Positions
 
 
 GridColumnType = Dict[int, str]
 GridType       = Dict[int, GridColumnType]
+LayoutPosition = Dict[NodeName, Position]
 
 
 class LayoutGrid:
@@ -28,9 +30,9 @@ class LayoutGrid:
         self._gridWidth  = width
         self._gridHeight = height
 
-        self._zeroNodePosition:   Position = cast(Position, None)
-        self._grid:               GridType = self._initializeValidGrid(self._gridWidth, self._gridHeight)
-        self._finalNodePositions: GridType = cast(GridType, None)
+        self.layoutPositions:     LayoutPosition = {}
+        self._zeroNodePosition:   Position       = cast(Position, None)
+        self._grid:               GridType       = self._initializeValidGrid(self._gridWidth, self._gridHeight)
 
         self.logger.debug(f'{self._grid}')
 
@@ -63,6 +65,7 @@ class LayoutGrid:
         inUsePositions: Set = set()
 
         gridCopy: GridType = deepcopy(self._grid)
+        self.layoutPositions = {}   # reset
 
         for nodeName in nodePositions:
 
@@ -84,13 +87,13 @@ class LayoutGrid:
                     inUsePositions.add(gridPos)
                     aRow[y] = nodeName
                     self.logger.debug(f'inUsePositions: {inUsePositions}')
+                    self.layoutPositions[nodeName] = gridPos
             except KeyError:
                 self.logger.debug(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
                 raise FailedPositioningException(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
 
         self.logger.info(f'All nodes positioned;  Zero Zero node at: {theGridPosition}')
-        self._finalNodePositions = gridCopy
-        self.logger.info(f'finalNodePositions: {self._finalNodePositions}')
+        self.logger.debug(f'layoutPositions: {self.layoutPositions}')
 
     def _nextGridPosition(self, currentGridPosition: Position) -> Position:
 
