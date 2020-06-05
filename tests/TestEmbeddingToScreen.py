@@ -26,22 +26,19 @@ class TestEmbeddingToScreen(TestBase):
 
     def setUp(self):
         self.logger: Logger = TestEmbeddingToScreen.clsLogger
+        self._simplePositions: Positions = {'Node0': Position(0, 0),
+                                            'Node5': Position(0, 1),
+                                            'Node1': Position(1, 0),
+                                            'Node4': Position(1, -1),
+                                            'Node3': Position(2, 0),
+                                            'Node2': Position(1, 1)
+                                            }
+        self._screenSize: ScreenSize = ScreenSize(1000, 1000)
 
     def testSimple(self):
-        simplePositions: Positions = {'Node0': Position(0, 0),
-                                      'Node5': Position(0, 1),
-                                      'Node1': Position(1, 0),
-                                      'Node4': Position(1, -1),
-                                      'Node3': Position(2, 0),
-                                      'Node2': Position(1, 1)
-                                      }
 
-        ets: EmbeddingToScreen   = EmbeddingToScreen(ScreenSize(1000, 1000), simplePositions)
+        ets: EmbeddingToScreen   = EmbeddingToScreen(ScreenSize(1000, 1000), self._simplePositions)
 
-        self.assertEqual(2, ets._maxX)
-        self.assertEqual(1, ets._maxY)
-        self.assertEqual(0, ets._minX)
-        self.assertEqual(-1, ets._minY)
         self.assertEqual(3, ets._embeddedWidth)
         self.assertEqual(3, ets._embeddedHeight)
 
@@ -59,18 +56,29 @@ class TestEmbeddingToScreen(TestBase):
                                        }
         ets: EmbeddingToScreen   = EmbeddingToScreen(ScreenSize(1000, 1000), complexPositions)
 
-        self.assertEqual(1, ets._maxX)
-        self.assertEqual(3, ets._maxY)
-        self.assertEqual(-2, ets._minX)
-        self.assertEqual(0, ets._minY)
         self.assertEqual(4, ets._embeddedWidth)
         self.assertEqual(4, ets._embeddedHeight)
 
-    # def testComputeXIntervals(self):
-    #
-    #     ets: EmbeddingToScreen = EmbeddingToScreen(ScreenSize(1000, 1000))
-    #
-    #     ets._computeXIntervals(biggestX=2)
+    def testComputeXIntervals(self):
+
+        ets: EmbeddingToScreen = EmbeddingToScreen(self._screenSize, self._simplePositions)
+
+        ets._computeXIntervals(maxX=2)
+
+        self.logger.info(f"xIntervals: {ets._xIntervals}")
+
+        actualXPos: int = ets._xIntervals['1']
+        self.assertEqual(499, actualXPos, 'X Computation changed')
+
+    def testComputeYIntervals(self):
+
+        ets: EmbeddingToScreen = EmbeddingToScreen(self._screenSize, self._simplePositions)
+
+        ets._computeYIntervals(maxY=2)
+
+        self.logger.info(f"yIntervals: {ets._yIntervals}")
+        actualYPos: int = ets._yIntervals['2']
+        self.assertEqual(999, actualYPos, 'Y Computation changed')
 
 
 def suite() -> TestSuite:

@@ -1,5 +1,5 @@
+
 from typing import Dict
-from typing import List
 
 from logging import Logger
 from logging import getLogger
@@ -11,6 +11,8 @@ from orthogonal.mapping.EmbeddedTypes import Positions
 
 from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
+IntervalType = Dict[str, int]
+
 
 class EmbeddingToScreen:
 
@@ -19,31 +21,34 @@ class EmbeddingToScreen:
         self.logger:      Logger = getLogger(__name__)
         self._screenSize: ScreenSize = screenSize
 
-        self._xIntervalList:     Dict[str, int] = {}
-        self._yUpIntervalList:   List[int] = []
-        self._yDownIntervalList: List[int] = []
+        self._xIntervals: IntervalType = {}
+        self._yIntervals: IntervalType = {}
 
-        self._minX: int = 0
-        self._maxX: int = 0
-        self._minY: int = 0
-        self._maxY: int = 0
+        self._embeddedWidth:  int = 0
+        self._embeddedHeight: int = 0
 
-        self._convertEmbeddingToScreenPosition(nodePositions)
-
-        self._embeddedWidth:  int = abs(self._minX - self._maxX) + 1
-        self._embeddedHeight: int = abs(self._minY - self._maxY) + 1
+        self._determineGridSize(nodePositions)
 
         self._layoutGrid: LayoutGrid = LayoutGrid(width=self._embeddedWidth, height=self._embeddedHeight)
         self._layoutGrid.determineZeroZeroNodePosition(nodePositions=nodePositions)
 
-    def _convertEmbeddingToScreenPosition(self, nodePositions: Positions):
+        self._computeXIntervals(self._embeddedWidth - 1)
+        self._computeYIntervals(self._embeddedHeight - 1)
 
-        self._maxX: int = self._findMaxX(nodePositions)
-        self._maxY: int = self._findMaxY(nodePositions)
-        self._minX: int = self._findMinX(nodePositions)
-        self._minY: int = self._findMinY(nodePositions)
+    def getScreenPosition(self, nodeName: str):
+        pass
 
-        self.logger.info(f'maxX: {self._maxX} maxY: {self._maxY} minX: {self._minX} minY: {self._minY}')
+    def _determineGridSize(self, nodePositions: Positions):
+
+        maxX: int = self._findMaxX(nodePositions)
+        maxY: int = self._findMaxY(nodePositions)
+        minX: int = self._findMinX(nodePositions)
+        minY: int = self._findMinY(nodePositions)
+
+        self.logger.info(f'maxX: {maxX} maxY: {maxY} minX: {minX} minY: {minY}')
+
+        self._embeddedWidth:  int = abs(minX - maxX) + 1
+        self._embeddedHeight: int = abs(minY - maxY) + 1
 
     def _findMaxX(self, nodePositions: Positions) -> int:
 
@@ -85,10 +90,19 @@ class EmbeddingToScreen:
 
         return minY
 
-    def _computeXIntervals(self, biggestX: int):
+    def _computeXIntervals(self, maxX: int):
+        self._xIntervals = self._computeIntervals(self._screenSize.width, maxX)
 
-        self._xIntervalList['0'] = 0
-        xInterval: int = self._screenSize.width // biggestX
-        for x in range(1, biggestX + 1):
-            self.logger.info(f'xInterval: {xInterval}')
-            self._xIntervalList[str(x)] = (x * xInterval) - 1
+    def _computeYIntervals(self, maxY: int):
+        self._yIntervals = self._computeIntervals(self._screenSize.height, maxY)
+
+    def _computeIntervals(self, nbrOfPoints: int, maxValue: int) -> IntervalType:
+
+        intervals: IntervalType = {'0': 0}
+
+        interval:  int = nbrOfPoints // maxValue
+        for x in range(1, maxValue + 1):
+            self.logger.info(f'interval: {interval}')
+            intervals[str(x)] = (x * interval) - 1
+
+        return intervals
