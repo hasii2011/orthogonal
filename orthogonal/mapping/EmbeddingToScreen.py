@@ -8,9 +8,7 @@ from orthogonal.mapping.LayoutGrid import LayoutGrid
 from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddedTypes import Positions
 from orthogonal.mapping.EmbeddedTypes import ScreenCoordinates
-
-
-from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
+from orthogonal.mapping.ScreenSize import ScreenSize
 
 IntervalType = Dict[int, int]   # interval, screen coordinate
 
