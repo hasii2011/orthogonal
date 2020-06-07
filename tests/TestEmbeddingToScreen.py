@@ -5,14 +5,13 @@ from logging import getLogger
 from unittest import TestSuite
 from unittest import main as unitTestMain
 
-from orthogonal.mapping.EmbeddedTypes import ScreenCoordinates
 from tests.TestBase import TestBase
 
+from orthogonal.mapping.EmbeddedTypes import ScreenCoordinates
+from orthogonal.mapping.ScreenSize import ScreenSize
 from orthogonal.mapping.EmbeddedTypes import Positions
 from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddingToScreen import EmbeddingToScreen
-
-from orthogonal.topologyShapeMetric.ScreenSize import ScreenSize
 
 
 class TestEmbeddingToScreen(TestBase):
