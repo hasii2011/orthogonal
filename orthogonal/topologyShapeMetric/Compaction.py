@@ -145,7 +145,7 @@ class Compaction:
             hv_flow.add_edge(source, sink, 'extend_edge',
                              weight=0, lowerbound=0, capacity=2**32)
 
-            # selfloop，avoid inner edge longer than border
+            # self loop avoid inner edge longer than border
             # for u, _ in hv_flow.selfloop_edges():
             #     in_nodes = [v for v, _ in hv_flow.in_edges(u)]
             #     assert in_nodes
