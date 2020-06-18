@@ -9,6 +9,8 @@ import math as m
 
 import networkx as nx
 
+from networkx import Graph
+
 from orthogonal.doublyConnectedEdgeList.Dcel import Dcel
 from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
 
@@ -22,13 +24,11 @@ class Planarization:
     This step determines the topology of the drawing which is described by a planar embedding.
     """
 
-    def __init__(self, G, pos: POSITIONS = None):
+    def __init__(self, G: Graph, pos: POSITIONS = None):
 
-        # assert nx.number_of_selfloops(G) == 0, 'Number of self loops is greater than zero'
         if nx.number_of_selfloops(G) != 0:
             raise OrthogonalException('There can be no self loops in the graph')
 
-        # assert nx.is_connected(G), 'Graph is not connected'
         if nx.is_connected(G) is False:
             raise OrthogonalException('The graph or parts of it are not connected.')
 
@@ -38,15 +38,14 @@ class Planarization:
             assert is_planar
             pos = nx.combinatorial_embedding_to_pos(self.embedding)
         else:
-            # assert self.numberOfCrossings(G, pos) == 0
             if self.numberOfCrossings(G, pos) != 0:
                 raise OrthogonalException('The graph has edges that cross each other')
-            self.embedding = self.convert_pos_to_embedding(G, pos)
+            self.embedding: nx.PlanarEmbedding = self.convert_pos_to_embedding(G, pos)
 
-        self.G = G.copy()
+        self.G: Graph = G.copy()
         self.pos = pos  # is only used to find the ext_face now.
-        self.dcel = Dcel(G, self.embedding)
-        self.ext_face = self.get_external_face()
+        self.dcel: Dcel = Dcel(G, self.embedding)
+        self.ext_face   = self.get_external_face()
 
     def copy(self):
         new_planar = self.__new__(self.__class__)
@@ -107,11 +106,11 @@ class Planarization:
                             self.logger.info(nodeA, nodeB, nodeC, nodeD)
         return count
 
-    def convert_pos_to_embedding(self, G, pos):
+    def convert_pos_to_embedding(self, G: Graph, pos) -> nx.PlanarEmbedding:
         """
             Only straight line in G.
         """
-        emd = nx.PlanarEmbedding()
+        emd: nx.PlanarEmbedding = nx.PlanarEmbedding()
         for node in G:
             neigh_pos = {
                 neigh: (pos[neigh][0]-pos[node][0], pos[neigh][1]-pos[node][1]) for neigh in G[node]
