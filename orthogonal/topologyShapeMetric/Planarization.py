@@ -10,7 +10,7 @@ import math as m
 import networkx as nx
 
 from orthogonal.doublyConnectedEdgeList.Dcel import Dcel
-
+from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
 
 NODE_NAME = str
 POSITION  = Tuple[int, int]
@@ -24,8 +24,13 @@ class Planarization:
 
     def __init__(self, G, pos: POSITIONS = None):
 
-        assert nx.number_of_selfloops(G) == 0, 'Number of self loops is greater than zero'
-        assert nx.is_connected(G), 'Graph is not connected'
+        # assert nx.number_of_selfloops(G) == 0, 'Number of self loops is greater than zero'
+        if nx.number_of_selfloops(G) != 0:
+            raise OrthogonalException('There can be no self loops in the graph')
+
+        # assert nx.is_connected(G), 'Graph is not connected'
+        if nx.is_connected(G) is False:
+            raise OrthogonalException('The graph or parts of it are not connected.')
 
         self.logger: Logger = getLogger(__name__)
         if pos is None:
@@ -33,8 +38,9 @@ class Planarization:
             assert is_planar
             pos = nx.combinatorial_embedding_to_pos(self.embedding)
         else:
-            # assert number_of_cross(G, pos) == 0
-            assert self.numberOfCrossings(G, pos) == 0
+            # assert self.numberOfCrossings(G, pos) == 0
+            if self.numberOfCrossings(G, pos) != 0:
+                raise OrthogonalException('The graph has edges that cross each other')
             self.embedding = self.convert_pos_to_embedding(G, pos)
 
         self.G = G.copy()

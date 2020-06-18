@@ -1,0 +1,4 @@
+
+
+class OrthogonalException(Exception):
+    pass
