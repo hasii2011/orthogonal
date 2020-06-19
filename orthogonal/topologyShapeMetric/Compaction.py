@@ -8,6 +8,7 @@ import copy
 
 from orthogonal.topologyShapeMetric.FlowNet import FlowNet
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
+from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 
 class Compaction:
@@ -25,7 +26,7 @@ class Compaction:
             self.planar = orthogonalization.planar
             self.flow_dict = orthogonalization.flow_dict
         else:
-            self.planar = orthogonalization.planar.copy()
+            self.planar: Planarization = orthogonalization.planar.copy()
             self.flow_dict = copy.deepcopy(orthogonalization.flow_dict)
 
         self.bend_point_processor()
