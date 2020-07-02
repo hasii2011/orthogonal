@@ -3,6 +3,7 @@
 import collections as coll
 
 from orthogonal.topologyShapeMetric.FlowNet import FlowNet
+from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 
@@ -13,7 +14,11 @@ class Orthogonalization:
 
     def __init__(self, planar: Planarization):
 
-        assert max(pair[1] for pair in planar.G.degree) <= 4
+        # assert max(pair[1] for pair in planar.G.degree) <= 4
+        # noinspection PyTypeChecker
+        for pair in planar.G.degree:
+            if pair[1] > 4:
+                raise OrthogonalException('There is a node in this graph with a degree greater than 4')
         assert planar.G.number_of_nodes() > 1
 
         self.planar = planar
@@ -148,6 +153,7 @@ class Orthogonalization:
     def number_of_corners(self):
         count_right_angle = 0
         for node in self.planar.G:
+            # noinspection PyTypeChecker
             if self.planar.G.degree(node) == 2:
                 for f, he_id in [(f, key) for f, keys in self.flow_network.adj[node].items()
                                  for key in keys]:
