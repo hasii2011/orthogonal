@@ -67,7 +67,7 @@ class TestEmbeddingToScreen(TestBase):
         self.assertEqual(499, screenPosition.x, 'X Mapping must be incorrect')
         self.assertEqual(499, screenPosition.y, 'Y Mapping must be incorrect')
 
-        self.logger.info(f'screenPosition: {screenPosition}')
+        self.logger.info(f'{screenPosition=}')
 
     def testComplexGetScreenPosition(self):
 
@@ -77,13 +77,13 @@ class TestEmbeddingToScreen(TestBase):
         self.assertEqual(0, screenPosition.x, 'X Mapping must be incorrect')
         self.assertEqual(665, screenPosition.y, 'Y Mapping must be incorrect')
 
-        self.logger.info(f'Class4 - screenPosition: {screenPosition}')
+        self.logger.debug(f'Class4 - screenPosition: {screenPosition}')
 
         screenPosition = ets.getScreenPosition('Class6')
         self.assertEqual(998, screenPosition.x, 'X Mapping must be incorrect')
         self.assertEqual(665, screenPosition.y, 'Y Mapping must be incorrect')
 
-        self.logger.info(f'Class6 - screenPosition: {screenPosition}')
+        self.logger.debug(f'Class6 - {screenPosition=}')
 
     def testComputeXIntervals(self):
 
@@ -91,7 +91,7 @@ class TestEmbeddingToScreen(TestBase):
 
         ets._computeXIntervals(maxX=2)
 
-        self.logger.info(f"xIntervals: {ets._xIntervals}")
+        self.logger.debug(f"xIntervals: {ets._xIntervals=}")
 
         actualXPos: int = ets._xIntervals[1]
         self.assertEqual(499, actualXPos, 'X Computation changed')
@@ -102,7 +102,7 @@ class TestEmbeddingToScreen(TestBase):
 
         ets._computeYIntervals(maxY=2)
 
-        self.logger.info(f"yIntervals: {ets._yIntervals}")
+        self.logger.debug(f"{ets._yIntervals=}")
         actualYPos: int = ets._yIntervals[2]
         self.assertEqual(999, actualYPos, 'Y Computation changed')
 

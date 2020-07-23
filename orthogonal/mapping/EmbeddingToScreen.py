@@ -52,7 +52,7 @@ class EmbeddingToScreen:
         minX: int = self._findMinX(nodePositions)
         minY: int = self._findMinY(nodePositions)
 
-        self.logger.info(f'maxX: {maxX} maxY: {maxY} minX: {minX} minY: {minY}')
+        self.logger.info(f'{maxX=} {maxY=} {minX=} {minY=}')
 
         self._embeddedWidth:  int = abs(minX - maxX) + 1
         self._embeddedHeight: int = abs(minY - maxY) + 1

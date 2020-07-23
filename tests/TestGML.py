@@ -4,6 +4,7 @@ from typing import Tuple
 
 from logging import Logger
 from logging import getLogger
+from logging import DEBUG
 
 from unittest import TestSuite
 from unittest import main as unitTestMain
@@ -54,8 +55,9 @@ class TestGML(TestBase):
         compact.draw()
         plt.savefig("case2.png")
 
-        for flowKey in compact.flow_dict.keys():
-            self.logger.info(f'flowKey: {flowKey} - value: {compact.flow_dict[flowKey]}')
+        if self.logger.level == DEBUG:
+            for flowKey in compact.flow_dict.keys():
+                self.logger.debug(f'{flowKey=} - {compact.flow_dict[flowKey]=}')
 
     def testCase2BiConnected(self):
         fqFileName: str = TestGML.retrieveResourcePath("case2BiConnected.gml")
@@ -68,15 +70,18 @@ class TestGML(TestBase):
 
         fqFileName: str = TestGML.retrieveResourcePath("simple.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
-        for node in G:
-            self.logger.info(f'node: {node}')
+        if self.logger.level == DEBUG:
+            for node in G:
+                self.logger.debug(f'{node=}')
+
         compact: Compaction = self.generate(G, {node: eval(node) for node in G})
 
         for flowKey in compact.flow_dict.keys():
             valueDict = compact.flow_dict[flowKey]
-            self.logger.info(f'flowKey: {flowKey} - valueDict: {valueDict}')
-            for valueKey in valueDict.keys():
-                self.logger.info(f'\t\t{valueKey} value: {valueDict[valueKey]}')
+            self.logger.debug(f'{flowKey=} - {valueDict}=')
+            if self.logger.level == DEBUG:
+                for valueKey in valueDict.keys():
+                    self.logger.info(f'\t\t{valueKey=} {valueDict[valueKey]=}')
 
         compact.draw(with_labels=True)
         plt.savefig("simple.png")
@@ -84,10 +89,10 @@ class TestGML(TestBase):
     def testTranslationGraphSimple(self):
         fqFileName: str = TestGML.retrieveResourcePath("translationGraphSimple.gml")
         G = nx.Graph(nx.read_gml(fqFileName))
-        self.logger.info(f'Nodes: {G.nodes}')
+        self.logger.debug(f'{G.nodes=}')
         positionDictionary: Dict[str, Tuple] = {}
         for node in G:
-            self.logger.info(f'node: {node}')
+            self.logger.debug(f'{node=}')
             x: int = G.nodes[node]['graphics']['x']
             y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)
@@ -103,7 +108,7 @@ class TestGML(TestBase):
         G = nx.Graph(nx.read_gml(fqFileName))
         positionDictionary: Dict[str, Tuple] = {}
         for node in G:
-            self.logger.info(f'node: {node}')
+            self.logger.debug(f'{node=}')
             x: int = G.nodes[node]['graphics']['x']
             y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)
@@ -119,7 +124,7 @@ class TestGML(TestBase):
         G = nx.Graph(nx.read_gml(fqFileName))
         positionDictionary: Dict[str, Tuple] = {}
         for node in G:
-            self.logger.info(f'node: {node}')
+            self.logger.debug(f'{node=}')
             x: int = G.nodes[node]['graphics']['x']
             y: int = G.nodes[node]['graphics']['y']
             positionDictionary[node] = (x, y)

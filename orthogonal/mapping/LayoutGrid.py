@@ -73,27 +73,27 @@ class LayoutGrid:
 
             x = theGridPosition.x + currentGridPos.x
             y = theGridPosition.y - currentGridPos.y         # y is always up
-            self.logger.debug(f'currentGridPos :{currentGridPos}  grid x,y = ({x},{y})')
+            self.logger.debug(f'{currentGridPos=}  grid x,y = ({x},{y})')
             try:
                 # aRow = self._grid[x]
                 aRow = gridCopy[x]
                 # noinspection PyUnusedLocal
                 aCell = aRow[y]         # Only used to see if that key will generate a KeyError
-                self.logger.debug(f'currentGridPos: {currentGridPos} fits at {x},{y}')
+                self.logger.debug(f'{currentGridPos=} fits at {x},{y}')
                 gridPos: Position = Position(x, y)
                 if gridPos in inUsePositions:
                     raise FailedPositioningException(f'grid position {gridPos} in use')
                 else:
                     inUsePositions.add(gridPos)
                     aRow[y] = nodeName
-                    self.logger.debug(f'inUsePositions: {inUsePositions}')
+                    self.logger.debug(f'{inUsePositions=}')
                     self.layoutPositions[nodeName] = gridPos
             except KeyError:
                 self.logger.debug(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
                 raise FailedPositioningException(f'Potential Position: {theGridPosition} failed at computed {x},{y}')
 
         self.logger.info(f'All nodes positioned;  Zero Zero node at: {theGridPosition}')
-        self.logger.debug(f'layoutPositions: {self.layoutPositions}')
+        self.logger.debug(f'{self.layoutPositions=}')
 
     def _nextGridPosition(self, currentGridPosition: Position) -> Position:
 
