@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="orthogonal",
-    version="1.1.4",
+    version="1.1.5",
     description="Orthogonal Graph Layout for Python 3",
     long_description=README,
     long_description_content_type="text/markdown",
