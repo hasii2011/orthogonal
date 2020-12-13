@@ -29,4 +29,4 @@ install:
   - pip install html-testRunner
 
 # command to run tests
-script: ${TRAVIS_BUILD_DIR}/runtests.sh
+script: ${TRAVIS_BUILD_DIR}/scripts/runtests.sh
