@@ -1,5 +1,14 @@
 #!/usr/local/bin/bash
 
+function changeToProjectRoot {
+
+    export areHere=`basename ${PWD}`
+    if [[ ${areHere} = "scripts" ]]; then
+        cd ..
+    fi
+}
+
+changeToProjectRoot
 
 rm -rf dist build
 rm -rf orthogonal.egg-info

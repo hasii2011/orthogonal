@@ -3,6 +3,16 @@
 # Assumes python 3 is on PATH
 # Assumes you are in a virtual environment
 #
+function changeToProjectRoot {
+
+    export areHere=`basename ${PWD}`
+    if [[ ${areHere} = "scripts" ]]; then
+        cd ..
+    fi
+}
+
+changeToProjectRoot
+
 clear
 pip3 list > /dev/null 2>&1
 STATUS=$?
