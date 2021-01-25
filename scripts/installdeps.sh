@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 #
 # Assumes python 3 is on PATH
 # Assumes you are in a virtual environment

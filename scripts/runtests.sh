@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function changeToProjectRoot {
 
@@ -14,9 +14,10 @@ changeToProjectRoot
 python3 -m tests.TestAll $*
 status=$?
 
+./scripts/cleanup.sh
+
 cd -  > /dev/null 2>&1
 
-./cleanup.sh
 
 echo "Exit with status: ${status}"
 exit ${status}

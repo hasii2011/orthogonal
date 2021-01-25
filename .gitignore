@@ -3,4 +3,5 @@ __pycache__/
 /build/
 /orthogonal.egg-info/
 /venv-pyenv-3.8.2/
+/venv-pyenv-3.9.1/
 .idea

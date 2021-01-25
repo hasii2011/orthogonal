@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 
 function changeToProjectRoot {
 
@@ -12,7 +12,7 @@ changeToProjectRoot
 
 clear
 
-./cleanup.sh
+./scripts/cleanup.sh
 python3 setup.py sdist bdist_wheel
 
 # Check package
