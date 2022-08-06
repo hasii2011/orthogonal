@@ -25,7 +25,7 @@ class TestAll:
     NOT_TESTS: List[str] = ['TestAll', 'TestBase', 'TestTemplate']
 
     VERBOSITY_QUIET:   int = 0  # Print the total numbers of tests executed and the global result
-    VERBOSITY_DEFAULT: int = 1  # VERBOSITY_QUIET plus a dot for every successful test or a F for every failure
+    VERBOSITY_DEFAULT: int = 1  # VERBOSITY_QUIET plus a dot for every successful test or an 'F' for every failure
     VERBOSITY_VERBOSE: int = 2  # Print help string of every test and the result
     VERBOSITY_LOUD:    int = 3  # ??
 
@@ -39,7 +39,7 @@ class TestAll:
 
     def runTextTestRunner(self) -> int:
 
-        status: TestResult = TextTestRunner(verbosity=TestAll.VERBOSITY_QUIET).run(self._testSuite)
+        status: TestResult = TextTestRunner(verbosity=TestAll.VERBOSITY_VERBOSE).run(self._testSuite)
         self.logger.info(f'Test Suite Status: {status}')
         if len(status.failures) != 0:
             return 1

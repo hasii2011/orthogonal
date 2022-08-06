@@ -14,17 +14,17 @@
     },
     "loggers": {
         "root": {
-            "level": "INFO",
+            "level": "WARN",
             "handlers": ["consoleHandler"],
             "propagate": "False"
         },
         "orthogonal": {
-            "level": "INFO",
+            "level": "WARN",
             "handlers": ["consoleHandler"],
             "propagate": "False"
         },
         "tests": {
-            "level": "INFO",
+            "level": "WARN",
             "handlers": ["consoleHandler"],
             "propagate": "False"
         },

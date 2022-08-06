@@ -10,12 +10,14 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="orthogonal",
-    version="1.1.6",
+    version="1.1.7",
     description="Orthogonal Graph Layout for Python 3",
     long_description=README,
     long_description_content_type="text/markdown",
+    maintainer='Humberto A. Sanchez II',
+    maintainer_email='humberto.a.sanchez.ii@gmail.com',
     url="https://github.com/hasii2011/OrthogonalDrawing",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['networkx']
+    install_requires=['networkx==2.5']
 )

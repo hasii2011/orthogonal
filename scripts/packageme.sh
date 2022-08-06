@@ -2,7 +2,7 @@
 
 function changeToProjectRoot {
 
-    export areHere=`basename ${PWD}`
+    areHere=$(basename "${PWD}")
     if [[ ${areHere} = "scripts" ]]; then
         cd ..
     fi
@@ -13,7 +13,7 @@ changeToProjectRoot
 clear
 
 ./scripts/cleanup.sh
-python3 setup.py sdist bdist_wheel
+python -m build --sdist --wheel
 
 # Check package
 twine check dist/*
