@@ -5,5 +5,5 @@ wheel==0.37.1
 twine==4.0.1
 build==0.8.0
 
-networkx==2.5
-matplotlib==3.3.3
+networkx==2.8.5
+matplotlib==3.5.2

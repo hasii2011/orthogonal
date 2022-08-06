@@ -19,5 +19,5 @@ setup(
     url="https://github.com/hasii2011/OrthogonalDrawing",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['networkx==2.5']
+    install_requires=['networkx==2.8.5']
 )
