@@ -8,5 +8,5 @@ build==0.10.0
 # networkx==2.8.5
 # matplotlib==3.5.2
 
-networkx==2.8.5
-matplotlib==3.5.2
+networkx==3.0
+matplotlib==3.6.3
