@@ -2,8 +2,7 @@ __pycache__/
 /dist/
 /build/
 /orthogonal.egg-info/
-/pyenv-3.9.1/
-/pyenv-3.11.0/
+/pyenv-3.11.5/
 .idea
 .envrc
 .python-version

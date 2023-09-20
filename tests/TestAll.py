@@ -39,7 +39,7 @@ class TestAll:
 
     def runTextTestRunner(self) -> int:
 
-        status: TestResult = TextTestRunner(verbosity=TestAll.VERBOSITY_VERBOSE).run(self._testSuite)
+        status: TestResult = TextTestRunner(verbosity=TestAll.VERBOSITY_DEFAULT).run(self._testSuite)
         self.logger.info(f'Test Suite Status: {status}')
         if len(status.failures) != 0:
             return 1
