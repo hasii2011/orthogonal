@@ -111,8 +111,8 @@ def suite() -> TestSuite:
     import unittest
 
     testSuite: TestSuite = TestSuite()
-    # noinspection PyUnresolvedReferences
-    testSuite.addTest(unittest.makeSuite(TestEmbeddingToScreen))
+
+    testSuite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestEmbeddingToScreen))
 
     return testSuite
 
