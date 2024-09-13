@@ -1,0 +1,29 @@
+[build-system]
+requires = ['setuptools', 'wheel']
+build-backend = "setuptools.build_meta"
+
+[project]
+name='orthogonal'
+dynamic = ["version"]
+description = 'Orthogonal Graph Layout for Python 3'
+readme = "README.md"
+license = {text = 'GNU AFFERO GENERAL PUBLIC LICENSE'}
+authors = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
+maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
+keywords = ['pyut', 'graphics', 'layout']
+
+dependencies = [
+  'networkx>=3.0',
+]
+
+[project.urls]
+Repository = 'https://github.com/hasii2011/orthogonal'
+
+[tool.setuptools.packages.find]
+where = ['src']
+
+[tool.setuptools.package-data]
+'orthogonal.resources' = ['loggingConfiguration.json']
+
+[tool.setuptools.dynamic]
+version = {attr = 'orthogonal.__version__'}
