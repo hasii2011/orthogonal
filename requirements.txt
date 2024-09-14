@@ -1,12 +1,15 @@
 
-setuptools==68.2.2
-html-testRunner~=1.2.1
-wheel==0.41.2
-twine==4.0.2
-build==1.0.3
+setuptools==74.1.2
+wheel==0.44.0
+twine==5.1.1
+build==1.2.2
+
 
 # following is strictly for maintenance purposes
-buildlackey==1.6.3
+buildlackey>=1.6.3
+html-testRunner~=1.2.1
+mypy==1.11.2
 
-networkx==3.0
-matplotlib==3.6.3
+codeallybasic>=1.4.0
+networkx>=3.3
+matplotlib>=3.9.2

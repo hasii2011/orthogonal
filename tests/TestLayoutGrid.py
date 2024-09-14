@@ -1,31 +1,25 @@
 
-from logging import Logger
-from logging import getLogger
-
 from unittest import TestSuite
 from unittest import main as unitTestMain
 
 from orthogonal.mapping.LayoutGrid import GridColumnType
 from orthogonal.mapping.LayoutGrid import LayoutGrid
 
-from tests.TestBase import TestBase
+from tests.ProjectTestBase import ProjectTestBase
 
 
 from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddedTypes import Positions
 
 
-class TestLayoutGrid(TestBase):
-
-    clsLogger: Logger = None
+class TestLayoutGrid(ProjectTestBase):
 
     @classmethod
     def setUpClass(cls):
-        TestBase.setUpLogging()
-        TestLayoutGrid.clsLogger = getLogger(__name__)
+        super().setUpClass()
 
     def setUp(self):
-        self.logger: Logger = TestLayoutGrid.clsLogger
+        super().setUp()
 
     def testInitializeValidGrid(self):
 

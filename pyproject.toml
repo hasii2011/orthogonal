@@ -13,7 +13,7 @@ maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@
 keywords = ['pyut', 'graphics', 'layout']
 
 dependencies = [
-  'networkx>=3.0',
+  'networkx>=3.3',
 ]
 
 [project.urls]

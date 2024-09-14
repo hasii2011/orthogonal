@@ -2,8 +2,6 @@
 from typing import Dict
 from typing import Tuple
 
-from logging import Logger
-from logging import getLogger
 from logging import DEBUG
 
 from unittest import TestSuite
@@ -16,20 +14,17 @@ from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
-from tests.TestBase import TestBase
+from tests.ProjectTestBase import ProjectTestBase
 
 
-class TestGML(TestBase):
-
-    clsLogger: Logger = None
+class TestGML(ProjectTestBase):
 
     @classmethod
     def setUpClass(cls):
-        TestBase.setUpLogging()
-        TestGML.clsLogger = getLogger(__name__)
+        super().setUpClass()
 
     def setUp(self):
-        self.logger: Logger = TestGML.clsLogger
+        super().setUp()
 
     def testCase1(self):
         fqFileName: str = TestGML.retrieveResourcePath("case1.gml")

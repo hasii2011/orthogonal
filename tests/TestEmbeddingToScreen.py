@@ -1,11 +1,8 @@
 
-from logging import Logger
-from logging import getLogger
-
 from unittest import TestSuite
 from unittest import main as unitTestMain
 
-from tests.TestBase import TestBase
+from tests.ProjectTestBase import ProjectTestBase
 
 from orthogonal.mapping.EmbeddedTypes import ScreenCoordinates
 from orthogonal.mapping.ScreenSize import ScreenSize
@@ -14,17 +11,15 @@ from orthogonal.mapping.EmbeddedTypes import Position
 from orthogonal.mapping.EmbeddingToScreen import EmbeddingToScreen
 
 
-class TestEmbeddingToScreen(TestBase):
-
-    clsLogger: Logger = None
+class TestEmbeddingToScreen(ProjectTestBase):
 
     @classmethod
     def setUpClass(cls):
-        TestBase.setUpLogging()
-        TestEmbeddingToScreen.clsLogger = getLogger(__name__)
+        super().setUpClass()
 
     def setUp(self):
-        self.logger: Logger = TestEmbeddingToScreen.clsLogger
+        super().setUp()
+
         self._simplePositions: Positions = {'Node0': Position(0, 0),
                                             'Node5': Position(0, 1),
                                             'Node1': Position(1, 0),

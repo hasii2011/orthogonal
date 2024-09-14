@@ -1,27 +1,23 @@
-from logging import Logger
-from logging import getLogger
+
 from typing import Set
 
 from unittest import TestSuite
 from unittest import main as unitTestMain
 
-from tests.TestBase import TestBase
+from tests.ProjectTestBase import ProjectTestBase
 
 
 from orthogonal.mapping.EmbeddedTypes import Position
 
 
-class TestSetOfPositions(TestBase):
-
-    clsLogger: Logger = None
+class TestSetOfPositions(ProjectTestBase):
 
     @classmethod
     def setUpClass(cls):
-        TestBase.setUpLogging()
-        TestSetOfPositions.clsLogger = getLogger(__name__)
+        super().setUpClass()
 
     def setUp(self):
-        self.logger: Logger = TestSetOfPositions.clsLogger
+        super().setUp()
 
     def testInSet(self):
 
