@@ -30,21 +30,7 @@ class ProjectTestBase(UnitTestBase):
     @classmethod
     def retrieveResourcePath(cls, bareFileName: str) -> str:
 
-        # Use this method in Python 3.9
-        # from importlib_resources import files
-        # configFilePath: str  = files('org.pyut.resources').joinpath(Pyut.JSON_LOGGING_CONFIG_FILENAME)
-
         fqFileName: str = ResourceManager.retrieveResourcePath(bareFileName=bareFileName,
                                                                resourcePath=ProjectTestBase.RESOURCES_DATA_PATH,
                                                                packageName=ProjectTestBase.RESOURCES_DATA_PACKAGE_NAME)
-        # try:
-        #     fqFileName: str = resource_filename(TestBase.RESOURCES_PACKAGE_NAME, bareFileName)
-        # except (ValueError, Exception):
-        #     #
-        #     # Maybe we are in an app
-        #     #
-        #     from os import environ
-        #     pathToResources: str = environ.get(f'{TestBase.RESOURCE_ENV_VAR}')
-        #     fqFileName:      str = f'{pathToResources}/{TestBase.RESOURCES_PATH}/{bareFileName}'
-
         return fqFileName
