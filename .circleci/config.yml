@@ -15,10 +15,11 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.13
     executor: python/default
     steps:
-      - checkout
+      - checkout:
+          method: full                
       - python/install-packages:
           pkg-manager: pip
       - run:

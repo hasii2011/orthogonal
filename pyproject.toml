@@ -7,10 +7,10 @@ name='orthogonal'
 dynamic = ["version"]
 description = 'Orthogonal Graph Layout for Python 3'
 readme = "README.md"
-license = {text = 'GNU AFFERO GENERAL PUBLIC LICENSE'}
 authors = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
 maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
 keywords = ['pyut', 'graphics', 'layout']
+license     = 'AGPL-1.0-or-later'
 
 dependencies = [
   'networkx>=3.4.2',
