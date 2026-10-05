@@ -11,7 +11,7 @@ import networkx as nx
 
 from networkx import Graph
 
-from orthogonal.doublyConnectedEdgeList.Dcel import Dcel
+from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
 from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
 
 NODE_NAME = str
@@ -44,7 +44,7 @@ class Planarization:
 
         self.G: Graph = G.copy()
         self.pos = pos  # is only used to find the ext_face now.
-        self.dcel: Dcel = Dcel(G, self.embedding)
+        self.dcel: DoublyConnectedEdgeList = DoublyConnectedEdgeList(G, self.embedding)
         self.ext_face   = self.get_external_face()
 
     def copy(self):

@@ -26,8 +26,9 @@ class HalfEdge(GraphElement):
         self.inc: Any = None  # the incident face
         self.twin: Optional[HalfEdge] = None
         self.ori: Any = None
+
         self._previous: Optional[HalfEdge] = None
-        self._next: Optional[HalfEdge] = None
+        self._next:     Optional[HalfEdge] = None
 
     @property
     def previous(self) -> Optional[HalfEdge]:

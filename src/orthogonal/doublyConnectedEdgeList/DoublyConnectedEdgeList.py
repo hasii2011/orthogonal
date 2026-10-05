@@ -7,7 +7,7 @@ from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
 
 
-class Dcel:
+class DoublyConnectedEdgeList:
     def __init__(self, G, embedding):
         assert nx.check_planarity(G)[0]
 
