@@ -11,23 +11,27 @@ authors     = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@
 maintainers = [{name = 'Humberto A. Sanchez II', email = 'Humberto.A.Sanchez.II@gmail.com'}]
 keywords    = ['umldiagrammer', 'graphics', 'layout']
 license     = 'AGPL-1.0-or-later'
+license-files = ['LICENSE']
 
 dependencies = [
   'networkx>=3.4.2',
 ]
 [project.optional-dependencies]
 test = [
-    'mypy==1.20.2',
+    'mypy==2.4.0',
     'mypy-extensions==1.1.0',
     'types-Deprecated==1.3.1.20260130',
     'html-testRunner~=1.2.1',
+    'buildlackey>=2.1.0',
+    'codeallybasic>=1.41.0',
+    'matplotlib>=3.11.2',
 ]
 
 deploy = [
-    "setuptools==82.0.1",
-    "wheel==0.47.0",
-    "twine==6.2.0",
-    "build==1.4.4",
+    'setuptools==82.0.1',
+    'wheel==0.47.0',
+    'twine==6.2.0',
+    'build==1.4.4',
 ]
 
 [project.urls]

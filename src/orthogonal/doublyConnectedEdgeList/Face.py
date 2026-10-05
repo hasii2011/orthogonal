@@ -23,10 +23,10 @@ class Face(GraphElement):
 
     def surround_half_edges(self):  # clockwise
         yield self.inc
-        he = self.inc.succ
+        he = self.inc.next
         while he is not self.inc:
             yield he
-            he = he.succ
+            he = he.next
 
     def surround_vertices(self):
         for he in self.surround_half_edges():

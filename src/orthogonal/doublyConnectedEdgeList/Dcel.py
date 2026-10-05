@@ -3,7 +3,7 @@
 import networkx as nx
 
 from orthogonal.doublyConnectedEdgeList.Face import Face
-from orthogonal.doublyConnectedEdgeList.Hedge import Hedge
+from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
 
 
@@ -17,7 +17,7 @@ class Dcel:
 
         self.half_edge_dict = {}
         for u, v in G.edges:
-            he1, he2 = Hedge((u, v)), Hedge((v, u))
+            he1, he2 = HalfEdge((u, v)), HalfEdge((v, u))
             self.half_edge_dict[he1.id] = he1
             self.half_edge_dict[he2.id] = he2
             he1.twin = he2
@@ -30,8 +30,8 @@ class Dcel:
 
         for he in self.half_edge_dict.values():
             u, v = he.get_points()
-            he.succ = self.half_edge_dict[embedding.next_face_half_edge(u, v)]
-            he.succ.pred = he
+            he.next = self.half_edge_dict[embedding.next_face_half_edge(u, v)]
+            he.next.previous = he
 
         self.face_dict = {}
         for he in self.half_edge_dict.values():
@@ -53,15 +53,15 @@ class Dcel:
     def add_node_between(self, u: 'id', v: 'id', node_name):
         def insert_node(u, v, mid_vertice):
             he = self.half_edge_dict.pop((u, v))
-            he1 = Hedge((u, mid_vertice.id))
-            he2 = Hedge((mid_vertice.id, v))
+            he1 = HalfEdge((u, mid_vertice.id))
+            he2 = HalfEdge((mid_vertice.id, v))
             # update half_edge_dict
             self.half_edge_dict[u, mid_vertice.id] = he1
             self.half_edge_dict[mid_vertice.id, v] = he2
-            he1.set_all(None, he.ori, he.pred, he2, he.inc)
-            he2.set_all(None, mid_vertice, he1, he.succ, he.inc)
-            he1.pred.succ = he1
-            he2.succ.pred = he2
+            he1.set_all(None, he.ori, he.previous, he2, he.inc)
+            he2.set_all(None, mid_vertice, he1, he.next, he.inc)
+            he1.previous.next = he1
+            he2.next.previous = he2
             # update face
             if he.inc.inc is he:
                 he.inc.inc = he1

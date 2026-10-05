@@ -86,7 +86,7 @@ class Compaction:
             side = 0
             for he in face.surround_half_edges():
                 edge_side[he.id] = side
-                end_angle = self.flow_dict[he.succ.ori.id][face.id][he.succ.id]
+                end_angle = self.flow_dict[he.next.ori.id][face.id][he.next.id]
                 if end_angle == 1:
                     # turn right in internal face or turn left in external face
                     side = (side + 1) % 4

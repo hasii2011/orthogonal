@@ -1,0 +1,49 @@
+name: 'CI'
+
+on:
+  push:
+    branches: [ 'master', 'Issue-*' ]
+  pull_request:
+    branches: [ 'master' ]
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - name: 'Check out repository'
+        uses: 'actions/checkout@v4'
+
+      - name: 'Set up Python ${{ matrix.python-version }}'
+        uses: 'actions/setup-python@v5'
+        with:
+          python-version: '${{ matrix.python-version }}'
+          cache: 'pip'
+
+      - name: 'Install dependencies and orthogonal with test and deploy extras'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[test,deploy]'
+
+      - name: 'Run Type Checks (mypy)'
+        continue-on-error: true
+        run: |
+          mypy --config-file .mypi.ini src
+
+      - name: 'Run Unittest Suite'
+        env:
+          PYTHONPATH: 'src:.'
+        run: |
+          python -m unittest discover -s tests -t . -p 'Test*.py' -v
+
+      - name: 'Verify Package Build'
+        run: |
+          python -m build --sdist --wheel
+
+      - name: 'Check Package with Twine'
+        run: |
+          twine check dist/*
