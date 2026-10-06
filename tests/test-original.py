@@ -1,12 +1,14 @@
 import networkx as nx
-from orthogonal.topologyShapeMetric import TSM
+from orthogonal.topologyShapeMetric.Compaction import Compaction
+from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
+from orthogonal.topologyShapeMetric.Planarization import Planarization
 import unittest
 
 
 def generate(G, pos=None):
-    planar = TSM.Planarization(G, pos)
-    orthogonal = TSM.Orthogonalization(planar)
-    compact = TSM.Compaction(orthogonal)
+    planar = Planarization(G, pos)
+    orthogonal = Orthogonalization(planar)
+    compact = Compaction(orthogonal)
 
 
 class TestGML(unittest.TestCase):

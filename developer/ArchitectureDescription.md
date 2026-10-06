@@ -73,12 +73,14 @@ classDiagram
         +id: Any
     }
     class Vertex {
-        +inc: HalfEdge
+        +incidentEdge: HalfEdge
+        +hasIncidentEdge: bool
         +surround_half_edges()
         +surround_faces()
     }
     class Face {
         +incidentEdge: HalfEdge
+        +hasIncidentEdge: bool
         +nodes_id: List
         +surround_half_edges()
         +surround_faces()
@@ -90,13 +92,15 @@ classDiagram
         +previous: HalfEdge
         +next: HalfEdge
         +incidentFace: Face
-        +get_points()
+        +hasIncidentFace: bool
+        +getPoints()
     }
     class DoublyConnectedEdgeList {
         +vertex_dict: Dict~id, Vertex~
         +half_edge_dict: Dict~Tuple, HalfEdge~
         +face_dict: Dict~str, Face~
-        +add_node_between(u, v, node_name)
+        +add_node_between(u, v, nodeName)
+        -__insertNode(sourceNode, targetNode, midVertex)
     }
 
     GraphElement <|-- Vertex
@@ -109,9 +113,10 @@ classDiagram
     HalfEdge --> Vertex : origin
     HalfEdge --> Face : incidentFace
     Face --> HalfEdge : incidentEdge
+    Vertex --> HalfEdge : incidentEdge
 ```
 
-- [`Vertex`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Vertex.py): Holds an `inc` pointer to an outgoing half-edge.
+- [`Vertex`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Vertex.py): Holds an `incidentEdge` pointer to an outgoing half-edge.
 - [`HalfEdge`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/HalfEdge.py): Half-edge with pointers to its `twin`, `next` (next counter-clockwise edge on face boundary), `previous` (preceding edge), `origin` (origin vertex), and `incidentFace` (incident face to its left).
 - [`Face`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Face.py): Holds an `incidentEdge` pointer to one half-edge on its bounding cycle.
 - [`DoublyConnectedEdgeList.add_node_between`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/DoublyConnectedEdgeList.py#L53): Dynamically splits an existing half-edge pair by introducing a dummy bend vertex `b_i`, rewiring `next`, `previous`, and `twin` pointers while updating the bounding face cycles.

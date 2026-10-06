@@ -17,6 +17,7 @@ from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalExcepti
 NODE_NAME = str
 POSITION  = Tuple[int, int]
 POSITIONS = Dict[NODE_NAME, POSITION]
+NO_POSITIONS: POSITIONS = {}
 
 
 class Planarization:
@@ -24,7 +25,7 @@ class Planarization:
     This step determines the topology of the drawing which is described by a planar embedding.
     """
 
-    def __init__(self, G: Graph, pos: POSITIONS = None):
+    def __init__(self, G: Graph, pos: POSITIONS = NO_POSITIONS):
 
         if nx.number_of_selfloops(G) != 0:
             raise OrthogonalException('There can be no self loops in the graph')
@@ -33,14 +34,17 @@ class Planarization:
             raise OrthogonalException('The graph or parts of it are not connected.')
 
         self.logger: Logger = getLogger(__name__)
-        if pos is None:
-            is_planar, self.embedding = nx.check_planarity(G)
-            assert is_planar
+        self.embedding: nx.PlanarEmbedding
+        if not pos:
+            isPlanar, rawEmbedding = nx.check_planarity(G)
+            if not isPlanar or not isinstance(rawEmbedding, nx.PlanarEmbedding):
+                raise OrthogonalException('The graph is not planar')
+            self.embedding = rawEmbedding
             pos = nx.combinatorial_embedding_to_pos(self.embedding)
         else:
             if self.numberOfCrossings(G, pos) != 0:
                 raise OrthogonalException('The graph has edges that cross each other')
-            self.embedding: nx.PlanarEmbedding = self.convert_pos_to_embedding(G, pos)
+            self.embedding = self.convert_pos_to_embedding(G, pos)
 
         self.G: Graph = G.copy()
         self.pos = pos  # is only used to find the ext_face now.
@@ -48,9 +52,7 @@ class Planarization:
         self.ext_face   = self.get_external_face()
 
     def copy(self):
-        new_planar = self.__new__(self.__class__)
-        new_planar.__init__(self.G, self.pos)
-        return new_planar
+        return self.__class__(self.G, self.pos)
 
     def get_external_face(self):
         def left_most(G, pos):

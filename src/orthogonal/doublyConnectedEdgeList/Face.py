@@ -4,6 +4,7 @@ from typing import Optional
 from typing import Iterator
 from typing import TYPE_CHECKING
 
+from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.doublyConnectedEdgeList.GraphElement import GraphElement
 
 if TYPE_CHECKING:
@@ -30,13 +31,18 @@ class Face(GraphElement):
         self.nodes_id:      List[Any]            = []
 
     @property
-    def incidentEdge(self) -> Optional['HalfEdge']:
+    def incidentEdge(self) -> 'HalfEdge':
         """
         Get the first half-edge incident to the face boundary cycle.
 
         Returns:
             The incident HalfEdge bounding this face.
+
+        Raises:
+            UninitializedDcelError: If accessed before incidentEdge is wired.
         """
+        if self._incidentEdge is None:
+            raise UninitializedDcelError(f'Face {self.id} incidentEdge is uninitialized')
         return self._incidentEdge
 
     @incidentEdge.setter
@@ -48,6 +54,16 @@ class Face(GraphElement):
             edge: The incident HalfEdge bounding this face.
         """
         self._incidentEdge = edge
+
+    @property
+    def hasIncidentEdge(self) -> bool:
+        """
+        Check if an incident edge has been assigned to this face.
+
+        Returns:
+            True if incidentEdge is assigned, False otherwise.
+        """
+        return self._incidentEdge is not None
 
     def update_nodes(self):
         """
@@ -63,11 +79,7 @@ class Face(GraphElement):
             Adjacent Face instances across boundary half-edge twins.
         """
         for halfEdge in self.surround_half_edges():
-            twinEdge: Optional['HalfEdge'] = halfEdge.twin
-            if twinEdge is not None:
-                adjacentFace: Optional['Face'] = twinEdge.incidentFace
-                if adjacentFace is not None:
-                    yield adjacentFace
+            yield halfEdge.twin.incidentFace
 
     def surround_half_edges(self) -> Iterator['HalfEdge']:
         """
@@ -76,14 +88,13 @@ class Face(GraphElement):
         Yields:
             Successive HalfEdge instances forming the face boundary.
         """
-        startEdge: Optional['HalfEdge'] = self.incidentEdge
-        if startEdge is None:
+        if not self.hasIncidentEdge:
             return
 
+        startEdge: 'HalfEdge' = self.incidentEdge
         yield startEdge
-        currentEdge: Optional['HalfEdge'] = startEdge.next
-        while currentEdge is not None and currentEdge is not startEdge:
-            assert currentEdge is not None
+        currentEdge: 'HalfEdge' = startEdge.next
+        while currentEdge is not startEdge:
             yield currentEdge
             currentEdge = currentEdge.next
 
@@ -95,9 +106,7 @@ class Face(GraphElement):
             Successive Vertex instances bounding this face.
         """
         for halfEdge in self.surround_half_edges():
-            originVertex: Optional['Vertex'] = halfEdge.origin
-            if originVertex is not None:
-                yield originVertex
+            yield halfEdge.origin
 
     def __len__(self) -> int:
         return len(self.nodes_id)

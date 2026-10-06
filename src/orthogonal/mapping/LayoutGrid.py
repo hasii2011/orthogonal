@@ -57,7 +57,7 @@ class LayoutGrid:
                 self.logger.debug(f'{fpe}')
             potentialPos = self._nextGridPosition(currentGridPosition=potentialPos)
 
-        self._zeroNodePosition: Position = potentialPos
+        self._zeroNodePosition = potentialPos
 
     def _computeAGridPosition(self, theGridPosition: Position, nodePositions: Positions):
 
@@ -101,7 +101,7 @@ class LayoutGrid:
         nextY: int = currentGridPosition.y
         if nextX > self._gridWidth - 1:
             nextX = 0
-            nextY: int = currentGridPosition.y + 1
+            nextY = currentGridPosition.y + 1
 
         return Position(nextX, nextY)
 

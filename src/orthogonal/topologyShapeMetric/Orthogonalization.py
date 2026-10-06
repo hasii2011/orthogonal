@@ -52,11 +52,11 @@ class Orthogonalization:
         # alert: pulp will automatically transfer node's name into str and replace some special
         # chars into '_', and will throw a error if there are variables' name duplicated.
         #
-        import pulp
+        import pulp  # type: ignore[import-not-found]
 
         prob = pulp.LpProblem()  # minimize
 
-        var_dict = coll.defaultdict(lambda: coll.defaultdict(dict))
+        var_dict: dict = coll.defaultdict(lambda: coll.defaultdict(dict))
 
         for u, v, he_id in self.flow_network.edges:
             var_dict[u][v][he_id] = pulp.LpVariable(

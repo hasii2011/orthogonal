@@ -1,10 +1,10 @@
-
 from typing import Tuple
 from typing import NewType
 from typing import Optional
 from typing import Hashable
 from typing import TYPE_CHECKING
 
+from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.doublyConnectedEdgeList.GraphElement import GraphElement
 
 HalfEdgeId = NewType('HalfEdgeId', Tuple[Hashable, Hashable])
@@ -37,13 +37,18 @@ class HalfEdge(GraphElement):
         self._next:         Optional['HalfEdge'] = None
 
     @property
-    def twin(self) -> Optional['HalfEdge']:
+    def twin(self) -> 'HalfEdge':
         """
         Get the opposite directed twin half-edge.
 
         Returns:
             The twin half-edge running in the opposing direction.
+
+        Raises:
+            UninitializedDcelError: If accessed before twin is wired.
         """
+        if self._twin is None:
+            raise UninitializedDcelError(f'HalfEdge {self.id} twin is uninitialized')
         return self._twin
 
     @twin.setter
@@ -57,13 +62,18 @@ class HalfEdge(GraphElement):
         self._twin = twinEdge
 
     @property
-    def origin(self) -> Optional['Vertex']:
+    def origin(self) -> 'Vertex':
         """
         Get the origin vertex of this directed half-edge.
 
         Returns:
             The starting vertex where this half-edge originates.
+
+        Raises:
+            UninitializedDcelError: If accessed before origin is wired.
         """
+        if self._origin is None:
+            raise UninitializedDcelError(f'HalfEdge {self.id} origin is uninitialized')
         return self._origin
 
     @origin.setter
@@ -77,13 +87,18 @@ class HalfEdge(GraphElement):
         self._origin = originVertex
 
     @property
-    def incidentFace(self) -> Optional['Face']:
+    def incidentFace(self) -> 'Face':
         """
         Get the face incident to the left of this directed half-edge.
 
         Returns:
             The incident Face object.
+
+        Raises:
+            UninitializedDcelError: If accessed before incidentFace is wired.
         """
+        if self._incidentFace is None:
+            raise UninitializedDcelError(f'HalfEdge {self.id} incidentFace is uninitialized')
         return self._incidentFace
 
     @incidentFace.setter
@@ -97,13 +112,28 @@ class HalfEdge(GraphElement):
         self._incidentFace = theIncidentFace
 
     @property
-    def previous(self) -> Optional['HalfEdge']:
+    def hasIncidentFace(self) -> bool:
+        """
+        Check if an incident face has been assigned to this half-edge.
+
+        Returns:
+            True if incidentFace is assigned, False otherwise.
+        """
+        return self._incidentFace is not None
+
+    @property
+    def previous(self) -> 'HalfEdge':
         """
         Get the predecessor half-edge on the face boundary cycle.
 
         Returns:
             The previous half-edge in counter-clockwise order around the face.
+
+        Raises:
+            UninitializedDcelError: If accessed before previous is wired.
         """
+        if self._previous is None:
+            raise UninitializedDcelError(f'HalfEdge {self.id} previous is uninitialized')
         return self._previous
 
     @previous.setter
@@ -117,13 +147,18 @@ class HalfEdge(GraphElement):
         self._previous = previousEdge
 
     @property
-    def next(self) -> Optional['HalfEdge']:
+    def next(self) -> 'HalfEdge':
         """
         Get the successor half-edge on the face boundary cycle.
 
         Returns:
             The next half-edge in counter-clockwise order around the face.
+
+        Raises:
+            UninitializedDcelError: If accessed before next is wired.
         """
+        if self._next is None:
+            raise UninitializedDcelError(f'HalfEdge {self.id} next is uninitialized')
         return self._next
 
     @next.setter
@@ -143,16 +178,7 @@ class HalfEdge(GraphElement):
         Returns:
             The HalfEdgeId (u, v) representing this directed half-edge.
         """
-        originVertex: Optional['Vertex']   = self.origin
-        twinEdge:     Optional['HalfEdge'] = self.twin
-
-        assert originVertex is not None
-        assert twinEdge is not None
-
-        twinOrigin: Optional['Vertex'] = twinEdge.origin
-        assert twinOrigin is not None
-
-        return HalfEdgeId((originVertex.id, twinOrigin.id))
+        return HalfEdgeId((self.origin.id, self.twin.origin.id))
 
     def setAll(
         self,

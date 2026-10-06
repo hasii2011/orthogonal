@@ -4,6 +4,7 @@ from unittest import main as unitTestMain
 
 from tests.ProjectTestBase import ProjectTestBase
 
+from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
@@ -24,21 +25,28 @@ class TestHalfEdge(ProjectTestBase):
 
     def testInitialization(self):
         """
-        Verify that a HalfEdge initializes with correct default pointers and identifier.
+        Verify that a HalfEdge initializes with correct identifier and raises on uninitialized access.
         """
         edgeName: HalfEdgeId = HalfEdgeId(('u', 'v'))
         halfEdge: HalfEdge = HalfEdge(edgeName)
 
         self.assertEqual(edgeName, halfEdge.id, 'Identifier should match initialization argument')
-        self.assertIsNone(halfEdge.twin, 'Twin property should initially be None')
-        self.assertIsNone(halfEdge.origin, 'Origin property should initially be None')
-        self.assertIsNone(halfEdge.incidentFace, 'IncidentFace property should initially be None')
-        self.assertIsNone(halfEdge.previous, 'Previous property should initially be None')
-        self.assertIsNone(halfEdge.next, 'Next property should initially be None')
+        self.assertFalse(halfEdge.hasIncidentFace, 'hasIncidentFace should initially be False')
+
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.twin
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.origin
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.incidentFace
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.previous
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.next
 
     def testTwinProperty(self):
         """
-        Verify that twin getter and setter correctly update the twin edge.
+        Verify that twin getter and setter correctly update the twin edge and raise when uninitialized.
         """
         halfEdge1: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
         halfEdge2: HalfEdge = HalfEdge(HalfEdgeId(('v', 'u')))
@@ -47,11 +55,12 @@ class TestHalfEdge(ProjectTestBase):
         self.assertIs(halfEdge2, halfEdge1.twin, 'twin getter should return the assigned twin edge')
 
         halfEdge1.twin = None
-        self.assertIsNone(halfEdge1.twin, 'twin should be None after resetting')
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge1.twin
 
     def testOriginProperty(self):
         """
-        Verify that origin getter and setter correctly update the origin vertex.
+        Verify that origin getter and setter correctly update the origin vertex and raise when uninitialized.
         """
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
         originVertex: Vertex = Vertex('u')
@@ -60,24 +69,29 @@ class TestHalfEdge(ProjectTestBase):
         self.assertIs(originVertex, halfEdge.origin, 'origin getter should return the assigned origin vertex')
 
         halfEdge.origin = None
-        self.assertIsNone(halfEdge.origin, 'origin should be None after resetting')
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.origin
 
     def testIncidentFaceProperty(self):
         """
-        Verify that incidentFace getter and setter correctly update the incident face.
+        Verify that incidentFace getter and setter correctly update the incident face and raise when uninitialized.
         """
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
         face: Face = Face('f0')
 
+        self.assertFalse(halfEdge.hasIncidentFace, 'hasIncidentFace should be False before assignment')
         halfEdge.incidentFace = face
+        self.assertTrue(halfEdge.hasIncidentFace, 'hasIncidentFace should be True after assignment')
         self.assertIs(face, halfEdge.incidentFace, 'incidentFace getter should return the assigned face')
 
         halfEdge.incidentFace = None
-        self.assertIsNone(halfEdge.incidentFace, 'incidentFace should be None after resetting')
+        self.assertFalse(halfEdge.hasIncidentFace, 'hasIncidentFace should be False after reset')
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.incidentFace
 
     def testPreviousProperty(self):
         """
-        Verify that previous getter and setter correctly update the predecessor edge.
+        Verify that previous getter and setter correctly update the predecessor edge and raise when uninitialized.
         """
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('v', 'w')))
         previousEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
@@ -86,11 +100,12 @@ class TestHalfEdge(ProjectTestBase):
         self.assertIs(previousEdge, halfEdge.previous, 'previous getter should return the assigned predecessor')
 
         halfEdge.previous = None
-        self.assertIsNone(halfEdge.previous, 'previous should be None after resetting')
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.previous
 
     def testNextProperty(self):
         """
-        Verify that next getter and setter correctly update the successor edge.
+        Verify that next getter and setter correctly update the successor edge and raise when uninitialized.
         """
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
         nextEdge: HalfEdge = HalfEdge(HalfEdgeId(('v', 'w')))
@@ -99,7 +114,8 @@ class TestHalfEdge(ProjectTestBase):
         self.assertIs(nextEdge, halfEdge.next, 'next getter should return the assigned successor')
 
         halfEdge.next = None
-        self.assertIsNone(halfEdge.next, 'next should be None after resetting')
+        with self.assertRaises(UninitializedDcelError):
+            _ = halfEdge.next
 
     def testGetPoints(self):
         """
@@ -122,14 +138,14 @@ class TestHalfEdge(ProjectTestBase):
         self.assertEqual(HalfEdgeId(('u', 'v')), points1, 'halfEdge1 points should be (u, v)')
         self.assertEqual(HalfEdgeId(('v', 'u')), points2, 'halfEdge2 points should be (v, u)')
 
-    def testGetPointsWithoutTwinRaisesAssertion(self):
+    def testGetPointsWithoutTwinRaisesUninitializedError(self):
         """
-        Verify getPoints asserts that twin must be initialized before retrieval.
+        Verify getPoints raises UninitializedDcelError when twin is not yet wired.
         """
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
         halfEdge.origin = Vertex('u')
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(UninitializedDcelError):
             halfEdge.getPoints()
 
     def testSetAll(self):

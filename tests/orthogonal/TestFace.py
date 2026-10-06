@@ -4,6 +4,7 @@ from unittest import main as unitTestMain
 
 from tests.ProjectTestBase import ProjectTestBase
 
+from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
@@ -24,38 +25,45 @@ class TestFace(ProjectTestBase):
 
     def testInitialization(self):
         """
-        Verify that a Face initializes with the correct identifier, empty node list, and None incidentEdge.
+        Verify that a Face initializes with the correct identifier, empty node list, and raises on uninitialized incidentEdge.
         """
         faceName: str = 'f0'
         face: Face = Face(faceName)
 
         self.assertEqual(faceName, face.id, 'Identifier should match initialization argument')
-        self.assertIsNone(face.incidentEdge, 'incidentEdge property should initially be None')
+        self.assertFalse(face.hasIncidentEdge, 'hasIncidentEdge should initially be False')
+        with self.assertRaises(UninitializedDcelError):
+            _ = face.incidentEdge
+
         self.assertEqual([], face.nodes_id, 'nodes_id should initially be an empty list')
         self.assertEqual(0, len(face), 'Length of a newly initialized face should be 0')
         self.assertEqual('FaceView[]', repr(face), 'String representation should reflect empty nodes_id')
 
     def testIncidentEdgeProperty(self):
         """
-        Verify that incidentEdge getter and setter correctly update the incident half-edge.
+        Verify that incidentEdge getter and setter correctly update the incident half-edge and raise when uninitialized.
         """
         face: Face = Face('f1')
         halfEdge: HalfEdge = HalfEdge(HalfEdgeId(('u', 'v')))
 
+        self.assertFalse(face.hasIncidentEdge, 'hasIncidentEdge should be False before assignment')
         face.incidentEdge = halfEdge
+        self.assertTrue(face.hasIncidentEdge, 'hasIncidentEdge should be True after assignment')
         self.assertIs(halfEdge, face.incidentEdge, 'incidentEdge getter should return the assigned half-edge')
 
         face.incidentEdge = None
-        self.assertIsNone(face.incidentEdge, 'incidentEdge should be None after resetting')
+        self.assertFalse(face.hasIncidentEdge, 'hasIncidentEdge should be False after reset')
+        with self.assertRaises(UninitializedDcelError):
+            _ = face.incidentEdge
 
     def testSurroundHalfEdgesWhenNone(self):
         """
-        Verify that surround_half_edges yields nothing when incidentEdge is None.
+        Verify that surround_half_edges yields nothing when incidentEdge is not set.
         """
         face: Face = Face('f2')
         edges: list[HalfEdge] = list(face.surround_half_edges())
 
-        self.assertEqual([], edges, 'surround_half_edges should yield an empty sequence when incidentEdge is None')
+        self.assertEqual([], edges, 'surround_half_edges should yield an empty sequence when incidentEdge is not set')
 
     def testSurroundHalfEdgesCycle(self):
         """

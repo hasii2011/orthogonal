@@ -26,7 +26,7 @@ class Compaction:
             self.planar = orthogonalization.planar
             self.flow_dict = orthogonalization.flow_dict
         else:
-            self.planar: Planarization = orthogonalization.planar.copy()
+            self.planar = orthogonalization.planar.copy()
             self.flow_dict = copy.deepcopy(orthogonalization.flow_dict)
 
         self.bend_point_processor()
@@ -72,9 +72,9 @@ class Compaction:
             self.planar.G.add_edge(f'b{idx-1}', v)
 
     def face_side_processor(self):
-        '''
+        """
         Associating edges with face sides.
-        '''
+        """
 
         def update_face_edge(edge_side, face, base):
             for he in face.surround_half_edges():
@@ -178,7 +178,7 @@ class Compaction:
                 self.planar.G.edges[he.id]['len'] = length
 
     def layout(self):
-        pos = {}
+        pos: dict = {}
         for face in self.planar.dfs_face_order():
             for i, u in enumerate(face.nodes_id):
                 if not pos:

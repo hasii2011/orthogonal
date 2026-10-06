@@ -28,7 +28,7 @@ class FlowNet(nx.MultiDiGraph):
             return in_flow - out_flow
 
         def split(multi_flowG):
-            base_dict = coll.defaultdict(lambda: coll.defaultdict(dict))
+            base_dict: dict = coll.defaultdict(lambda: coll.defaultdict(dict))
             new_mdg = nx.MultiDiGraph()
 
             for u, v, key in multi_flowG.edges:

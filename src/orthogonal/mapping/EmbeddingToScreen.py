@@ -54,8 +54,8 @@ class EmbeddingToScreen:
 
         self.logger.info(f'{maxX=} {maxY=} {minX=} {minY=}')
 
-        self._embeddedWidth:  int = abs(minX - maxX) + 1
-        self._embeddedHeight: int = abs(minY - maxY) + 1
+        self._embeddedWidth  = abs(minX - maxX) + 1
+        self._embeddedHeight = abs(minY - maxY) + 1
 
     def _findMaxX(self, nodePositions: Positions) -> int:
 
