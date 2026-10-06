@@ -19,7 +19,7 @@ class Face(GraphElement):
 
     def surround_faces(self):  # clockwise, duplicated!!
         for he in self.surround_half_edges():
-            yield he.twin.inc
+            yield he.twin.incidentFace
 
     def surround_half_edges(self):  # clockwise
         yield self.inc
@@ -30,4 +30,4 @@ class Face(GraphElement):
 
     def surround_vertices(self):
         for he in self.surround_half_edges():
-            yield he.ori
+            yield he.origin

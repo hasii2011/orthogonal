@@ -40,7 +40,7 @@ class Compaction:
         """
         bends = {}  # left to right
         for he in self.planar.dcel.half_edge_dict.values():
-            lf, rf = he.twin.inc, he.inc
+            lf, rf = he.twin.incidentFace, he.incidentFace
             flow = self.flow_dict[lf.id][rf.id][he.id]
             if flow > 0:
                 bends[he.id] = flow
@@ -50,8 +50,8 @@ class Compaction:
             # Q: what if there are bends on both (u, v) and (v, u)?
             # A: Impossible, not a min cost
             he = self.planar.dcel.half_edge_dict[he_id]
-            u, v = he.get_points()
-            lf_id, rf_id = he.twin.inc.id, he.inc.id
+            u, v = he.getPoints()
+            lf_id, rf_id = he.twin.incidentFace.id, he.incidentFace.id
 
             self.planar.G.remove_edge(u, v)
             self.flow_dict[u][rf_id][u, f'b{idx}'] = self.flow_dict[u][rf_id].pop((u, v))
@@ -86,7 +86,7 @@ class Compaction:
             side = 0
             for he in face.surround_half_edges():
                 edge_side[he.id] = side
-                end_angle = self.flow_dict[he.next.ori.id][face.id][he.next.id]
+                end_angle = self.flow_dict[he.next.origin.id][face.id][he.next.id]
                 if end_angle == 1:
                     # turn right in internal face or turn left in external face
                     side = (side + 1) % 4
@@ -103,7 +103,7 @@ class Compaction:
         for face in faces_dfs[1:]:
             # at least one twin edge has been set
             for he in face.surround_half_edges():
-                lf_id = he.twin.inc.id
+                lf_id = he.twin.incidentFace.id
                 if lf_id in has_updated:  # neighbor face has been updated
                     # the edge that has been updated
                     l_side = edge_side[he.twin.id]
@@ -125,7 +125,7 @@ class Compaction:
             for he_id, side in self.edge_side.items():
                 if side == target_side:
                     he = self.planar.dcel.half_edge_dict[he_id]
-                    lf, rf = he.twin.inc, he.inc
+                    lf, rf = he.twin.incidentFace, he.incidentFace
                     lf_id = lf.id
                     rf_id = rf.id if rf.id != self.planar.ext_face.id else 'end'
                     hv_flow.add_edge(lf_id, rf_id, he_id)
@@ -165,9 +165,9 @@ class Compaction:
             if self.edge_side[he.id] in (0, 1):
                 side = self.edge_side[he.id]
 
-                rf = he.inc
+                rf = he.incidentFace
                 rf_id = 'end' if rf.id == self.planar.ext_face.id else rf.id
-                lf_id = he.twin.inc.id
+                lf_id = he.twin.incidentFace.id
 
                 if side == 0:
                     hv_flow_dict = ver_flow_dict

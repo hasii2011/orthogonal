@@ -11,7 +11,7 @@ class Vertex(GraphElement):
 
     def surround_faces(self):  # clockwise, duplicated
         for he in self.surround_half_edges():
-            yield he.inc
+            yield he.incidentFace
 
     def surround_half_edges(self):  # clockwise
         yield self.inc

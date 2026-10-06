@@ -37,10 +37,10 @@ class Orthogonalization:
 
         for vertex in self.planar.dcel.vertex_dict.values():
             for he in vertex.surround_half_edges():
-                flow_network.add_v2f(vertex.id, he.inc.id, he.id)
+                flow_network.add_v2f(vertex.id, he.incidentFace.id, he.id)
 
         for he in self.planar.dcel.half_edge_dict.values():
-            flow_network.add_f2f(he.twin.inc.id, he.inc.id, he.id)  # lf -> rf
+            flow_network.add_f2f(he.twin.incidentFace.id, he.incidentFace.id, he.id)  # lf -> rf
 
         return flow_network
 
@@ -68,7 +68,7 @@ class Orthogonalization:
 
         objs = []
         for he in self.planar.dcel.half_edge_dict.values():
-            lf, rf = he.twin.inc.id, he.inc.id
+            lf, rf = he.twin.incidentFace.id, he.incidentFace.id
             objs.append(
                 self.flow_network[lf][rf][he.id]['weight'] *
                 var_dict[lf][rf][he.id]

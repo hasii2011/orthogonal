@@ -86,10 +86,10 @@ classDiagram
     }
     class HalfEdge {
         +twin: HalfEdge
-        +ori: Vertex
+        +origin: Vertex
         +previous: HalfEdge
         +next: HalfEdge
-        +inc: Face
+        +incidentFace: Face
         +get_points()
     }
     class DoublyConnectedEdgeList {
@@ -106,12 +106,12 @@ classDiagram
     DoublyConnectedEdgeList *-- Face
     DoublyConnectedEdgeList *-- HalfEdge
     HalfEdge --> HalfEdge : twin / next / previous
-    HalfEdge --> Vertex : ori
-    HalfEdge --> Face : inc
+    HalfEdge --> Vertex : origin
+    HalfEdge --> Face : incidentFace
 ```
 
 - [`Vertex`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Vertex.py): Holds an `inc` pointer to an outgoing half-edge.
-- [`HalfEdge`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/HalfEdge.py): Half-edge with pointers to its `twin`, `next` (next counter-clockwise edge on face boundary), `previous` (preceding edge), `ori` (origin vertex), and `inc` (incident face to its left).
+- [`HalfEdge`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/HalfEdge.py): Half-edge with pointers to its `twin`, `next` (next counter-clockwise edge on face boundary), `previous` (preceding edge), `origin` (origin vertex), and `incidentFace` (incident face to its left).
 - [`Face`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Face.py): Holds an `inc` pointer to one half-edge on its bounding cycle.
 - [`DoublyConnectedEdgeList.add_node_between`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/DoublyConnectedEdgeList.py#L53): Dynamically splits an existing half-edge pair by introducing a dummy bend vertex `b_i`, rewiring `next`, `previous`, and `twin` pointers while updating the bounding face cycles.
 
