@@ -5,7 +5,7 @@ from typing import Hashable
 from typing import TYPE_CHECKING
 
 from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
-from orthogonal.doublyConnectedEdgeList.GraphElement import GraphElement
+from orthogonal.GraphElement import GraphElement
 
 HalfEdgeId = NewType('HalfEdgeId', Tuple[Hashable, Hashable])
 
