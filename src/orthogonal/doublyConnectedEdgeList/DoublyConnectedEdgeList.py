@@ -39,7 +39,7 @@ class DoublyConnectedEdgeList:
             if not he.incidentFace:
                 face_id = f'f{len(self.face_dict)}'
                 face: Face = Face(face_id)
-                face.inc = he
+                face.incidentEdge = he
                 self.face_dict[face_id] = face
 
                 face.nodes_id = embedding.traverse_face(*he.getPoints())
@@ -65,8 +65,8 @@ class DoublyConnectedEdgeList:
             he1.previous.next = he1
             he2.next.previous = he2
             # update face
-            if he.incidentFace.inc is he:
-                he.incidentFace.inc = he1
+            if he.incidentFace.incidentEdge is he:
+                he.incidentFace.incidentEdge = he1
             he.incidentFace.update_nodes() # not efficient
 
         # update vertex_dict
