@@ -1,59 +1,151 @@
 
-import collections as coll
+from typing import Any
+from typing import Tuple
 
-import networkx as nx
+from collections import defaultdict
+
+from networkx import MultiDiGraph
+from networkx import min_cost_flow
 
 
-class FlowNet(nx.MultiDiGraph):
-    def add_v2f(self, v, f, key):
-        self.add_edge(v, f, key=key, lowerbound=1, capacity=4, weight=0)
+class FlowNet(MultiDiGraph):
+    """
+    Network flow graph representing the minimum-cost circulation problem
+    for orthogonal representation angles and bends.
+    """
 
-    def add_f2f(self, f1, f2, key):
-        # if not self.has_edge(f1, f2):
-        self.add_edge(f1, f2, key=key, lowerbound=0, capacity=2**32, weight=1)
+    def __init__(self):
+        """
+        Initialize an empty flow network and its circulation metrics.
+        """
+        super().__init__()
+        self._cost: int = 0
 
-    def add_v(self, v):
-        self.add_node(v, demand=-4)     # the total degree around a node is 2pi
+    @property
+    def cost(self) -> int:
+        """
+        Get the total circulation cost computed by the network flow solver.
 
-    def add_f(self, f, degree, is_external):
-        # the degree of a face is the length of the cycle bounding the face.
-        self.add_node(f, demand=(2 * degree + 4) if is_external else (2 * degree - 4))
+        Returns:
+            Total circulation cost as an integer.
+        """
+        return self._cost
 
-    def min_cost_flow(self):
-        def get_demand(flow_dict, node):
-            in_flow = sum(flow_dict[u][v][key]
-                          for u, v, key in self.in_edges(node, keys=True))
-            out_flow = sum(flow_dict[u][v][key]
-                           for u, v, key in self.out_edges(node, keys=True))
-            return in_flow - out_flow
+    def addVertexToFaceEdge(self, vertexId: Any, faceId: Any, key: Any):
+        """
+        Add a directed edge from a vertex to an incident face representing angle allocation.
 
-        def split(multi_flowG):
-            base_dict: dict = coll.defaultdict(lambda: coll.defaultdict(dict))
-            new_mdg = nx.MultiDiGraph()
+        Args:
+            vertexId: Origin vertex identifier.
+            faceId: Target incident face identifier.
+            key: Half-edge identifier key.
+        """
+        self.add_edge(vertexId, faceId, key=key, lowerbound=1, capacity=4, weight=0)
 
-            for u, v, key in multi_flowG.edges:
-                lowerbound = multi_flowG[u][v][key]['lowerbound']
-                base_dict[u][v][key] = lowerbound
-                new_mdg.add_edge(u, v, key,
-                                          capacity=multi_flowG[u][v][key]['capacity'] - lowerbound,
-                                          weight=multi_flowG[u][v][key]['weight'],
-                                          )
-            for node in multi_flowG:
-                new_mdg.nodes[node]['demand'] =  \
-                    multi_flowG.nodes[node]['demand'] - \
-                    get_demand(base_dict, node)
-            return base_dict, new_mdg
+    def addFaceToFaceEdge(self, sourceFaceId: Any, targetFaceId: Any, key: Any):
+        """
+        Add a directed edge between adjacent faces representing potential edge bends.
 
-        base_dict, new_mdg = split(self)
-        flow_dict = nx.min_cost_flow(new_mdg)
+        Args:
+            sourceFaceId: Origin face identifier.
+            targetFaceId: Destination adjacent face identifier.
+            key: Half-edge identifier key.
+        """
+        self.add_edge(sourceFaceId, targetFaceId, key=key, lowerbound=0, capacity=2**32, weight=1)
+
+    def addVertexNode(self, vertexId: Any):
+        """
+        Add a vertex node to the circulation network with supply demand of -4 (2pi).
+
+        Args:
+            vertexId: Unique vertex identifier.
+        """
+        self.add_node(vertexId, demand=-4)
+
+    def addFaceNode(self, faceId: Any, degree: int, isExternal: bool):
+        """
+        Add a face node with demand determined by bounding degree and external status.
+
+        Args:
+            faceId: Unique face identifier.
+            degree: Count of bounding edges.
+            isExternal: True if face is the unbounded external face.
+        """
+        self.add_node(faceId, demand=(2 * degree + 4) if isExternal else (2 * degree - 4))
+
+    def minCostFlow(self) -> dict:
+        """
+        Compute the minimum cost flow for the network.
+
+        Returns:
+            Dictionary of edge flows fulfilling demand at minimum cost.
+        """
+        baseDict, newMdg = self.__split()
+        flowDict: dict = min_cost_flow(newMdg)
         for u, v, key in self.edges:
-            flow_dict[u][v][key] += base_dict[u][v][key]
+            flowDict[u][v][key] += baseDict[u][v][key]
 
-        self.cost = self.cost_of_flow(flow_dict)
-        return flow_dict
+        self._cost = self.costOfFlow(flowDict)
+        return flowDict
 
-    def cost_of_flow(self, flow_dict):
-        cost = 0
+    def costOfFlow(self, flowDict: dict) -> int:
+        """
+        Calculate the total cost of the flow assignment.
+
+        Args:
+            flowDict: Mapping of assigned edge flows.
+
+        Returns:
+            Total circulation cost as an integer.
+        """
+        cost: int = 0
         for u, v, key in self.edges:
-            cost += flow_dict[u][v][key] * self[u][v][key]['weight']
+            cost += flowDict[u][v][key] * self[u][v][key]['weight']
         return cost
+
+    def __getDemand(self, flowDict: dict, node: Any) -> int:
+        """
+        Calculate the net flow demand (inflow minus outflow) for a node.
+
+        Args:
+            flowDict: Mapping of edge flows keyed by (u, v, key).
+            node: Node identifier to calculate demand for.
+
+        Returns:
+            Net demand as an integer.
+        """
+        inFlow: int = sum(
+            flowDict[u][v][key]
+            for u, v, key in self.in_edges(node, keys=True)
+        )
+        outFlow: int = sum(
+            flowDict[u][v][key]
+            for u, v, key in self.out_edges(node, keys=True)
+        )
+        return inFlow - outFlow
+
+    def __split(self) -> Tuple[dict, MultiDiGraph]:
+        """
+        Transform the network with non-zero lower bounds into a zero lower-bound circulation graph.
+
+        Returns:
+            Tuple of base lower-bound flows and transformed MultiDiGraph.
+        """
+        baseDict: dict = defaultdict(lambda: defaultdict(dict))
+        newMdg: MultiDiGraph = MultiDiGraph()
+
+        for u, v, key in self.edges:
+            lowerBound: int = self[u][v][key].get('lowerbound', self[u][v][key].get('lowerBound', 0))
+            baseDict[u][v][key] = lowerBound
+            newMdg.add_edge(
+                u,
+                v,
+                key,
+                capacity=self[u][v][key]['capacity'] - lowerBound,
+                weight=self[u][v][key]['weight']
+            )
+        for node in self:
+            newMdg.nodes[node]['demand'] = (
+                self.nodes[node]['demand'] - self.__getDemand(baseDict, node)
+            )
+        return baseDict, newMdg

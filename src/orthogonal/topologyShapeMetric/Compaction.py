@@ -153,7 +153,7 @@ class Compaction:
             #     delta = sum(hv_flow[v][u]['lowerbound'] for v in in_nodes) - hv_flow[u][u]['count']
             #     if delta < 0:
             #         hv_flow.edges[in_nodes[0]][u]['lowerbound'] += -delta
-            return hv_flow.min_cost_flow()
+            return hv_flow.minCostFlow()
 
         hor_flow = build_flow(1)  # up -> bottom
         ver_flow = build_flow(0)  # left -> right

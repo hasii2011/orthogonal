@@ -154,7 +154,7 @@ flowchart LR
     F1 <-->|"cost: 1, cap: [0, inf] <br> (Each flow unit = 1 bend)"| F2
 ```
 
-- **Solution via `min_cost_flow`:** [`FlowNet.min_cost_flow()`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/topologyShapeMetric/FlowNet.py#L22) transforms non-zero lower bounds into standard minimum-cost circulation format and solves via NetworkX's simplex-based flow algorithm.
+- **Solution via `minCostFlow`:** [`FlowNet.minCostFlow()`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/topologyShapeMetric/FlowNet.py#L68) transforms non-zero lower bounds into standard minimum-cost circulation format and solves via NetworkX's simplex-based flow algorithm.
 - **Alternative LP Formulation:** [`Orthogonalization.lp_solve()`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/topologyShapeMetric/Orthogonalization.py#L50) provides an integer programming formulation via PuLP with penalties for non-symmetric paths and corners.
 
 ---

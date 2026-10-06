@@ -27,25 +27,25 @@ class Orthogonalization:
         self.flow_dict = self.tamassia_orthogonalization()
 
     def face_determination(self):
-        flow_network = FlowNet()
+        flowNetwork: FlowNet = FlowNet()
 
         for vertex in self.planar.dcel.vertex_dict.values():
-            flow_network.add_v(vertex.id)
+            flowNetwork.addVertexNode(vertex.id)
 
         for face in self.planar.dcel.face_dict.values():
-            flow_network.add_f(face.id, len(face), face is self.planar.ext_face)
+            flowNetwork.addFaceNode(face.id, len(face), face is self.planar.ext_face)
 
         for vertex in self.planar.dcel.vertex_dict.values():
             for he in vertex.surroundHalfEdges():
-                flow_network.add_v2f(vertex.id, he.incidentFace.id, he.id)
+                flowNetwork.addVertexToFaceEdge(vertex.id, he.incidentFace.id, he.id)
 
         for he in self.planar.dcel.half_edge_dict.values():
-            flow_network.add_f2f(he.twin.incidentFace.id, he.incidentFace.id, he.id)  # lf -> rf
+            flowNetwork.addFaceToFaceEdge(he.twin.incidentFace.id, he.incidentFace.id, he.id)  # lf -> rf
 
-        return flow_network
+        return flowNetwork
 
     def tamassia_orthogonalization(self):
-        return self.flow_network.min_cost_flow()
+        return self.flow_network.minCostFlow()
 
     def lp_solve(self, weight_of_corner=1, weight_of_sym=0, sym_pairs=None):
         #
