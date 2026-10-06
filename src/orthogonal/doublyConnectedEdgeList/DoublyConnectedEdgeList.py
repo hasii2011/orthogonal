@@ -2,6 +2,7 @@
 
 from typing import Any
 from typing import Dict
+from typing import Hashable
 
 import networkx as nx
 
@@ -9,6 +10,8 @@ from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
+
+type NodeId = Hashable
 
 
 class DoublyConnectedEdgeList:
@@ -28,7 +31,7 @@ class DoublyConnectedEdgeList:
         """
         assert nx.check_planarity(G)[0]
 
-        self.vertex_dict: Dict[Any, Vertex] = {}
+        self.vertex_dict: Dict[NodeId, Vertex] = {}
         for node in G.nodes:
             self.vertex_dict[node] = Vertex(node)
 
@@ -67,7 +70,7 @@ class DoublyConnectedEdgeList:
         if not self.face_dict:
             self.face_dict['f0'] = Face('f0')
 
-    def add_node_between(self, u: Any, v: Any, nodeName: Any):
+    def add_node_between(self, u: NodeId, v: NodeId, nodeName: NodeId):
         """
         Insert a new node between existing nodes u and v by splitting the edge.
 
@@ -86,7 +89,7 @@ class DoublyConnectedEdgeList:
             self.half_edge_dict[v1, v2].twin = self.half_edge_dict[v2, v1]
             self.half_edge_dict[v2, v1].twin = self.half_edge_dict[v1, v2]
 
-    def __insertNode(self, sourceNode: Any, targetNode: Any, midVertex: Vertex):
+    def __insertNode(self, sourceNode: NodeId, targetNode: NodeId, midVertex: Vertex):
         """
         Split a directed half-edge (sourceNode, targetNode) by inserting midVertex.
 
