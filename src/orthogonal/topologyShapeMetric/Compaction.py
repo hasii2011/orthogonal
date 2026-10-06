@@ -61,7 +61,7 @@ class Compaction:
                 pre_node = f'b{idx-1}' if i > 0 else u
                 nxt_node = f'b{idx+1}' if i < n_bends - 1 else v
                 self.planar.G.add_edge(pre_node, cur_node)
-                self.planar.dcel.add_node_between(
+                self.planar.dcel.addNodeBetween(
                     pre_node, v, cur_node
                 )
                 self.flow_dict.setdefault(cur_node, {}).setdefault(lf_id, {})[cur_node, pre_node] = 1
@@ -77,14 +77,14 @@ class Compaction:
         """
 
         def update_face_edge(edge_side, face, base):
-            for he in face.surround_half_edges():
+            for he in face.surroundHalfEdges():
                 edge_side[he.id] = (edge_side[he.id] + base) % 4
 
         edge_side = {}
         for face in self.planar.dcel.face_dict.values():
             # set edges' side in internal faces independently at first
             side = 0
-            for he in face.surround_half_edges():
+            for he in face.surroundHalfEdges():
                 edge_side[he.id] = side
                 end_angle = self.flow_dict[he.next.origin.id][face.id][he.next.id]
                 if end_angle == 1:
@@ -102,7 +102,7 @@ class Compaction:
         has_updated = {faces_dfs[0].id}
         for face in faces_dfs[1:]:
             # at least one twin edge has been set
-            for he in face.surround_half_edges():
+            for he in face.surroundHalfEdges():
                 lf_id = he.twin.incidentFace.id
                 if lf_id in has_updated:  # neighbor face has been updated
                     # the edge that has been updated

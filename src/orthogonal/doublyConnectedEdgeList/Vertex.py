@@ -65,17 +65,17 @@ class Vertex(GraphElement):
         """
         return self._incidentEdge is not None
 
-    def surround_faces(self) -> Iterator['Face']:
+    def surroundFaces(self) -> Iterator['Face']:
         """
         Generate faces incident to this vertex in clockwise order.
 
         Yields:
             Incident Face instances surrounding this vertex.
         """
-        for halfEdge in self.surround_half_edges():
+        for halfEdge in self.surroundHalfEdges():
             yield halfEdge.incidentFace
 
-    def surround_half_edges(self) -> Iterator['HalfEdge']:
+    def surroundHalfEdges(self) -> Iterator['HalfEdge']:
         """
         Generate outgoing half-edges incident to this vertex in clockwise order.
 

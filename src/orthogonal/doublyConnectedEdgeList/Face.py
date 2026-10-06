@@ -65,23 +65,23 @@ class Face(GraphElement):
         """
         return self._incidentEdge is not None
 
-    def update_nodes(self):
+    def updateNodes(self):
         """
         Update the list of bounding vertex identifiers for this face.
         """
-        self.nodes_id = [vertex.id for vertex in self.surround_vertices()]
+        self.nodes_id = [vertex.id for vertex in self.surroundVertices()]
 
-    def surround_faces(self) -> Iterator['Face']:
+    def surroundFaces(self) -> Iterator['Face']:
         """
         Generate adjacent faces sharing edges with this face.
 
         Yields:
             Adjacent Face instances across boundary half-edge twins.
         """
-        for halfEdge in self.surround_half_edges():
+        for halfEdge in self.surroundHalfEdges():
             yield halfEdge.twin.incidentFace
 
-    def surround_half_edges(self) -> Iterator['HalfEdge']:
+    def surroundHalfEdges(self) -> Iterator['HalfEdge']:
         """
         Generate half-edges bounding this face in clockwise cycle order.
 
@@ -98,14 +98,14 @@ class Face(GraphElement):
             yield currentEdge
             currentEdge = currentEdge.next
 
-    def surround_vertices(self) -> Iterator['Vertex']:
+    def surroundVertices(self) -> Iterator['Vertex']:
         """
         Generate origin vertices bounding this face in cycle order.
 
         Yields:
             Successive Vertex instances bounding this face.
         """
-        for halfEdge in self.surround_half_edges():
+        for halfEdge in self.surroundHalfEdges():
             yield halfEdge.origin
 
     def __len__(self) -> int:

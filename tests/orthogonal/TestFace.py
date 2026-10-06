@@ -58,16 +58,16 @@ class TestFace(ProjectTestBase):
 
     def testSurroundHalfEdgesWhenNone(self):
         """
-        Verify that surround_half_edges yields nothing when incidentEdge is not set.
+        Verify that surroundHalfEdges yields nothing when incidentEdge is not set.
         """
         face: Face = Face('f2')
-        edges: list[HalfEdge] = list(face.surround_half_edges())
+        edges: list[HalfEdge] = list(face.surroundHalfEdges())
 
-        self.assertEqual([], edges, 'surround_half_edges should yield an empty sequence when incidentEdge is not set')
+        self.assertEqual([], edges, 'surroundHalfEdges should yield an empty sequence when incidentEdge is not set')
 
     def testSurroundHalfEdgesCycle(self):
         """
-        Verify that surround_half_edges cycles through all boundary half-edges in order.
+        Verify that surroundHalfEdges cycles through all boundary half-edges in order.
         """
         face: Face = Face('f3')
 
@@ -93,20 +93,20 @@ class TestFace(ProjectTestBase):
 
         face.incidentEdge = edge1
 
-        surroundingEdges: list[HalfEdge] = list(face.surround_half_edges())
+        surroundingEdges: list[HalfEdge] = list(face.surroundHalfEdges())
         self.assertEqual([edge1, edge2, edge3], surroundingEdges, 'Boundary edges should match clockwise order')
 
-        surroundingVertices: list[Vertex] = list(face.surround_vertices())
+        surroundingVertices: list[Vertex] = list(face.surroundVertices())
         self.assertEqual([vertex1, vertex2, vertex3], surroundingVertices, 'Boundary vertices should match origin order')
 
-        face.update_nodes()
+        face.updateNodes()
         self.assertEqual(['v1', 'v2', 'v3'], face.nodes_id, 'nodes_id should contain vertex identifiers')
         self.assertEqual(3, len(face), 'len(face) should return the count of bounding nodes')
         self.assertEqual("FaceView['v1', 'v2', 'v3']", repr(face), 'repr should reflect updated nodes_id')
 
     def testSurroundFaces(self):
         """
-        Verify that surround_faces correctly yields adjacent faces via twin half-edges.
+        Verify that surroundFaces correctly yields adjacent faces via twin half-edges.
         """
         face1: Face = Face('f_inner')
         face2: Face = Face('f_outer1')
@@ -127,8 +127,8 @@ class TestFace(ProjectTestBase):
 
         face1.incidentEdge = edge1
 
-        neighborFaces: list[Face] = list(face1.surround_faces())
-        self.assertEqual([face2, face3], neighborFaces, 'surround_faces should yield adjacent faces of twin edges')
+        neighborFaces: list[Face] = list(face1.surroundFaces())
+        self.assertEqual([face2, face3], neighborFaces, 'surroundFaces should yield adjacent faces of twin edges')
 
 
 def suite() -> TestSuite:

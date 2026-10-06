@@ -36,7 +36,7 @@ class Orthogonalization:
             flow_network.add_f(face.id, len(face), face is self.planar.ext_face)
 
         for vertex in self.planar.dcel.vertex_dict.values():
-            for he in vertex.surround_half_edges():
+            for he in vertex.surroundHalfEdges():
                 flow_network.add_v2f(vertex.id, he.incidentFace.id, he.id)
 
         for he in self.planar.dcel.half_edge_dict.values():
@@ -94,9 +94,9 @@ class Orthogonalization:
                 for u, v in sym_pairs:
                     if u != v:
                         faces1 = {
-                            face.id for face in self.planar.dcel.vertex_dict[u].surround_faces()}
+                            face.id for face in self.planar.dcel.vertex_dict[u].surroundFaces()}
                         faces2 = {
-                            face.id for face in self.planar.dcel.vertex_dict[v].surround_faces()}
+                            face.id for face in self.planar.dcel.vertex_dict[v].surroundFaces()}
                         for f in faces1 & faces2:
                             nodes_id = self.planar.dcel.face_dict[f].nodes_id
                             n = len(nodes_id)

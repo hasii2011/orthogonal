@@ -70,7 +70,7 @@ class DoublyConnectedEdgeList:
         if not self.face_dict:
             self.face_dict['f0'] = Face('f0')
 
-    def add_node_between(self, u: NodeId, v: NodeId, nodeName: NodeId):
+    def addNodeBetween(self, u: NodeId, v: NodeId, nodeName: NodeId):
         """
         Insert a new node between existing nodes u and v by splitting the edge.
 
@@ -113,4 +113,4 @@ class DoublyConnectedEdgeList:
         # update face
         if he.incidentFace.incidentEdge is he:
             he.incidentFace.incidentEdge = he1
-        he.incidentFace.update_nodes()   # not efficient
+        he.incidentFace.updateNodes()   # not efficient

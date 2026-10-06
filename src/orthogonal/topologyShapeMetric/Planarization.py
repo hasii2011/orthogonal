@@ -77,7 +77,7 @@ class Planarization:
         def dfs_face(face, marked):
             marked.add(face.id)
             yield face
-            for neighbor_face in set(face.surround_faces()):
+            for neighbor_face in set(face.surroundFaces()):
                 if neighbor_face.id not in marked:
                     yield from dfs_face(neighbor_face, marked)
         yield from dfs_face(self.ext_face, set())
