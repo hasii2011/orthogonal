@@ -1,11 +1,14 @@
 
-from typing import Any
 from typing import Tuple
 
 from collections import defaultdict
 
 from networkx import MultiDiGraph
 from networkx import min_cost_flow
+
+from orthogonal.TopologyTypes import FaceId
+from orthogonal.TopologyTypes import FlowEdgeKey
+from orthogonal.TopologyTypes import NodeId
 
 
 class FlowNet(MultiDiGraph):
@@ -31,7 +34,7 @@ class FlowNet(MultiDiGraph):
         """
         return self._cost
 
-    def addVertexToFaceEdge(self, vertexId: Any, faceId: Any, key: Any):
+    def addVertexToFaceEdge(self, vertexId: NodeId, faceId: FaceId, key: FlowEdgeKey):
         """
         Add a directed edge from a vertex to an incident face representing angle allocation.
 
@@ -42,7 +45,7 @@ class FlowNet(MultiDiGraph):
         """
         self.add_edge(vertexId, faceId, key=key, lowerbound=1, capacity=4, weight=0)
 
-    def addFaceToFaceEdge(self, sourceFaceId: Any, targetFaceId: Any, key: Any):
+    def addFaceToFaceEdge(self, sourceFaceId: FaceId, targetFaceId: FaceId, key: FlowEdgeKey):
         """
         Add a directed edge between adjacent faces representing potential edge bends.
 
@@ -53,7 +56,7 @@ class FlowNet(MultiDiGraph):
         """
         self.add_edge(sourceFaceId, targetFaceId, key=key, lowerbound=0, capacity=2**32, weight=1)
 
-    def addVertexNode(self, vertexId: Any):
+    def addVertexNode(self, vertexId: NodeId):
         """
         Add a vertex node to the circulation network with supply demand of -4 (2pi).
 
@@ -62,7 +65,7 @@ class FlowNet(MultiDiGraph):
         """
         self.add_node(vertexId, demand=-4)
 
-    def addFaceNode(self, faceId: Any, degree: int, isExternal: bool):
+    def addFaceNode(self, faceId: FaceId, degree: int, isExternal: bool):
         """
         Add a face node with demand determined by bounding degree and external status.
 
@@ -103,7 +106,7 @@ class FlowNet(MultiDiGraph):
             cost += flowDict[u][v][key] * self[u][v][key]['weight']
         return cost
 
-    def __getDemand(self, flowDict: dict, node: Any) -> int:
+    def __getDemand(self, flowDict: dict, node: NodeId | FaceId) -> int:
         """
         Calculate the net flow demand (inflow minus outflow) for a node.
 

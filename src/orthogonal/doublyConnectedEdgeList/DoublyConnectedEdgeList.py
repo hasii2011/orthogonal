@@ -1,17 +1,17 @@
 
-
 from typing import Any
 from typing import Dict
-from typing import Hashable
 
-import networkx as nx
+from networkx import Graph
+from networkx import PlanarEmbedding
+from networkx import check_planarity
 
+from orthogonal.TopologyTypes import FaceId
+from orthogonal.TopologyTypes import HalfEdgeId
+from orthogonal.TopologyTypes import NodeId
 from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
-from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
-
-type NodeId = Hashable
 
 
 class DoublyConnectedEdgeList:
@@ -20,8 +20,7 @@ class DoublyConnectedEdgeList:
 
     Maintains topological connectivity between vertices, half-edges, and faces.
     """
-
-    def __init__(self, G: nx.Graph, embedding: nx.PlanarEmbedding):
+    def __init__(self, G: Graph, embedding: PlanarEmbedding):
         """
         Construct a DCEL from a planar graph and its combinatorial embedding.
 
@@ -29,46 +28,76 @@ class DoublyConnectedEdgeList:
             G: Planar graph to represent.
             embedding: Planar embedding defining cyclic ordering of edges around vertices.
         """
-        assert nx.check_planarity(G)[0]
+        assert check_planarity(G)[0]
 
-        self.vertex_dict: Dict[NodeId, Vertex] = {}
+        self._vertexDict: Dict[NodeId, Vertex] = {}
         for node in G.nodes:
-            self.vertex_dict[node] = Vertex(node)
+            self._vertexDict[node] = Vertex(node)
 
-        self.half_edge_dict: Dict[Any, HalfEdge] = {}
+        self._halfEdgeDict: Dict[Any, HalfEdge] = {}
         for u, v in G.edges:
             he1, he2 = HalfEdge(HalfEdgeId((u, v))), HalfEdge(HalfEdgeId((v, u)))
-            self.half_edge_dict[he1.id] = he1
-            self.half_edge_dict[he2.id] = he2
+            self._halfEdgeDict[he1.id] = he1
+            self._halfEdgeDict[he2.id] = he2
             he1.twin = he2
-            he1.origin = self.vertex_dict[u]
-            self.vertex_dict[u].incidentEdge = he1
+            he1.origin = self._vertexDict[u]
+            self._vertexDict[u].incidentEdge = he1
 
             he2.twin = he1
-            he2.origin = self.vertex_dict[v]
-            self.vertex_dict[v].incidentEdge = he2
+            he2.origin = self._vertexDict[v]
+            self._vertexDict[v].incidentEdge = he2
 
-        for he in self.half_edge_dict.values():
+        for he in self._halfEdgeDict.values():
             u, v = he.getPoints()
-            he.next = self.half_edge_dict[embedding.next_face_half_edge(u, v)]
+            he.next = self._halfEdgeDict[embedding.next_face_half_edge(u, v)]
             he.next.previous = he
 
-        self.face_dict: Dict[str, Face] = {}
-        for he in self.half_edge_dict.values():
+        self._faceDict: Dict[FaceId, Face] = {}
+        for he in self._halfEdgeDict.values():
             if not he.hasIncidentFace:
-                face_id = f'f{len(self.face_dict)}'
-                face: Face = Face(face_id)
+                faceId: str = f'f{len(self._faceDict)}'
+                face: Face = Face(faceId)
                 face.incidentEdge = he
-                self.face_dict[face_id] = face
+                self._faceDict[faceId] = face
 
                 face.nodes_id = embedding.traverse_face(*he.getPoints())
-                for v1_id, v2_id in zip(face.nodes_id, face.nodes_id[1:]+face.nodes_id[:1]):
-                    other = self.half_edge_dict[v1_id, v2_id]
+                for v1Id, v2Id in zip(face.nodes_id, face.nodes_id[1:]+face.nodes_id[:1]):
+                    other: HalfEdge = self._halfEdgeDict[v1Id, v2Id]
                     assert not other.hasIncidentFace
                     other.incidentFace = face
 
-        if not self.face_dict:
-            self.face_dict['f0'] = Face('f0')
+        if not self._faceDict:
+            self._faceDict['f0'] = Face('f0')
+
+    @property
+    def vertexDict(self) -> Dict[NodeId, Vertex]:
+        """
+        Get the mapping of node IDs to Vertex instances.
+
+        Returns:
+            Dictionary mapping NodeId to Vertex.
+        """
+        return self._vertexDict
+
+    @property
+    def halfEdgeDict(self) -> Dict[Any, HalfEdge]:
+        """
+        Get the mapping of edge ID keys to HalfEdge instances.
+
+        Returns:
+            Dictionary mapping edge identifiers to HalfEdge.
+        """
+        return self._halfEdgeDict
+
+    @property
+    def faceDict(self) -> Dict[FaceId, Face]:
+        """
+        Get the mapping of face IDs to Face instances.
+
+        Returns:
+            Dictionary mapping FaceId to Face.
+        """
+        return self._faceDict
 
     def addNodeBetween(self, u: NodeId, v: NodeId, nodeName: NodeId):
         """
@@ -80,14 +109,14 @@ class DoublyConnectedEdgeList:
             nodeName: Identifier for the new intermediate node.
         """
         midVertex: Vertex = Vertex(nodeName)
-        self.vertex_dict[nodeName] = midVertex
+        self._vertexDict[nodeName] = midVertex
 
         self.__insertNode(u, v, midVertex)
         self.__insertNode(v, u, midVertex)
 
         for v1, v2 in ((u, midVertex.id), (midVertex.id, v)):
-            self.half_edge_dict[v1, v2].twin = self.half_edge_dict[v2, v1]
-            self.half_edge_dict[v2, v1].twin = self.half_edge_dict[v1, v2]
+            self._halfEdgeDict[v1, v2].twin = self._halfEdgeDict[v2, v1]
+            self._halfEdgeDict[v2, v1].twin = self._halfEdgeDict[v1, v2]
 
     def __insertNode(self, sourceNode: NodeId, targetNode: NodeId, midVertex: Vertex):
         """
@@ -98,13 +127,13 @@ class DoublyConnectedEdgeList:
             targetNode: The destination identifier of the existing half-edge.
             midVertex: The new intermediate Vertex being inserted.
         """
-        he: HalfEdge = self.half_edge_dict.pop((sourceNode, targetNode))
+        he: HalfEdge = self._halfEdgeDict.pop((sourceNode, targetNode))
         he1: HalfEdge = HalfEdge(HalfEdgeId((sourceNode, midVertex.id)))
         he2: HalfEdge = HalfEdge(HalfEdgeId((midVertex.id, targetNode)))
 
-        # update half_edge_dict
-        self.half_edge_dict[sourceNode, midVertex.id] = he1
-        self.half_edge_dict[midVertex.id, targetNode] = he2
+        # update halfEdgeDict
+        self._halfEdgeDict[sourceNode, midVertex.id] = he1
+        self._halfEdgeDict[midVertex.id, targetNode] = he2
         he1.setAll(None, he.origin, he.previous, he2, he.incidentFace)
         he2.setAll(None, midVertex, he1, he.next, he.incidentFace)
         he1.previous.next = he1

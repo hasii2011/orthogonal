@@ -1,14 +1,16 @@
+
 from unittest import TestSuite
 from unittest import defaultTestLoader
 from unittest import main as unitTestMain
 
 from tests.ProjectTestBase import ProjectTestBase
 
-from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
+from orthogonal.TopologyTypes import HalfEdgeId
+
 from orthogonal.doublyConnectedEdgeList.Face import Face
-from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
-from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
+from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
+from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 
 
 class TestFace(ProjectTestBase):

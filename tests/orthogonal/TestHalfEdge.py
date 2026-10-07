@@ -7,7 +7,7 @@ from tests.ProjectTestBase import ProjectTestBase
 from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdge
-from orthogonal.doublyConnectedEdgeList.HalfEdge import HalfEdgeId
+from orthogonal.TopologyTypes import HalfEdgeId
 from orthogonal.doublyConnectedEdgeList.Vertex import Vertex
 
 

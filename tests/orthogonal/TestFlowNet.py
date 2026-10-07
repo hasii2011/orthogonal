@@ -38,7 +38,7 @@ class TestFlowNet(ProjectTestBase):
 
         with self.assertRaises(AttributeError):
             # noinspection PyPropertyAccess
-            flowNet.cost = 10
+            flowNet.cost = 10        # type: ignore
 
     def testVertexNodeDemand(self):
         """

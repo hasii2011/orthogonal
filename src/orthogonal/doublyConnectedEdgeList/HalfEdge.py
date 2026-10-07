@@ -1,13 +1,9 @@
-from typing import Tuple
-from typing import NewType
 from typing import Optional
-from typing import Hashable
 from typing import TYPE_CHECKING
 
+from orthogonal.TopologyTypes import HalfEdgeId
 from orthogonal.doublyConnectedEdgeList.DcelExceptions import UninitializedDcelError
 from orthogonal.GraphElement import GraphElement
-
-HalfEdgeId = NewType('HalfEdgeId', Tuple[Hashable, Hashable])
 
 if TYPE_CHECKING:
     from orthogonal.doublyConnectedEdgeList.Face import Face
