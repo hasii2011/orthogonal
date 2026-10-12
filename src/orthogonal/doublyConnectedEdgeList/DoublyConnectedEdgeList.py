@@ -118,6 +118,8 @@ class DoublyConnectedEdgeList:
             self._halfEdgeDict[v1, v2].twin = self._halfEdgeDict[v2, v1]
             self._halfEdgeDict[v2, v1].twin = self._halfEdgeDict[v1, v2]
 
+        midVertex.incidentEdge = self._halfEdgeDict[midVertex.id, v]
+
     def __insertNode(self, sourceNode: NodeId, targetNode: NodeId, midVertex: Vertex):
         """
         Split a directed half-edge (sourceNode, targetNode) by inserting midVertex.
@@ -138,6 +140,9 @@ class DoublyConnectedEdgeList:
         he2.setAll(None, midVertex, he1, he.next, he.incidentFace)
         he1.previous.next = he1
         he2.next.previous = he2
+
+        if he.origin.incidentEdge is he:
+            he.origin.incidentEdge = he1
 
         # update face
         if he.incidentFace.incidentEdge is he:

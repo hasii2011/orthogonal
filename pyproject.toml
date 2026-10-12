@@ -27,6 +27,10 @@ test = [
     'matplotlib>=3.11.2',
 ]
 
+demo = [
+    'wxPython>=4.3.1',
+]
+
 deploy = [
     'setuptools==82.0.1',
     'wheel==0.47.0',

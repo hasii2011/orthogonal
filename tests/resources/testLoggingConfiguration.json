@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "disable_existing_loggers": "False",
+    "disable_existing_loggers": false,
     "formatters": {
         "simple": {
             "format": "%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s"
@@ -20,19 +20,19 @@
         "root": {
             "level": "WARNING",
             "handlers": ["consoleHandler"],
-            "propagate": "False"
+            "propagate": true
         },
         "__main__": {
             "level": "INFO",
-            "propagate": "False"
+            "propagate": true
         },
         "hasiihelper": {
             "level": "INFO",
-            "propagate": "False"
+            "propagate": true
         },
         "tests.UnitTestBase": {
             "level":     "INFO",
-            "propagate": "False"
+            "propagate": true
         }
     }
 }

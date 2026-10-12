@@ -59,11 +59,11 @@ flowchart LR
    - Each face boundary is an oriented cycle of directed edges (counter-clockwise for internal faces).
    - Travel along the boundary of Face A moves from u → v, whereas travel along Face B moves in the opposite direction from v → u. A single undirected edge cannot point in both directions simultaneously. Splitting {u, v} into two opposing half-edges (`(u, v)` with Face A on its left, and `(v, u)` with Face B on its left) resolves this conflict.
 2. **Constant-Time (O(1)) Topological Navigation:**
-   - **Walk face boundary:** `he.succ` advances to the next counter-clockwise half-edge enclosing the same face.
-   - **Rotate around a vertex:** `he.twin.succ` cycles to the next edge incident to the origin vertex in circular order.
-   - **Access adjacent face:** `he.twin.inc` directly accesses the face on the other side of the edge.
+   - **Walk face boundary:** `he.next` advances to the next counter-clockwise half-edge enclosing the same face.
+   - **Rotate around a vertex:** `he.twin.next` cycles to the next edge incident to the origin vertex in circular order.
+   - **Access adjacent face:** `he.twin.incidentFace` directly accesses the face on the other side of the edge.
 3. **Modeling Edge Bends as Flow:**
-   - In Tamassia's orthogonalization network flow, a 90° bend on an edge is represented as units of flow passing across the edge between its left face `he.twin.inc` and right face `he.inc`. Having explicit half-edges makes assigning and tracking directional bend flows straightforward.
+   - In Tamassia's orthogonalization network flow, a 90° bend on an edge is represented as units of flow passing across the edge between its left face `he.twin.incidentFace` and right face `he.incidentFace`. Having explicit half-edges makes assigning and tracking directional bend flows straightforward.
 4. **Opposing Cardinal Directions:**
    - In compaction, moving from u → v along `(u, v)` is assigned a cardinal direction (e.g. East / side 1), whereas moving from v → u along `(v, u)` is assigned the exact opposite direction (West / side 3).
 
@@ -97,9 +97,9 @@ classDiagram
         +getPoints()
     }
     class DoublyConnectedEdgeList {
-        +vertex_dict: Dict~NodeId, Vertex~
-        +half_edge_dict: Dict~Tuple, HalfEdge~
-        +face_dict: Dict~str, Face~
+        +vertexDict: Dict~NodeId, Vertex~
+        +halfEdgeDict: Dict~HalfEdgeId, HalfEdge~
+        +faceDict: Dict~FaceId, Face~
         +addNodeBetween(u: NodeId, v: NodeId, nodeName: NodeId)
         -__insertNode(sourceNode: NodeId, targetNode: NodeId, midVertex: Vertex)
     }
@@ -120,7 +120,7 @@ classDiagram
 - [`Vertex`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Vertex.py): Holds an `incidentEdge` pointer to an outgoing half-edge.
 - [`HalfEdge`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/HalfEdge.py): Half-edge with pointers to its `twin`, `next` (next counter-clockwise edge on face boundary), `previous` (preceding edge), `origin` (origin vertex), and `incidentFace` (incident face to its left).
 - [`Face`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/Face.py): Holds an `incidentEdge` pointer to one half-edge on its bounding cycle.
-- [`DoublyConnectedEdgeList.addNodeBetween`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/DoublyConnectedEdgeList.py#L73): Dynamically splits an existing half-edge pair by introducing a dummy bend vertex `b_i`, rewiring `next`, `previous`, and `twin` pointers while updating the bounding face cycles.
+- [`DoublyConnectedEdgeList.addNodeBetween`](file:///Users/humberto.a.sanchez.ii/PycharmProjects/orthogonal/src/orthogonal/doublyConnectedEdgeList/DoublyConnectedEdgeList.py#L102): Dynamically splits an existing half-edge pair by introducing a dummy bend vertex `b_i`, rewiring `next`, `previous`, and `twin` pointers while updating the bounding face cycles.
 
 ---
 
