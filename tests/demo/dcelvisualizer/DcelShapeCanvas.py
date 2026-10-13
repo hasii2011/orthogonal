@@ -9,8 +9,8 @@ from wx import MouseEvent
 from wx.lib.ogl import Shape
 from wx.lib.ogl import ShapeCanvas
 
-from tests.demo.dcelvisualizer.DcelVertexShape import DcelVertexShape
-from tests.demo.dcelvisualizer.DcelBadgeShape import DcelBadgeShape
+from tests.demo.dcelvisualizer.shapes.DcelVertexShape import DcelVertexShape
+from tests.demo.dcelvisualizer.shapes.DcelBadgeShape import DcelBadgeShape
 
 
 class DcelShapeCanvas(ShapeCanvas):

@@ -39,8 +39,8 @@ from tests.demo.dcelvisualizer.VisualizerTypes import EdgeShapeEntry
 from tests.demo.dcelvisualizer.VisualizerTypes import FaceShapeEntry
 
 from tests.demo.dcelvisualizer.DcelShapeCanvas import DcelShapeCanvas
-from tests.demo.dcelvisualizer.DcelVertexShape import DcelVertexShape
-from tests.demo.dcelvisualizer.DcelBadgeShape import DcelBadgeShape
+from tests.demo.dcelvisualizer.shapes.DcelVertexShape import DcelVertexShape
+from tests.demo.dcelvisualizer.shapes.DcelBadgeShape import DcelBadgeShape
 from tests.demo.dcelvisualizer.VertexShapeEvtHandler import VertexShapeEvtHandler
 
 NODE_SPREAD_FACTOR:       float = 1.35

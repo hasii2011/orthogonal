@@ -10,7 +10,7 @@ from typing import NewType
 from orthogonal.TopologyTypes import NodeId
 
 from wx.lib.ogl import LineShape
-from tests.demo.dcelvisualizer.DcelBadgeShape import DcelBadgeShape
+from tests.demo.dcelvisualizer.shapes.DcelBadgeShape import DcelBadgeShape
 
 CanvasPoint    = NewType('CanvasPoint',    Tuple[float, float])
 NodePositions  = NewType('NodePositions',  Dict[NodeId, CanvasPoint])
