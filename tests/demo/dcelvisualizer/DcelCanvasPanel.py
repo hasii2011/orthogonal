@@ -21,10 +21,8 @@ from wx.lib.sized_controls import SizedPanel
 from wx.lib.ogl import ARROW_ARROW
 from wx.lib.ogl import ARROW_POSITION_END
 
-from wx.lib.ogl import CircleShape
 from wx.lib.ogl import Diagram
 from wx.lib.ogl import LineShape
-from wx.lib.ogl import RectangleShape
 
 from orthogonal.TopologyTypes import FaceId
 from orthogonal.TopologyTypes import NodeId
@@ -33,23 +31,39 @@ from orthogonal.doublyConnectedEdgeList.Face import Face
 
 from tests.demo.dcelvisualizer.DcelShapeCanvas import DcelShapeCanvas
 from tests.demo.dcelvisualizer.VertexShapeEvtHandler import VertexShapeEvtHandler
+from tests.demo.dcelvisualizer.DcelCircleShape import DcelCircleShape
+from tests.demo.dcelvisualizer.DcelRectangleShape import DcelRectangleShape
 
 NODE_SPREAD_FACTOR:       float = 1.35
+DEFAULT_NODE_X:           float = 250.0
+DEFAULT_NODE_Y:           float = 200.0
+
 VERTEX_CIRCLE_DIAMETER:   float = 44.0
 EDGE_SPLINE_OFFSET:       float = 18.0
 EDGE_LABEL_WIDTH:         float = 72.0
 EDGE_LABEL_HEIGHT:        float = 22.0
 EDGE_LABEL_CORNER_RADIUS: float = 3.0
+EDGE_LABEL_BORDER_WIDTH:  int   = 1
 EDGE_ARROW_SIZE:          float = 11.0
 FACE_BADGE_WIDTH:         float = 96.0
 FACE_BADGE_HEIGHT:        float = 24.0
 FACE_BADGE_CORNER_RADIUS: float = 4.0
+FACE_BADGE_BORDER_WIDTH:  int   = 1
 FACE_BADGE_OFFSET_Y:      float = 18.0
+
+MIN_EDGE_DISTANCE:        float = 0.001
 
 VERTEX_FONT_SIZE:     int = 12
 EDGE_LABEL_FONT_SIZE: int = 12
-
 FACE_BADGE_FONT_SIZE: int = 12
+
+CANVAS_BACKGROUND_COLOUR:     Colour = Colour(255, 255, 255)
+INSERTED_NODE_COLOUR:         Colour = Colour(244, 63, 94)
+DEFAULT_NODE_COLOUR:          Colour = Colour(96, 165, 250)
+EDGE_LABEL_BACKGROUND_COLOUR: Colour = Colour(255, 255, 255)
+EDGE_LABEL_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
+FACE_BADGE_BACKGROUND_COLOUR: Colour = Colour(241, 245, 249)
+FACE_BADGE_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
 
 class DcelCanvasPanel(SizedPanel):
     """
@@ -71,14 +85,14 @@ class DcelCanvasPanel(SizedPanel):
         # noinspection PyUnresolvedReferences
         self._canvas.SetSizerProps(expand=True, proportion=1, border=('all', 0))
         self._canvas.SetDiagram(self._diagram)
-        self._canvas.SetBackgroundColour(Colour(255, 255, 255))
+        self._canvas.SetBackgroundColour(CANVAS_BACKGROUND_COLOUR)
         self._diagram.SetCanvas(self._canvas)
 
         self._positions: Dict[NodeId, Tuple[float, float]] = {}
-        self._shapeMap:  Dict[NodeId, CircleShape]         = {}
+        self._shapeMap:  Dict[NodeId, DcelCircleShape]         = {}
 
-        self._edgeShapes: List[Tuple[NodeId, NodeId, LineShape, RectangleShape]] = []
-        self._faceShapes: List[Tuple[List[NodeId], float, RectangleShape]]       = []
+        self._edgeShapes: List[Tuple[NodeId, NodeId, LineShape, DcelRectangleShape]] = []
+        self._faceShapes: List[Tuple[List[NodeId], float, DcelRectangleShape]]       = []
 
     def renderDcel(
         self,
@@ -87,7 +101,7 @@ class DcelCanvasPanel(SizedPanel):
         insertedNode: Optional[NodeId],
     ):
         """
-        Clear and redraw the DCEL vertices, half-edge arcs, and face centroids on the OGL canvas.
+        Clear and redraw the DCEL vertices, half-edge arcs, and face badges on the OGL canvas.
 
         Args:
             dcel: Current DoublyConnectedEdgeList instance.
@@ -100,10 +114,31 @@ class DcelCanvasPanel(SizedPanel):
         self._edgeShapes.clear()
         self._faceShapes.clear()
 
-        shapeMap: Dict[NodeId, CircleShape] = {}
+        self._renderVertices(dcel, positions, insertedNode)
+        self._renderHalfEdges(dcel, positions)
+        self._renderFaces(dcel, positions)
+
+        self._diagram.ShowAll(True)
+        self._canvas.Draw()
+        self._canvas.Refresh()
+
+    def _renderVertices(
+        self,
+        dcel: DoublyConnectedEdgeList,
+        positions: Dict[NodeId, Tuple[float, float]],
+        insertedNode: Optional[NodeId],
+    ):
+        """
+        Render vertex circular shapes with event handlers and tooltips.
+
+        Args:
+            dcel: Current DoublyConnectedEdgeList instance.
+            positions: Coordinate lookup for all present vertices.
+            insertedNode: Identifier of recently inserted vertex to highlight, if any.
+        """
         for nodeId, _vertexInstance in dcel.vertexDict.items():
-            pos: Tuple[float, float] = positions.get(nodeId, (250.0 * NODE_SPREAD_FACTOR, 200.0 * NODE_SPREAD_FACTOR))
-            circle: CircleShape = CircleShape(VERTEX_CIRCLE_DIAMETER)
+            pos: Tuple[float, float] = positions.get(nodeId, (DEFAULT_NODE_X * NODE_SPREAD_FACTOR, DEFAULT_NODE_Y * NODE_SPREAD_FACTOR))
+            circle: DcelCircleShape = DcelCircleShape(VERTEX_CIRCLE_DIAMETER)
             circle.SetX(pos[0])
             circle.SetY(pos[1])
             circle.AddText(str(nodeId))
@@ -111,27 +146,38 @@ class DcelCanvasPanel(SizedPanel):
             circle.SetTextColour('WHITE')
 
             if nodeId == insertedNode:
-                circle.SetBrush(Brush(Colour(244, 63, 94)))
+                circle.SetBrush(Brush(INSERTED_NODE_COLOUR))
             else:
-                circle.SetBrush(Brush(Colour(96, 165, 250)))
+                circle.SetBrush(Brush(DEFAULT_NODE_COLOUR))
 
-            setattr(circle, '_tooltipText', f'Vertex {nodeId}\nPosition: ({int(pos[0])}, {int(pos[1])})')
+            circle.tooltipText = f'Vertex {nodeId}\nPosition: ({int(pos[0])}, {int(pos[1])})'
             self._diagram.AddShape(circle)
             circle.SetCanvas(self._canvas)
             evtHandler: VertexShapeEvtHandler = VertexShapeEvtHandler(nodeId, self._canvas)
             evtHandler.SetShape(circle)
             evtHandler.SetPreviousHandler(circle.GetEventHandler())
             circle.SetEventHandler(evtHandler)
-            shapeMap[nodeId] = circle
             self._shapeMap[nodeId] = circle
 
+    def _renderHalfEdges(
+        self,
+        dcel: DoublyConnectedEdgeList,
+        positions: Dict[NodeId, Tuple[float, float]],
+    ):
+        """
+        Render directed half-edge splines and midpoint label badges with tooltips.
+
+        Args:
+            dcel: Current DoublyConnectedEdgeList instance.
+            positions: Coordinate lookup for all present vertices.
+        """
         for _edgeKey, halfEdge in dcel.halfEdgeDict.items():
             uId: NodeId = halfEdge.origin.id
             vId: NodeId = halfEdge.twin.origin.id
 
-            if uId in shapeMap and vId in shapeMap:
-                c1: CircleShape = shapeMap[uId]
-                c2: CircleShape = shapeMap[vId]
+            if uId in self._shapeMap and vId in self._shapeMap:
+                c1: DcelCircleShape = self._shapeMap[uId]
+                c2: DcelCircleShape = self._shapeMap[vId]
 
                 posU: Tuple[float, float] = positions.get(uId, (0.0, 0.0))
                 posV: Tuple[float, float] = positions.get(vId, (0.0, 0.0))
@@ -142,7 +188,7 @@ class DcelCanvasPanel(SizedPanel):
 
                 normX: float = 0.0
                 normY: float = 0.0
-                if distance > 0.001:
+                if distance > MIN_EDGE_DISTANCE:
                     normX = -deltaY / distance
                     normY = deltaX / distance
 
@@ -161,21 +207,36 @@ class DcelCanvasPanel(SizedPanel):
                 c1.AddLine(line, c2)
                 self._diagram.AddShape(line)
 
-                edgeLabel: RectangleShape = RectangleShape(EDGE_LABEL_WIDTH, EDGE_LABEL_HEIGHT)
+                edgeLabel: DcelRectangleShape = DcelRectangleShape(EDGE_LABEL_WIDTH, EDGE_LABEL_HEIGHT)
                 edgeLabel.SetCornerRadius(EDGE_LABEL_CORNER_RADIUS)
                 edgeLabel.SetX(midX)
                 edgeLabel.SetY(midY)
                 edgeLabel.AddText(f'{uId}->{vId}')
                 edgeLabel.SetFont(Font(EDGE_LABEL_FONT_SIZE, FONTFAMILY_SWISS, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD))
-                edgeLabel.SetBrush(Brush(Colour(255, 255, 255)))
-                edgeLabel.SetPen(Pen(Colour(203, 213, 225), 1))
+                edgeLabel.SetBrush(Brush(EDGE_LABEL_BACKGROUND_COLOUR))
+                edgeLabel.SetPen(Pen(EDGE_LABEL_BORDER_COLOUR, EDGE_LABEL_BORDER_WIDTH))
                 edgeLabel.SetTextColour('BLACK')
                 edgeLabel.SetDraggable(False)
-                setattr(edgeLabel, '_tooltipText', f'Half-Edge: {uId} -> {vId}')
+                edgeLabel.tooltipText = f'Half-Edge: {uId} -> {vId}'
                 self._diagram.AddShape(edgeLabel)
                 edgeLabel.SetCanvas(self._canvas)
                 self._edgeShapes.append((uId, vId, line, edgeLabel))
 
+    def _calculateOuterFaceId(
+        self,
+        dcel: DoublyConnectedEdgeList,
+        positions: Dict[NodeId, Tuple[float, float]],
+    ) -> Optional[FaceId]:
+        """
+        Identify the outer face using the Shoelace signed area formula across cycle nodes.
+
+        Args:
+            dcel: Current DoublyConnectedEdgeList instance.
+            positions: Coordinate lookup for all present vertices.
+
+        Returns:
+            The FaceId of the outer unbounded face if identified, None otherwise.
+        """
         faceSignedAreas: Dict[FaceId, float] = {}
         for faceId, faceInstance in dcel.faceDict.items():
             cycleNodes: List[NodeId] = list(faceInstance.nodes_id)
@@ -189,13 +250,28 @@ class DcelCanvasPanel(SizedPanel):
                         areaSum += positions[uNode][0] * positions[vNode][1] - positions[vNode][0] * positions[uNode][1]
                 faceSignedAreas[faceId] = areaSum / 2.0
 
-        outerFaceId: Optional[FaceId] = None
-        if faceSignedAreas:
-            positiveCount: int = sum(1 for a in faceSignedAreas.values() if a > 0)
-            negativeCount: int = sum(1 for a in faceSignedAreas.values() if a < 0)
-            if positiveCount > 0 and negativeCount > 0:
-                outerFaceId = min(faceSignedAreas, key=lambda fid: faceSignedAreas[fid]) if positiveCount > negativeCount else max(faceSignedAreas, key=lambda fid: faceSignedAreas[fid])
+        if not faceSignedAreas:
+            return None
 
+        positiveCount: int = sum(1 for a in faceSignedAreas.values() if a > 0)
+        negativeCount: int = sum(1 for a in faceSignedAreas.values() if a < 0)
+        if positiveCount > 0 and negativeCount > 0:
+            return min(faceSignedAreas, key=lambda fid: faceSignedAreas[fid]) if positiveCount > negativeCount else max(faceSignedAreas, key=lambda fid: faceSignedAreas[fid])
+        return None
+
+    def _renderFaces(
+        self,
+        dcel: DoublyConnectedEdgeList,
+        positions: Dict[NodeId, Tuple[float, float]],
+    ):
+        """
+        Render face label badges positioned at face centers and attach boundary cycle tooltips.
+
+        Args:
+            dcel: Current DoublyConnectedEdgeList instance.
+            positions: Coordinate lookup for all present vertices.
+        """
+        outerFaceId: Optional[FaceId] = self._calculateOuterFaceId(dcel, positions)
         faceItems: List[Tuple[FaceId, Face]] = list(dcel.faceDict.items())
         for idx, (faceId, faceInstance) in enumerate(faceItems):
             if faceInstance.nodes_id:
@@ -208,22 +284,32 @@ class DcelCanvasPanel(SizedPanel):
                         sumY += positions[cycleNode][1]
                         validPoints += 1
                 if validPoints > 0:
-                    centroidX: float = sumX / float(validPoints)
-                    centroidY: float = sumY / float(validPoints)
-                    offsetY: float = -FACE_BADGE_OFFSET_Y if idx == 0 else FACE_BADGE_OFFSET_Y
-                    faceBadge: RectangleShape = RectangleShape(FACE_BADGE_WIDTH, FACE_BADGE_HEIGHT)
+                    faceCenterX: float = sumX / float(validPoints)
+                    faceCenterY: float = sumY / float(validPoints)
+                    offsetY: float
+                    if idx == 0:
+                        offsetY = -FACE_BADGE_OFFSET_Y
+                    else:
+                        offsetY = FACE_BADGE_OFFSET_Y
+                    faceBadge: DcelRectangleShape = DcelRectangleShape(FACE_BADGE_WIDTH, FACE_BADGE_HEIGHT)
                     faceBadge.SetCornerRadius(FACE_BADGE_CORNER_RADIUS)
-                    faceBadge.SetX(centroidX)
-                    faceBadge.SetY(centroidY + offsetY)
+                    faceBadge.SetX(faceCenterX)
+                    faceBadge.SetY(faceCenterY + offsetY)
                     isOuter: bool = (faceId == outerFaceId)
-                    labelText: str = f'{faceId} (outer)' if isOuter else str(faceId)
+                    labelText: str
+                    faceTypeStr: str
+                    if isOuter:
+                        labelText = f'{faceId} (outer)'
+                        faceTypeStr = 'Unbounded Outer Face'
+                    else:
+                        labelText = str(faceId)
+                        faceTypeStr = 'Bounded Internal Face'
                     faceBadge.AddText(labelText)
                     cycleStr: str = ' -> '.join(str(n) for n in faceInstance.nodes_id)
-                    faceTypeStr: str = 'Unbounded Outer Face' if isOuter else 'Bounded Internal Face'
-                    setattr(faceBadge, '_tooltipText', f'Face {faceId} ({faceTypeStr})\nBoundary Cycle: [{cycleStr}]')
+                    faceBadge.tooltipText = f'Face {faceId} ({faceTypeStr})\nBoundary Cycle: [{cycleStr}]'
                     faceBadge.SetFont(Font(FACE_BADGE_FONT_SIZE, FONTFAMILY_SWISS, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD))
-                    faceBadge.SetBrush(Brush(Colour(241, 245, 249)))
-                    faceBadge.SetPen(Pen(Colour(203, 213, 225), 1))
+                    faceBadge.SetBrush(Brush(FACE_BADGE_BACKGROUND_COLOUR))
+                    faceBadge.SetPen(Pen(FACE_BADGE_BORDER_COLOUR, FACE_BADGE_BORDER_WIDTH))
                     faceBadge.SetTextColour('BLACK')
                     faceBadge.SetDraggable(False)
                     self._diagram.AddShape(faceBadge)
@@ -245,7 +331,7 @@ class DcelCanvasPanel(SizedPanel):
         """
         self._positions[nodeId] = (newX, newY)
         if nodeId in self._shapeMap:
-            circle: CircleShape = self._shapeMap[nodeId]
+            circle: DcelCircleShape = self._shapeMap[nodeId]
             circle.SetX(newX)
             circle.SetY(newY)
 
@@ -258,7 +344,7 @@ class DcelCanvasPanel(SizedPanel):
                 distance: float = sqrt(deltaX * deltaX + deltaY * deltaY)
                 normX: float = 0.0
                 normY: float = 0.0
-                if distance > 0.001:
+                if distance > MIN_EDGE_DISTANCE:
                     normX = -deltaY / distance
                     normY = deltaX / distance
                 midX: float = (posU[0] + posV[0]) / 2.0 + normX * EDGE_SPLINE_OFFSET

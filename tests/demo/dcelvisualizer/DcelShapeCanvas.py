@@ -1,12 +1,16 @@
 
 from typing import Optional
 
-from wx import EVT_MOTION
-from wx import MouseEvent
 from wx import Point
 from wx import Window
+from wx import EVT_MOTION
+from wx import MouseEvent
+
 from wx.lib.ogl import Shape
 from wx.lib.ogl import ShapeCanvas
+
+from tests.demo.dcelvisualizer.DcelCircleShape import DcelCircleShape
+from tests.demo.dcelvisualizer.DcelRectangleShape import DcelRectangleShape
 
 
 class DcelShapeCanvas(ShapeCanvas):
@@ -14,15 +18,15 @@ class DcelShapeCanvas(ShapeCanvas):
     ShapeCanvas subclass that relays empty-space left clicks to the top-level frame.
     """
 
-    def __init__(self, parent: Window, id: int):
+    def __init__(self, parent: Window, windowId: int):
         """
         Initialize the canvas and bind mouse motion for dynamic shape tooltips.
 
         Args:
             parent: Parent container widget.
-            id: Control identifier.
+            windowId: Control identifier.
         """
-        super().__init__(parent, id)
+        super().__init__(parent, windowId)
         self._currentToolTipText: str = ''
         self.Bind(EVT_MOTION, self.onMouseMove)
 
@@ -36,8 +40,8 @@ class DcelShapeCanvas(ShapeCanvas):
         logicalPos: Point = self.CalcUnscrolledPosition(evt.GetPosition())
         shape: Optional[Shape]
         shape, _ = self.FindShape(float(logicalPos.x), float(logicalPos.y))
-        if shape is not None and hasattr(shape, '_tooltipText'):
-            tooltipText: str = getattr(shape, '_tooltipText')
+        if isinstance(shape, (DcelCircleShape, DcelRectangleShape)):
+            tooltipText: str = shape.tooltipText
             if self._currentToolTipText != tooltipText:
                 self._currentToolTipText = tooltipText
                 self.SetToolTip(tooltipText)
