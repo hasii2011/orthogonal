@@ -34,6 +34,7 @@ from orthogonal.doublyConnectedEdgeList.Face import Face
 from tests.demo.dcelvisualizer.DcelShapeCanvas import DcelShapeCanvas
 from tests.demo.dcelvisualizer.VertexShapeEvtHandler import VertexShapeEvtHandler
 
+NODE_SPREAD_FACTOR:       float = 1.35
 VERTEX_CIRCLE_DIAMETER:   float = 44.0
 EDGE_SPLINE_OFFSET:       float = 18.0
 EDGE_LABEL_WIDTH:         float = 72.0
@@ -64,8 +65,10 @@ class DcelCanvasPanel(SizedPanel):
         """
         super().__init__(parent, ID_ANY)
 
-        self._diagram: Diagram = Diagram()
-        self._canvas: DcelShapeCanvas = DcelShapeCanvas(self, ID_ANY)
+        self._diagram: Diagram         = Diagram()
+        self._canvas:  DcelShapeCanvas = DcelShapeCanvas(self, ID_ANY)
+
+        # noinspection PyUnresolvedReferences
         self._canvas.SetSizerProps(expand=True, proportion=1, border=('all', 0))
         self._canvas.SetDiagram(self._diagram)
         self._canvas.SetBackgroundColour(Colour(255, 255, 255))
@@ -99,7 +102,7 @@ class DcelCanvasPanel(SizedPanel):
 
         shapeMap: Dict[NodeId, CircleShape] = {}
         for nodeId, _vertexInstance in dcel.vertexDict.items():
-            pos: Tuple[float, float] = positions.get(nodeId, (250.0, 200.0))
+            pos: Tuple[float, float] = positions.get(nodeId, (250.0 * NODE_SPREAD_FACTOR, 200.0 * NODE_SPREAD_FACTOR))
             circle: CircleShape = CircleShape(VERTEX_CIRCLE_DIAMETER)
             circle.SetX(pos[0])
             circle.SetY(pos[1])
@@ -112,6 +115,7 @@ class DcelCanvasPanel(SizedPanel):
             else:
                 circle.SetBrush(Brush(Colour(96, 165, 250)))
 
+            setattr(circle, '_tooltipText', f'Vertex {nodeId}\nPosition: ({int(pos[0])}, {int(pos[1])})')
             self._diagram.AddShape(circle)
             circle.SetCanvas(self._canvas)
             evtHandler: VertexShapeEvtHandler = VertexShapeEvtHandler(nodeId, self._canvas)
@@ -167,9 +171,30 @@ class DcelCanvasPanel(SizedPanel):
                 edgeLabel.SetPen(Pen(Colour(203, 213, 225), 1))
                 edgeLabel.SetTextColour('BLACK')
                 edgeLabel.SetDraggable(False)
+                setattr(edgeLabel, '_tooltipText', f'Half-Edge: {uId} -> {vId}')
                 self._diagram.AddShape(edgeLabel)
                 edgeLabel.SetCanvas(self._canvas)
                 self._edgeShapes.append((uId, vId, line, edgeLabel))
+
+        faceSignedAreas: Dict[FaceId, float] = {}
+        for faceId, faceInstance in dcel.faceDict.items():
+            cycleNodes: List[NodeId] = list(faceInstance.nodes_id)
+            if len(cycleNodes) >= 3:
+                areaSum: float = 0.0
+                nodeCount: int = len(cycleNodes)
+                for i in range(nodeCount):
+                    uNode: NodeId = cycleNodes[i]
+                    vNode: NodeId = cycleNodes[(i + 1) % nodeCount]
+                    if uNode in positions and vNode in positions:
+                        areaSum += positions[uNode][0] * positions[vNode][1] - positions[vNode][0] * positions[uNode][1]
+                faceSignedAreas[faceId] = areaSum / 2.0
+
+        outerFaceId: Optional[FaceId] = None
+        if faceSignedAreas:
+            positiveCount: int = sum(1 for a in faceSignedAreas.values() if a > 0)
+            negativeCount: int = sum(1 for a in faceSignedAreas.values() if a < 0)
+            if positiveCount > 0 and negativeCount > 0:
+                outerFaceId = min(faceSignedAreas, key=lambda fid: faceSignedAreas[fid]) if positiveCount > negativeCount else max(faceSignedAreas, key=lambda fid: faceSignedAreas[fid])
 
         faceItems: List[Tuple[FaceId, Face]] = list(dcel.faceDict.items())
         for idx, (faceId, faceInstance) in enumerate(faceItems):
@@ -190,8 +215,12 @@ class DcelCanvasPanel(SizedPanel):
                     faceBadge.SetCornerRadius(FACE_BADGE_CORNER_RADIUS)
                     faceBadge.SetX(centroidX)
                     faceBadge.SetY(centroidY + offsetY)
-                    labelText: str = str(faceId) if idx == 0 else f'{faceId} (outer)'
+                    isOuter: bool = (faceId == outerFaceId)
+                    labelText: str = f'{faceId} (outer)' if isOuter else str(faceId)
                     faceBadge.AddText(labelText)
+                    cycleStr: str = ' -> '.join(str(n) for n in faceInstance.nodes_id)
+                    faceTypeStr: str = 'Unbounded Outer Face' if isOuter else 'Bounded Internal Face'
+                    setattr(faceBadge, '_tooltipText', f'Face {faceId} ({faceTypeStr})\nBoundary Cycle: [{cycleStr}]')
                     faceBadge.SetFont(Font(FACE_BADGE_FONT_SIZE, FONTFAMILY_SWISS, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD))
                     faceBadge.SetBrush(Brush(Colour(241, 245, 249)))
                     faceBadge.SetPen(Pen(Colour(203, 213, 225), 1))

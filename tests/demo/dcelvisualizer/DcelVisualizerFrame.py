@@ -30,11 +30,17 @@ from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
+from tests.demo.dcelvisualizer.DcelCanvasPanel import NODE_SPREAD_FACTOR
 from tests.demo.dcelvisualizer.DcelCanvasPanel import DcelCanvasPanel
 from tests.demo.dcelvisualizer.DcelDataSet import DcelDataSet
 from tests.demo.dcelvisualizer.DcelInspectorPanel import DcelInspectorPanel
 
 from tests.demo.dcelvisualizer.DcelStep import DcelStep
+
+DEFAULT_FRAME_WIDTH:   int   = 1280
+DEFAULT_FRAME_HEIGHT:  int   = 800
+SPLITTER_SASH_RATIO:   float = 2.0 / 3.0
+DEFAULT_SASH_POSITION: int   = int(DEFAULT_FRAME_WIDTH * SPLITTER_SASH_RATIO)
 
 class DcelVisualizerFrame(SizedFrame):
     """
@@ -45,7 +51,7 @@ class DcelVisualizerFrame(SizedFrame):
         """
         Initialize the DCEL visualizer window, controls, and default dataset.
         """
-        super().__init__(None, ID_ANY, 'DCEL Visualizer - wxPython ogl', size=Size(1280, 800))
+        super().__init__(None, ID_ANY, 'DCEL Visualizer - wxPython ogl', size=Size(DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT))
 
         self._datasets: List[DcelDataSet] = self._createDatasets()
         self._currentDatasetIndex: int = 0
@@ -139,10 +145,13 @@ class DcelVisualizerFrame(SizedFrame):
 
         self._splitter: SplitterWindow = SplitterWindow(mainPane, ID_ANY)
         self._splitter.SetSizerProps(expand=True, proportion=1)
-        self._canvasPanel: DcelCanvasPanel = DcelCanvasPanel(self._splitter)
+
+        self._canvasPanel:    DcelCanvasPanel    = DcelCanvasPanel(self._splitter)
         self._inspectorPanel: DcelInspectorPanel = DcelInspectorPanel(self._splitter)
-        self._splitter.SplitVertically(self._canvasPanel, self._inspectorPanel, 640)
-        self._splitter.SetMinimumPaneSize(350)
+
+        self._splitter.SplitVertically(self._canvasPanel, self._inspectorPanel, DEFAULT_SASH_POSITION)
+        self._splitter.SetSashGravity(SPLITTER_SASH_RATIO)
+        self._splitter.SetMinimumPaneSize(250)
 
         self._statusBar: StatusBar = self.CreateStatusBar(2)
         self._statusBar.SetStatusWidths([-3, -1])
@@ -318,10 +327,13 @@ class DcelVisualizerFrame(SizedFrame):
                 baseGraph.add_node(step.u)
                 stepPos: Optional[Tuple[float, float]] = step.position
                 if stepPos is not None:
-                    positions[step.u] = stepPos
+                    positions[step.u] = (stepPos[0] * NODE_SPREAD_FACTOR, stepPos[1] * NODE_SPREAD_FACTOR)
                 else:
                     count: int = len(positions)
-                    positions[step.u] = (120.0 + (count % 4) * 120.0, 120.0 + (count // 4) * 120.0)
+                    positions[step.u] = (
+                        (120.0 + (count % 4) * 120.0) * NODE_SPREAD_FACTOR,
+                        (120.0 + (count // 4) * 120.0) * NODE_SPREAD_FACTOR,
+                    )
                 dcel = self._buildDcel(baseGraph)
                 lastInserted = step.u
                 lastAction = f'addVertex({step.u!r})'
@@ -342,7 +354,7 @@ class DcelVisualizerFrame(SizedFrame):
                     posV: Tuple[float, float] = positions[stepV]
                     positions[stepNewNode] = ((posU[0] + posV[0]) / 2.0, (posU[1] + posV[1]) / 2.0)
                 else:
-                    positions[stepNewNode] = (250.0, 200.0)
+                    positions[stepNewNode] = (250.0 * NODE_SPREAD_FACTOR, 200.0 * NODE_SPREAD_FACTOR)
 
             for movedNode, movedPos in self._positionOverrides.items():
                 if movedNode in positions:
@@ -542,8 +554,8 @@ class DcelVisualizerFrame(SizedFrame):
             return
 
         count: int = len(positions)
-        posX: float = 120.0 + (count % 4) * 120.0
-        posY: float = 120.0 + (count // 4) * 120.0
+        posX: float = (120.0 + (count % 4) * 120.0) * NODE_SPREAD_FACTOR
+        posY: float = (120.0 + (count // 4) * 120.0) * NODE_SPREAD_FACTOR
         newStep: DcelStep = DcelStep('add_vertex', nodeName, position=(posX, posY))
         self._operations = self._operations[:self._currentStepIndex] + [newStep]
         self._currentStepIndex = len(self._operations)
