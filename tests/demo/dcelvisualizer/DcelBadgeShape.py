@@ -2,18 +2,18 @@
 from wx.lib.ogl import RectangleShape
 
 
-class DcelRectangleShape(RectangleShape):
+class DcelBadgeShape(RectangleShape):
     """
-    OGL rectangle shape with an explicit typed public tooltipText property for visualizer tooltips.
+    OGL rectangle badge shape with an explicit typed public tooltipText property for visualizer tooltips.
     """
 
     def __init__(self, width: float, height: float):
         """
-        Construct a DcelRectangleShape.
+        Construct a DcelBadgeShape.
 
         Args:
-            width: Width of the rectangle in pixels.
-            height: Height of the rectangle in pixels.
+            width: Width of the badge in pixels.
+            height: Height of the badge in pixels.
         """
         super().__init__(width, height)
         self._tooltipText: str = ''

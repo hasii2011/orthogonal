@@ -9,8 +9,8 @@ from wx import MouseEvent
 from wx.lib.ogl import Shape
 from wx.lib.ogl import ShapeCanvas
 
-from tests.demo.dcelvisualizer.DcelCircleShape import DcelCircleShape
-from tests.demo.dcelvisualizer.DcelRectangleShape import DcelRectangleShape
+from tests.demo.dcelvisualizer.DcelVertexShape import DcelVertexShape
+from tests.demo.dcelvisualizer.DcelBadgeShape import DcelBadgeShape
 
 
 class DcelShapeCanvas(ShapeCanvas):
@@ -40,7 +40,7 @@ class DcelShapeCanvas(ShapeCanvas):
         logicalPos: Point = self.CalcUnscrolledPosition(evt.GetPosition())
         shape: Optional[Shape]
         shape, _ = self.FindShape(float(logicalPos.x), float(logicalPos.y))
-        if isinstance(shape, (DcelCircleShape, DcelRectangleShape)):
+        if isinstance(shape, (DcelVertexShape, DcelBadgeShape)):
             tooltipText: str = shape.tooltipText
             if self._currentToolTipText != tooltipText:
                 self._currentToolTipText = tooltipText

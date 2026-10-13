@@ -2,14 +2,14 @@
 from wx.lib.ogl import CircleShape
 
 
-class DcelCircleShape(CircleShape):
+class DcelVertexShape(CircleShape):
     """
-    OGL circle shape with an explicit typed public tooltipText property for visualizer tooltips.
+    OGL circle shape representing a DCEL graph vertex, with an explicit typed tooltipText property.
     """
 
     def __init__(self, diameter: float):
         """
-        Construct a DcelCircleShape.
+        Construct a DcelVertexShape.
 
         Args:
             diameter: Diameter of the circle in pixels.

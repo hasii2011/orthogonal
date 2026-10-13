@@ -1,8 +1,8 @@
 
-from typing import Tuple
 from typing import Optional
 
 from orthogonal.TopologyTypes import NodeId
+from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
 
 
 class DcelStep:
@@ -16,7 +16,7 @@ class DcelStep:
         u: NodeId,
         v: Optional[NodeId] = None,
         newNode: Optional[NodeId] = None,
-        position: Optional[Tuple[float, float]] = None,
+        position: Optional[CanvasPoint] = None,
     ):
         """
         Initialize a DCEL construction step.
@@ -32,7 +32,7 @@ class DcelStep:
         self._u: NodeId = u
         self._v: Optional[NodeId] = v
         self._newNode: Optional[NodeId] = newNode
-        self._position: Optional[Tuple[float, float]] = position
+        self._position: Optional[CanvasPoint] = position
 
     @property
     def opType(self) -> str:
@@ -55,6 +55,6 @@ class DcelStep:
         return self._newNode
 
     @property
-    def position(self) -> Optional[Tuple[float, float]]:
+    def position(self) -> Optional[CanvasPoint]:
         """Get the canvas position coordinates, if any."""
         return self._position

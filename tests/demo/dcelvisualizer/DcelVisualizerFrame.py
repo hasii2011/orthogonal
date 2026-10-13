@@ -34,6 +34,8 @@ from tests.demo.dcelvisualizer.DcelCanvasPanel import NODE_SPREAD_FACTOR
 from tests.demo.dcelvisualizer.DcelCanvasPanel import DcelCanvasPanel
 from tests.demo.dcelvisualizer.DcelDataSet import DcelDataSet
 from tests.demo.dcelvisualizer.DcelInspectorPanel import DcelInspectorPanel
+from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
+from tests.demo.dcelvisualizer.VisualizerTypes import NodePositions
 
 from tests.demo.dcelvisualizer.DcelStep import DcelStep
 
@@ -57,7 +59,7 @@ class DcelVisualizerFrame(SizedFrame):
         self._currentDatasetIndex: int = 0
         self._currentStepIndex: int = 0
         self._operations: List[DcelStep] = list(self._datasets[0].plannedSteps)
-        self._positionOverrides: Dict[NodeId, Tuple[float, float]] = {}
+        self._positionOverrides: NodePositions = NodePositions({})
 
         self._timer: Timer = Timer(self)
         self.Bind(EVT_TIMER, self.onTimer, self._timer)
@@ -80,9 +82,9 @@ class DcelVisualizerFrame(SizedFrame):
         smallPreset: DcelDataSet = DcelDataSet(
             name='Small (Triangle K3)',
             plannedSteps=[
-                DcelStep('add_vertex', 'v1', position=(280.0, 90.0)),
-                DcelStep('add_vertex', 'v2', position=(460.0, 370.0)),
-                DcelStep('add_vertex', 'v3', position=(100.0, 370.0)),
+                DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 90.0))),
+                DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 370.0))),
+                DcelStep('add_vertex', 'v3', position=CanvasPoint((100.0, 370.0))),
                 DcelStep('add_edge', 'v1', 'v2'),
                 DcelStep('add_edge', 'v2', 'v3'),
                 DcelStep('add_edge', 'v3', 'v1'),
@@ -94,10 +96,10 @@ class DcelVisualizerFrame(SizedFrame):
         mediumPreset: DcelDataSet = DcelDataSet(
             name='Medium (Diamond K4 - e)',
             plannedSteps=[
-                DcelStep('add_vertex', 'v1', position=(280.0, 70.0)),
-                DcelStep('add_vertex', 'v2', position=(460.0, 230.0)),
-                DcelStep('add_vertex', 'v3', position=(280.0, 390.0)),
-                DcelStep('add_vertex', 'v4', position=(100.0, 230.0)),
+                DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 70.0))),
+                DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 230.0))),
+                DcelStep('add_vertex', 'v3', position=CanvasPoint((280.0, 390.0))),
+                DcelStep('add_vertex', 'v4', position=CanvasPoint((100.0, 230.0))),
                 DcelStep('add_edge', 'v1', 'v2'),
                 DcelStep('add_edge', 'v2', 'v3'),
                 DcelStep('add_edge', 'v3', 'v4'),
@@ -112,12 +114,12 @@ class DcelVisualizerFrame(SizedFrame):
         largePreset: DcelDataSet = DcelDataSet(
             name='Large (2x3 Planar Grid)',
             plannedSteps=[
-                DcelStep('add_vertex', 'n1', position=(120.0, 110.0)),
-                DcelStep('add_vertex', 'n2', position=(280.0, 110.0)),
-                DcelStep('add_vertex', 'n3', position=(440.0, 110.0)),
-                DcelStep('add_vertex', 'n4', position=(120.0, 350.0)),
-                DcelStep('add_vertex', 'n5', position=(280.0, 350.0)),
-                DcelStep('add_vertex', 'n6', position=(440.0, 350.0)),
+                DcelStep('add_vertex', 'n1', position=CanvasPoint((120.0, 110.0))),
+                DcelStep('add_vertex', 'n2', position=CanvasPoint((280.0, 110.0))),
+                DcelStep('add_vertex', 'n3', position=CanvasPoint((440.0, 110.0))),
+                DcelStep('add_vertex', 'n4', position=CanvasPoint((120.0, 350.0))),
+                DcelStep('add_vertex', 'n5', position=CanvasPoint((280.0, 350.0))),
+                DcelStep('add_vertex', 'n6', position=CanvasPoint((440.0, 350.0))),
                 DcelStep('add_edge', 'n1', 'n2'),
                 DcelStep('add_edge', 'n2', 'n3'),
                 DcelStep('add_edge', 'n4', 'n5'),
@@ -296,7 +298,7 @@ class DcelVisualizerFrame(SizedFrame):
     def _replaySteps(
         self,
         stepIndex: int,
-    ) -> Tuple[Graph, DoublyConnectedEdgeList, Dict[NodeId, Tuple[float, float]], Optional[NodeId], str]:
+    ) -> Tuple[Graph, DoublyConnectedEdgeList, NodePositions, Optional[NodeId], str]:
         """
         Replay construction steps, in order, from an empty DCEL up to stepIndex.
 
@@ -311,7 +313,7 @@ class DcelVisualizerFrame(SizedFrame):
             Tuple of (graph, dcel, positions, lastInsertedNode, lastActionDescription).
         """
         baseGraph: Graph = Graph()
-        positions: Dict[NodeId, Tuple[float, float]] = {}
+        positions: NodePositions = NodePositions({})
         lastInserted: Optional[NodeId] = None
         lastAction: str = 'Empty DCEL (Blank Canvas)'
         dcel: DoublyConnectedEdgeList = self._buildDcel(baseGraph)
@@ -325,15 +327,15 @@ class DcelVisualizerFrame(SizedFrame):
             stepNewNode: Optional[NodeId] = step.newNode
             if step.opType == 'add_vertex':
                 baseGraph.add_node(step.u)
-                stepPos: Optional[Tuple[float, float]] = step.position
+                stepPos: Optional[CanvasPoint] = step.position
                 if stepPos is not None:
-                    positions[step.u] = (stepPos[0] * NODE_SPREAD_FACTOR, stepPos[1] * NODE_SPREAD_FACTOR)
+                    positions[step.u] = CanvasPoint((stepPos[0] * NODE_SPREAD_FACTOR, stepPos[1] * NODE_SPREAD_FACTOR))
                 else:
                     count: int = len(positions)
-                    positions[step.u] = (
+                    positions[step.u] = CanvasPoint((
                         (120.0 + (count % 4) * 120.0) * NODE_SPREAD_FACTOR,
                         (120.0 + (count // 4) * 120.0) * NODE_SPREAD_FACTOR,
-                    )
+                    ))
                 dcel = self._buildDcel(baseGraph)
                 lastInserted = step.u
                 lastAction = f'addVertex({step.u!r})'
@@ -350,11 +352,11 @@ class DcelVisualizerFrame(SizedFrame):
                 lastAction = f'addNodeBetween({step.u!r}, {stepV!r}, {stepNewNode!r})'
 
                 if step.u in positions and stepV in positions:
-                    posU: Tuple[float, float] = positions[step.u]
-                    posV: Tuple[float, float] = positions[stepV]
-                    positions[stepNewNode] = ((posU[0] + posV[0]) / 2.0, (posU[1] + posV[1]) / 2.0)
+                    posU: CanvasPoint = positions[step.u]
+                    posV: CanvasPoint = positions[stepV]
+                    positions[stepNewNode] = CanvasPoint(((posU[0] + posV[0]) / 2.0, (posU[1] + posV[1]) / 2.0))
                 else:
-                    positions[stepNewNode] = (250.0 * NODE_SPREAD_FACTOR, 200.0 * NODE_SPREAD_FACTOR)
+                    positions[stepNewNode] = CanvasPoint((250.0 * NODE_SPREAD_FACTOR, 200.0 * NODE_SPREAD_FACTOR))
 
             for movedNode, movedPos in self._positionOverrides.items():
                 if movedNode in positions:
@@ -365,7 +367,7 @@ class DcelVisualizerFrame(SizedFrame):
     def _computeDcelAtStep(
         self,
         stepIndex: int,
-    ) -> Tuple[DoublyConnectedEdgeList, Dict[NodeId, Tuple[float, float]], Optional[NodeId], str]:
+    ) -> Tuple[DoublyConnectedEdgeList, NodePositions, Optional[NodeId], str]:
         """
         Reconstruct DCEL from an empty state by replaying steps up to stepIndex.
 
@@ -376,7 +378,7 @@ class DcelVisualizerFrame(SizedFrame):
             Tuple of (dcel, positions, lastInsertedNode, lastActionDescription).
         """
         dcel: DoublyConnectedEdgeList
-        positions: Dict[NodeId, Tuple[float, float]]
+        positions: NodePositions
         lastInserted: Optional[NodeId]
         lastAction: str
         _, dcel, positions, lastInserted, lastAction = self._replaySteps(stepIndex)
@@ -397,7 +399,7 @@ class DcelVisualizerFrame(SizedFrame):
         self._btnStepAll.Enable(self._currentStepIndex < totalSteps)
 
         dcel: DoublyConnectedEdgeList
-        positions: Dict[NodeId, Tuple[float, float]]
+        positions: NodePositions
         insertedNode: Optional[NodeId]
         lastAction: str
         dcel, positions, insertedNode, lastAction = self._computeDcelAtStep(self._currentStepIndex)
@@ -506,7 +508,7 @@ class DcelVisualizerFrame(SizedFrame):
             self._statusBar.SetStatusText(f'Vertex {nodeName!r} already exists', 0)
             return
 
-        newStep: DcelStep = DcelStep('add_vertex', nodeName, position=(clickX, clickY))
+        newStep: DcelStep = DcelStep('add_vertex', nodeName, position=CanvasPoint((clickX, clickY)))
         self._operations = self._operations[:self._currentStepIndex] + [newStep]
         self._currentStepIndex = len(self._operations)
         self._refreshState()
@@ -520,7 +522,7 @@ class DcelVisualizerFrame(SizedFrame):
             newX: Current X drag coordinate on canvas.
             newY: Current Y drag coordinate on canvas.
         """
-        self._positionOverrides[nodeId] = (newX, newY)
+        self._positionOverrides[nodeId] = CanvasPoint((newX, newY))
         self._canvasPanel.dragVertex(nodeId, newX, newY)
 
     def onVertexMoved(self, nodeId: NodeId, newX: float, newY: float):
@@ -532,7 +534,7 @@ class DcelVisualizerFrame(SizedFrame):
             newX: New X coordinate on canvas.
             newY: New Y coordinate on canvas.
         """
-        self._positionOverrides[nodeId] = (newX, newY)
+        self._positionOverrides[nodeId] = CanvasPoint((newX, newY))
         self._refreshState()
 
     def onAddVertex(self, _event: CommandEvent):
@@ -547,7 +549,7 @@ class DcelVisualizerFrame(SizedFrame):
             nodeName = self._getNextVertexName()
 
         dcel: DoublyConnectedEdgeList
-        positions: Dict[NodeId, Tuple[float, float]]
+        positions: NodePositions
         dcel, positions, _, _ = self._computeDcelAtStep(self._currentStepIndex)
         if nodeName in dcel.vertexDict:
             self._statusBar.SetStatusText(f'Vertex {nodeName!r} already exists', 0)
@@ -556,7 +558,7 @@ class DcelVisualizerFrame(SizedFrame):
         count: int = len(positions)
         posX: float = (120.0 + (count % 4) * 120.0) * NODE_SPREAD_FACTOR
         posY: float = (120.0 + (count // 4) * 120.0) * NODE_SPREAD_FACTOR
-        newStep: DcelStep = DcelStep('add_vertex', nodeName, position=(posX, posY))
+        newStep: DcelStep = DcelStep('add_vertex', nodeName, position=CanvasPoint((posX, posY)))
         self._operations = self._operations[:self._currentStepIndex] + [newStep]
         self._currentStepIndex = len(self._operations)
         self._refreshState()
