@@ -8,24 +8,14 @@ from networkx import Graph
 from networkx import PlanarEmbedding
 from networkx import check_planarity
 
-from wx import ALL  # type: ignore[import-untyped]
-
-from wx import BoxSizer
 from wx import Button
-
 from wx import Choice
 from wx import CommandEvent
 from wx import EVT_BUTTON
 from wx import EVT_CHOICE
 from wx import EVT_SLIDER
 from wx import EVT_TIMER
-from wx import EXPAND
-
-from wx import Frame
-from wx import HORIZONTAL
 from wx import ID_ANY
-
-from wx import Panel
 from wx import SL_HORIZONTAL
 from wx import Size
 from wx import Slider
@@ -35,7 +25,8 @@ from wx import StatusBar
 from wx import TextCtrl
 from wx import Timer
 from wx import TimerEvent
-from wx import VERTICAL
+from wx.lib.sized_controls import SizedFrame
+from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
@@ -45,7 +36,7 @@ from tests.demo.dcelvisualizer.DcelInspectorPanel import DcelInspectorPanel
 
 from tests.demo.dcelvisualizer.DcelStep import DcelStep
 
-class DcelVisualizerFrame(Frame):
+class DcelVisualizerFrame(SizedFrame):
     """
     Main application frame for DCEL visualization and interactive stepping.
     """
@@ -141,118 +132,113 @@ class DcelVisualizerFrame(Frame):
         """
         Build frame layout with top toolbar, splitter canvas/inspector, and status bar.
         """
-        mainPanel: Panel = Panel(self, ID_ANY)
-        rootSizer: BoxSizer = BoxSizer(VERTICAL)
+        mainPane: SizedPanel = self.GetContentsPane()
 
-        topControlsSizer: BoxSizer = BoxSizer(VERTICAL)
-        rowOneSizer: BoxSizer = BoxSizer(HORIZONTAL)
-        rowTwoSizer: BoxSizer = BoxSizer(HORIZONTAL)
+        self._buildPlaybackRow(mainPane)
+        self._buildEditRow(mainPane)
 
-        datasetLabel: StaticText = StaticText(mainPanel, ID_ANY, 'Dataset:')
-        rowOneSizer.Add(datasetLabel, 0, ALL, 6)
-
-        datasetNames: List[str] = [d.name for d in self._datasets]
-        self._datasetChoice: Choice = Choice(mainPanel, ID_ANY, choices=datasetNames)
-        self._datasetChoice.SetSelection(0)
-        self._datasetChoice.Bind(EVT_CHOICE, self.onDatasetChanged)
-        rowOneSizer.Add(self._datasetChoice, 0, ALL, 4)
-
-        self._btnReset: Button = Button(mainPanel, ID_ANY, '↺ Reset')
-        self._btnReset.Bind(EVT_BUTTON, self.onReset)
-        rowOneSizer.Add(self._btnReset, 0, ALL, 4)
-
-        self._btnStepBack: Button = Button(mainPanel, ID_ANY, '◀ Step Back')
-        self._btnStepBack.Bind(EVT_BUTTON, self.onStepBack)
-        rowOneSizer.Add(self._btnStepBack, 0, ALL, 4)
-
-        self._btnStepForward: Button = Button(mainPanel, ID_ANY, 'Step Fwd ▶')
-        self._btnStepForward.Bind(EVT_BUTTON, self.onStepForward)
-        rowOneSizer.Add(self._btnStepForward, 0, ALL, 4)
-
-        self._btnStepAll: Button = Button(mainPanel, ID_ANY, '⏭ Step All')
-        self._btnStepAll.Bind(EVT_BUTTON, self.onStepAll)
-        rowOneSizer.Add(self._btnStepAll, 0, ALL, 4)
-
-        self._btnPlay: Button = Button(mainPanel, ID_ANY, '▶ Auto-Play')
-        self._btnPlay.Bind(EVT_BUTTON, self.onTogglePlay)
-        rowOneSizer.Add(self._btnPlay, 0, ALL, 4)
-
-        sliderLabel: StaticText = StaticText(mainPanel, ID_ANY, 'Step:')
-        rowOneSizer.Add(sliderLabel, 0, ALL, 6)
-
-        self._stepSlider: Slider = Slider(mainPanel, ID_ANY, 0, 0, 2, style=SL_HORIZONTAL)
-        self._stepSlider.Bind(EVT_SLIDER, self.onSliderChanged)
-        rowOneSizer.Add(self._stepSlider, 0, ALL, 4)
-
-        vertexLabel: StaticText = StaticText(mainPanel, ID_ANY, 'Node:')
-        rowTwoSizer.Add(vertexLabel, 0, ALL, 6)
-
-        self._vertexNameText: TextCtrl = TextCtrl(mainPanel, ID_ANY, 'v1', size=Size(50, -1))
-        rowTwoSizer.Add(self._vertexNameText, 0, ALL, 4)
-
-        self._btnAddVertex: Button = Button(mainPanel, ID_ANY, '+ Add Vertex')
-        self._btnAddVertex.Bind(EVT_BUTTON, self.onAddVertex)
-        rowTwoSizer.Add(self._btnAddVertex, 0, ALL, 4)
-
-        edgeULabel: StaticText = StaticText(mainPanel, ID_ANY, 'Edge u:')
-        rowTwoSizer.Add(edgeULabel, 0, ALL, 6)
-
-        self._edgeUChoice: Choice = Choice(mainPanel, ID_ANY)
-        rowTwoSizer.Add(self._edgeUChoice, 0, ALL, 4)
-
-        edgeVLabel: StaticText = StaticText(mainPanel, ID_ANY, 'v:')
-        rowTwoSizer.Add(edgeVLabel, 0, ALL, 6)
-
-        self._edgeVChoice: Choice = Choice(mainPanel, ID_ANY)
-        rowTwoSizer.Add(self._edgeVChoice, 0, ALL, 4)
-
-        self._btnAddEdge: Button = Button(mainPanel, ID_ANY, '+ Add Edge')
-        self._btnAddEdge.Bind(EVT_BUTTON, self.onAddEdge)
-        rowTwoSizer.Add(self._btnAddEdge, 0, ALL, 4)
-
-        adHocULabel: StaticText = StaticText(mainPanel, ID_ANY, 'Split u:')
-        rowTwoSizer.Add(adHocULabel, 0, ALL, 6)
-
-        self._adhocUChoice: Choice = Choice(mainPanel, ID_ANY)
-        self._adhocUChoice.Bind(EVT_CHOICE, self.onAdhocUChanged)
-        rowTwoSizer.Add(self._adhocUChoice, 0, ALL, 4)
-
-        adHocVLabel: StaticText = StaticText(mainPanel, ID_ANY, 'v:')
-        rowTwoSizer.Add(adHocVLabel, 0, ALL, 6)
-
-        self._adhocVChoice: Choice = Choice(mainPanel, ID_ANY)
-        rowTwoSizer.Add(self._adhocVChoice, 0, ALL, 4)
-
-        newNodeLabel: StaticText = StaticText(mainPanel, ID_ANY, 'New Node:')
-        rowTwoSizer.Add(newNodeLabel, 0, ALL, 6)
-
-        self._adhocNewText: TextCtrl = TextCtrl(mainPanel, ID_ANY, 'v_mid', size=Size(65, -1))
-        rowTwoSizer.Add(self._adhocNewText, 0, ALL, 4)
-
-        self._btnExecuteAdhoc: Button = Button(mainPanel, ID_ANY, '+ Subdivide Edge')
-        self._btnExecuteAdhoc.Bind(EVT_BUTTON, self.onExecuteAdhoc)
-        rowTwoSizer.Add(self._btnExecuteAdhoc, 0, ALL, 4)
-
-        topControlsSizer.Add(rowOneSizer, 0, EXPAND | ALL, 2)
-        topControlsSizer.Add(rowTwoSizer, 0, EXPAND | ALL, 2)
-        rootSizer.Add(topControlsSizer, 0, EXPAND | ALL, 4)
-
-        self._splitter: SplitterWindow = SplitterWindow(mainPanel, ID_ANY)
+        self._splitter: SplitterWindow = SplitterWindow(mainPane, ID_ANY)
+        self._splitter.SetSizerProps(expand=True, proportion=1)
         self._canvasPanel: DcelCanvasPanel = DcelCanvasPanel(self._splitter)
         self._inspectorPanel: DcelInspectorPanel = DcelInspectorPanel(self._splitter)
         self._splitter.SplitVertically(self._canvasPanel, self._inspectorPanel, 640)
         self._splitter.SetMinimumPaneSize(350)
 
-        rootSizer.Add(self._splitter, 1, EXPAND | ALL, 2)
-
         self._statusBar: StatusBar = self.CreateStatusBar(2)
         self._statusBar.SetStatusWidths([-3, -1])
 
-        mainPanel.SetSizer(rootSizer)
-        frameSizer: BoxSizer = BoxSizer(VERTICAL)
-        frameSizer.Add(mainPanel, 1, EXPAND)
-        self.SetSizer(frameSizer)
         self.Layout()
+
+    def _buildPlaybackRow(self, parent: SizedPanel):
+        """
+        Build the top toolbar row with dataset selector, playback buttons, and step slider.
+
+        Args:
+            parent: Parent SizedPanel container.
+        """
+        rowOnePanel: SizedPanel = SizedPanel(parent, ID_ANY)
+        rowOnePanel.SetSizerType('horizontal')
+        rowOnePanel.SetSizerProps(expand=True)
+
+        datasetLabel: StaticText = StaticText(rowOnePanel, ID_ANY, 'Dataset:')
+        datasetLabel.SetSizerProps(valign='center')
+
+        datasetNames: List[str] = [d.name for d in self._datasets]
+        self._datasetChoice: Choice = Choice(rowOnePanel, ID_ANY, choices=datasetNames)
+        self._datasetChoice.SetSelection(0)
+        self._datasetChoice.Bind(EVT_CHOICE, self.onDatasetChanged)
+
+        self._btnReset: Button = Button(rowOnePanel, ID_ANY, '↺ Reset')
+        self._btnReset.Bind(EVT_BUTTON, self.onReset)
+
+        self._btnStepBack: Button = Button(rowOnePanel, ID_ANY, '◀ Step Back')
+        self._btnStepBack.Bind(EVT_BUTTON, self.onStepBack)
+
+        self._btnStepForward: Button = Button(rowOnePanel, ID_ANY, 'Step Fwd ▶')
+        self._btnStepForward.Bind(EVT_BUTTON, self.onStepForward)
+
+        self._btnStepAll: Button = Button(rowOnePanel, ID_ANY, '⏭ Step All')
+        self._btnStepAll.Bind(EVT_BUTTON, self.onStepAll)
+
+        self._btnPlay: Button = Button(rowOnePanel, ID_ANY, '▶ Auto-Play')
+        self._btnPlay.Bind(EVT_BUTTON, self.onTogglePlay)
+
+        sliderLabel: StaticText = StaticText(rowOnePanel, ID_ANY, 'Step:')
+        sliderLabel.SetSizerProps(valign='center')
+
+        self._stepSlider: Slider = Slider(rowOnePanel, ID_ANY, 0, 0, 2, style=SL_HORIZONTAL)
+        self._stepSlider.Bind(EVT_SLIDER, self.onSliderChanged)
+
+    def _buildEditRow(self, parent: SizedPanel):
+        """
+        Build the second toolbar row with vertex, edge, and subdivision controls.
+
+        Args:
+            parent: Parent SizedPanel container.
+        """
+        rowTwoPanel: SizedPanel = SizedPanel(parent, ID_ANY)
+        rowTwoPanel.SetSizerType('horizontal')
+        rowTwoPanel.SetSizerProps(expand=True)
+
+        vertexLabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'Node:')
+        vertexLabel.SetSizerProps(valign='center')
+
+        self._vertexNameText: TextCtrl = TextCtrl(rowTwoPanel, ID_ANY, 'v1', size=Size(50, -1))
+
+        self._btnAddVertex: Button = Button(rowTwoPanel, ID_ANY, '+ Add Vertex')
+        self._btnAddVertex.Bind(EVT_BUTTON, self.onAddVertex)
+
+        edgeULabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'Edge u:')
+        edgeULabel.SetSizerProps(valign='center')
+
+        self._edgeUChoice: Choice = Choice(rowTwoPanel, ID_ANY)
+
+        edgeVLabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'v:')
+        edgeVLabel.SetSizerProps(valign='center')
+
+        self._edgeVChoice: Choice = Choice(rowTwoPanel, ID_ANY)
+
+        self._btnAddEdge: Button = Button(rowTwoPanel, ID_ANY, '+ Add Edge')
+        self._btnAddEdge.Bind(EVT_BUTTON, self.onAddEdge)
+
+        adHocULabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'Split u:')
+        adHocULabel.SetSizerProps(valign='center')
+
+        self._adhocUChoice: Choice = Choice(rowTwoPanel, ID_ANY)
+        self._adhocUChoice.Bind(EVT_CHOICE, self.onAdhocUChanged)
+
+        adHocVLabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'v:')
+        adHocVLabel.SetSizerProps(valign='center')
+
+        self._adhocVChoice: Choice = Choice(rowTwoPanel, ID_ANY)
+
+        newNodeLabel: StaticText = StaticText(rowTwoPanel, ID_ANY, 'New Node:')
+        newNodeLabel.SetSizerProps(valign='center')
+
+        self._adhocNewText: TextCtrl = TextCtrl(rowTwoPanel, ID_ANY, 'v_mid', size=Size(65, -1))
+
+        self._btnExecuteAdhoc: Button = Button(rowTwoPanel, ID_ANY, '+ Subdivide Edge')
+        self._btnExecuteAdhoc.Bind(EVT_BUTTON, self.onExecuteAdhoc)
 
     def _loadDataset(self, datasetIndex: int):
         """

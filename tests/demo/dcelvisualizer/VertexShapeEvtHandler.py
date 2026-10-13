@@ -1,10 +1,10 @@
 
 from typing import Optional
 
-from wx import CallAfter  # type: ignore[import-untyped]
+from wx import CallAfter
 from wx import Window
 
-from wx.lib.ogl import Shape  # type: ignore[import-untyped]
+from wx.lib.ogl import Shape
 from wx.lib.ogl import ShapeCanvas
 from wx.lib.ogl import ShapeEvtHandler
 

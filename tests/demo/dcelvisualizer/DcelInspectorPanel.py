@@ -1,7 +1,5 @@
-from wx import ALL  # type: ignore[import-untyped]
+
 from wx import BORDER_SUNKEN
-from wx import BoxSizer
-from wx import EXPAND
 from wx import FONTFAMILY_SWISS
 from wx import FONTSTYLE_NORMAL
 from wx import FONTWEIGHT_BOLD
@@ -10,16 +8,16 @@ from wx import ID_ANY
 from wx import LC_REPORT
 from wx import ListCtrl
 from wx import Notebook
-from wx import Panel
-from wx import VERTICAL
 from wx import Window
+
+from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
 
 INSPECTOR_FONT_SIZE:  int = 12
 
 
-class DcelInspectorPanel(Panel):
+class DcelInspectorPanel(SizedPanel):
     """
     Notebook panel displaying tabular inspection of DCEL Vertices, Half-Edges, and Faces.
     """
@@ -35,6 +33,7 @@ class DcelInspectorPanel(Panel):
 
         tableFont: Font = Font(INSPECTOR_FONT_SIZE, FONTFAMILY_SWISS, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD)
         self._notebook: Notebook = Notebook(self, ID_ANY)
+        self._notebook.SetSizerProps(expand=True, proportion=1)
         self._notebook.SetFont(tableFont)
 
         self._vertexList: ListCtrl = ListCtrl(self._notebook, ID_ANY, style=LC_REPORT | BORDER_SUNKEN)
@@ -59,10 +58,6 @@ class DcelInspectorPanel(Panel):
         self._faceList.AppendColumn('incidentEdge', width=120)
         self._faceList.AppendColumn('nodes_id (Cycle)', width=260)
         self._notebook.AddPage(self._faceList, 'Faces')
-
-        panelSizer: BoxSizer = BoxSizer(VERTICAL)
-        panelSizer.Add(self._notebook, 1, EXPAND | ALL, 2)
-        self.SetSizer(panelSizer)
 
     def updateTables(self, dcel: DoublyConnectedEdgeList):
         """

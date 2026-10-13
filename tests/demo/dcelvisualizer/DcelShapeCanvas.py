@@ -1,6 +1,6 @@
 
-from wx import Window  # type: ignore[import-untyped]
-from wx.lib.ogl import ShapeCanvas  # type: ignore[import-untyped]
+from wx import Window
+from wx.lib.ogl import ShapeCanvas
 
 
 class DcelShapeCanvas(ShapeCanvas):

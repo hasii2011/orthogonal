@@ -7,22 +7,18 @@ from typing import Optional
 
 from math import sqrt
 
-from wx import ALL  # type: ignore[import-untyped]
 from wx import Pen
 from wx import Brush
 from wx import Font
 from wx import Colour
-from wx import EXPAND
-from wx import BoxSizer
 from wx import ID_ANY
-from wx import Panel
 from wx import Window
-from wx import VERTICAL
 from wx import FONTFAMILY_SWISS
 from wx import FONTSTYLE_NORMAL
 from wx import FONTWEIGHT_BOLD
+from wx.lib.sized_controls import SizedPanel
 
-from wx.lib.ogl import ARROW_ARROW  # type: ignore[import-untyped]
+from wx.lib.ogl import ARROW_ARROW
 from wx.lib.ogl import ARROW_POSITION_END
 
 from wx.lib.ogl import CircleShape
@@ -54,7 +50,7 @@ EDGE_LABEL_FONT_SIZE: int = 12
 
 FACE_BADGE_FONT_SIZE: int = 12
 
-class DcelCanvasPanel(Panel):
+class DcelCanvasPanel(SizedPanel):
     """
     Canvas panel hosting wx.lib.ogl.ShapeCanvas for vector graph rendering.
     """
@@ -70,6 +66,7 @@ class DcelCanvasPanel(Panel):
 
         self._diagram: Diagram = Diagram()
         self._canvas: DcelShapeCanvas = DcelShapeCanvas(self, ID_ANY)
+        self._canvas.SetSizerProps(expand=True, proportion=1, border=('all', 0))
         self._canvas.SetDiagram(self._diagram)
         self._canvas.SetBackgroundColour(Colour(255, 255, 255))
         self._diagram.SetCanvas(self._canvas)
@@ -79,10 +76,6 @@ class DcelCanvasPanel(Panel):
 
         self._edgeShapes: List[Tuple[NodeId, NodeId, LineShape, RectangleShape]] = []
         self._faceShapes: List[Tuple[List[NodeId], float, RectangleShape]]       = []
-
-        panelSizer: BoxSizer = BoxSizer(VERTICAL)
-        panelSizer.Add(self._canvas, 1, EXPAND | ALL, 0)
-        self.SetSizer(panelSizer)
 
     def renderDcel(
         self,

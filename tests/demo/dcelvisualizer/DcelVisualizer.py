@@ -6,8 +6,8 @@ planar graphs, directed twin half-edges, and topological updates resulting from
 stepping through addNodeBetween() operations.
 """
 
-from wx import App  # type: ignore[import-untyped]
-from wx.lib.ogl import OGLInitialize  # type: ignore[import-untyped]
+from wx import App
+from wx.lib.ogl import OGLInitialize
 
 from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
 
