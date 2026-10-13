@@ -513,6 +513,18 @@ class DcelVisualizerFrame(Frame):
         self._currentStepIndex = len(self._operations)
         self._refreshState()
 
+    def onVertexDragged(self, nodeId: NodeId, newX: float, newY: float):
+        """
+        Update a vertex position in-place while dragging on the canvas.
+
+        Args:
+            nodeId: Identifier of the dragged vertex.
+            newX: Current X drag coordinate on canvas.
+            newY: Current Y drag coordinate on canvas.
+        """
+        self._positionOverrides[nodeId] = (newX, newY)
+        self._canvasPanel.dragVertex(nodeId, newX, newY)
+
     def onVertexMoved(self, nodeId: NodeId, newX: float, newY: float):
         """
         Record updated canvas coordinates for a dragged vertex and refresh the diagram.

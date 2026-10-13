@@ -27,6 +27,50 @@ class VertexShapeEvtHandler(ShapeEvtHandler):
         super().__init__()
         self._nodeId: NodeId = nodeId
         self._canvas: ShapeCanvas = canvas
+        self._dragOffsetX: float = 0.0
+        self._dragOffsetY: float = 0.0
+
+    def OnBeginDragLeft(self, x: float, y: float, keys: int = 0, attachment: int = 0):
+        """
+        Begin dragging the vertex shape and capture mouse input.
+
+        Args:
+            x: Initial X drag coordinate.
+            y: Initial Y drag coordinate.
+            keys: Modifier key bitmask.
+            attachment: Attachment point index.
+        """
+        shape: Optional[Shape] = self.GetShape()
+        if shape is not None:
+            self._dragOffsetX = float(shape.GetX()) - float(x)
+            self._dragOffsetY = float(shape.GetY()) - float(y)
+
+        if not self._canvas.HasCapture():
+            self._canvas.CaptureMouse()
+
+    def OnDragLeft(self, draw: bool, x: float, y: float, keys: int = 0, attachment: int = 0):
+        """
+        Update vertex and connected edge positions live while dragging.
+
+        Args:
+            draw: True on the draw pass of the drag step, False on the erase pass.
+            x: Current X drag coordinate.
+            y: Current Y drag coordinate.
+            keys: Modifier key bitmask.
+            attachment: Attachment point index.
+        """
+        if not draw:
+            return
+
+        from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
+
+        newX: float = float(x) + self._dragOffsetX
+        newY: float = float(y) + self._dragOffsetY
+        topFrame: Window = self._canvas.GetTopLevelParent()
+
+        assert isinstance(topFrame, DcelVisualizerFrame), 'Top-level parent must be DcelVisualizerFrame'
+
+        topFrame.onVertexDragged(self._nodeId, newX, newY)
 
     def OnEndDragLeft(self, x: float, y: float, keys: int = 0, attachment: int = 0):
         """
@@ -38,16 +82,15 @@ class VertexShapeEvtHandler(ShapeEvtHandler):
             keys: Modifier key bitmask.
             attachment: Attachment point index.
         """
-        previousHandler: Optional[ShapeEvtHandler] = self.GetPreviousHandler()
-        if previousHandler is not None:
-            previousHandler.OnEndDragLeft(x, y, keys, attachment)
+        if self._canvas.HasCapture():
+            self._canvas.ReleaseMouse()
 
         shape: Optional[Shape] = self.GetShape()
         if shape is not None:
             from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
 
-            newX:     float = float(shape.GetX())
-            newY:     float = float(shape.GetY())
+            newX:     float = float(x) + self._dragOffsetX
+            newY:     float = float(y) + self._dragOffsetY
             topFrame: Window = self._canvas.GetTopLevelParent()
 
             assert isinstance(topFrame, DcelVisualizerFrame), 'Top-level parent must be DcelVisualizerFrame'

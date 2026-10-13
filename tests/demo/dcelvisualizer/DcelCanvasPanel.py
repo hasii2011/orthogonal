@@ -6,6 +6,7 @@ from typing import Tuple
 from typing import Optional
 
 from math import sqrt
+
 from wx import ALL  # type: ignore[import-untyped]
 from wx import Pen
 from wx import Brush
@@ -73,6 +74,12 @@ class DcelCanvasPanel(Panel):
         self._canvas.SetBackgroundColour(Colour(255, 255, 255))
         self._diagram.SetCanvas(self._canvas)
 
+        self._positions: Dict[NodeId, Tuple[float, float]] = {}
+        self._shapeMap:  Dict[NodeId, CircleShape]         = {}
+
+        self._edgeShapes: List[Tuple[NodeId, NodeId, LineShape, RectangleShape]] = []
+        self._faceShapes: List[Tuple[List[NodeId], float, RectangleShape]]       = []
+
         panelSizer: BoxSizer = BoxSizer(VERTICAL)
         panelSizer.Add(self._canvas, 1, EXPAND | ALL, 0)
         self.SetSizer(panelSizer)
@@ -92,6 +99,10 @@ class DcelCanvasPanel(Panel):
             insertedNode: Identifier of recently inserted vertex to highlight, if any.
         """
         self._diagram.DeleteAllShapes()
+        self._positions = dict(positions)
+        self._shapeMap.clear()
+        self._edgeShapes.clear()
+        self._faceShapes.clear()
 
         shapeMap: Dict[NodeId, CircleShape] = {}
         for nodeId, _vertexInstance in dcel.vertexDict.items():
@@ -115,6 +126,7 @@ class DcelCanvasPanel(Panel):
             evtHandler.SetPreviousHandler(circle.GetEventHandler())
             circle.SetEventHandler(evtHandler)
             shapeMap[nodeId] = circle
+            self._shapeMap[nodeId] = circle
 
         for _edgeKey, halfEdge in dcel.halfEdgeDict.items():
             uId: NodeId = halfEdge.origin.id
@@ -164,6 +176,7 @@ class DcelCanvasPanel(Panel):
                 edgeLabel.SetDraggable(False)
                 self._diagram.AddShape(edgeLabel)
                 edgeLabel.SetCanvas(self._canvas)
+                self._edgeShapes.append((uId, vId, line, edgeLabel))
 
         faceItems: List[Tuple[FaceId, Face]] = list(dcel.faceDict.items())
         for idx, (faceId, faceInstance) in enumerate(faceItems):
@@ -193,7 +206,64 @@ class DcelCanvasPanel(Panel):
                     faceBadge.SetDraggable(False)
                     self._diagram.AddShape(faceBadge)
                     faceBadge.SetCanvas(self._canvas)
+                    self._faceShapes.append((list(faceInstance.nodes_id), offsetY, faceBadge))
 
         self._diagram.ShowAll(True)
+        self._canvas.Draw()
+        self._canvas.Refresh()
+
+    def dragVertex(self, nodeId: NodeId, newX: float, newY: float):
+        """
+        Update a dragged vertex, its incident half-edge splines/labels, and face badges in-place.
+
+        Args:
+            nodeId: Identifier of the vertex being dragged.
+            newX: New X coordinate on canvas.
+            newY: New Y coordinate on canvas.
+        """
+        self._positions[nodeId] = (newX, newY)
+        if nodeId in self._shapeMap:
+            circle: CircleShape = self._shapeMap[nodeId]
+            circle.SetX(newX)
+            circle.SetY(newY)
+
+        for uId, vId, line, edgeLabel in self._edgeShapes:
+            if uId == nodeId or vId == nodeId:
+                posU: Tuple[float, float] = self._positions.get(uId, (0.0, 0.0))
+                posV: Tuple[float, float] = self._positions.get(vId, (0.0, 0.0))
+                deltaX: float = posV[0] - posU[0]
+                deltaY: float = posV[1] - posU[1]
+                distance: float = sqrt(deltaX * deltaX + deltaY * deltaY)
+                normX: float = 0.0
+                normY: float = 0.0
+                if distance > 0.001:
+                    normX = -deltaY / distance
+                    normY = deltaX / distance
+                midX: float = (posU[0] + posV[0]) / 2.0 + normX * EDGE_SPLINE_OFFSET
+                midY: float = (posU[1] + posV[1]) / 2.0 + normY * EDGE_SPLINE_OFFSET
+                ctrlPoints: Any = line.GetLineControlPoints()
+                if len(ctrlPoints) >= 2:
+                    ctrlPoints[1].x = midX
+                    ctrlPoints[1].y = midY
+                endPoints: Any = line.FindLineEndPoints()
+                if endPoints is not None:
+                    line.SetEnds(endPoints[0], endPoints[1], endPoints[2], endPoints[3])
+                edgeLabel.SetX(midX)
+                edgeLabel.SetY(midY)
+
+        for cycleNodes, offsetY, faceBadge in self._faceShapes:
+            if nodeId in cycleNodes:
+                sumX: float = 0.0
+                sumY: float = 0.0
+                validPoints: int = 0
+                for cycleNode in cycleNodes:
+                    if cycleNode in self._positions:
+                        sumX += self._positions[cycleNode][0]
+                        sumY += self._positions[cycleNode][1]
+                        validPoints += 1
+                if validPoints > 0:
+                    faceBadge.SetX(sumX / float(validPoints))
+                    faceBadge.SetY(sumY / float(validPoints) + offsetY)
+
         self._canvas.Draw()
         self._canvas.Refresh()
