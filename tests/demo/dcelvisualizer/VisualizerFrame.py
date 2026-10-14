@@ -1,5 +1,4 @@
 
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -38,6 +37,7 @@ from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
 from tests.demo.dcelvisualizer.VisualizerTypes import NodePositions
 
 from tests.demo.dcelvisualizer.DcelStep import DcelStep
+from tests.demo.dcelvisualizer.DcelStep import DcelSteps
 
 DEFAULT_FRAME_WIDTH:   int   = 1280
 DEFAULT_FRAME_HEIGHT:  int   = 800
@@ -58,7 +58,7 @@ class VisualizerFrame(SizedFrame):
         self._datasets: List[DcelDataSet] = self._createDatasets()
         self._currentDatasetIndex: int = 0
         self._currentStepIndex: int = 0
-        self._operations: List[DcelStep] = list(self._datasets[0].plannedSteps)
+        self._operations: DcelSteps = DcelSteps(list(self._datasets[0].plannedSteps))
         self._positionOverrides: NodePositions = NodePositions({})
 
         self._timer: Timer = Timer(self)
@@ -76,12 +76,12 @@ class VisualizerFrame(SizedFrame):
         """
         emptyPreset: DcelDataSet = DcelDataSet(
             name='Empty (Blank Canvas)',
-            plannedSteps=[],
+            plannedSteps=DcelSteps([]),
         )
 
         smallPreset: DcelDataSet = DcelDataSet(
             name='Small (Triangle K3)',
-            plannedSteps=[
+            plannedSteps=DcelSteps([
                 DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 90.0))),
                 DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 370.0))),
                 DcelStep('add_vertex', 'v3', position=CanvasPoint((100.0, 370.0))),
@@ -90,12 +90,12 @@ class VisualizerFrame(SizedFrame):
                 DcelStep('add_edge', 'v3', 'v1'),
                 DcelStep('subdivide', 'v1', 'v2', newNode='v12'),
                 DcelStep('subdivide', 'v2', 'v3', newNode='v23'),
-            ],
+            ]),
         )
 
         mediumPreset: DcelDataSet = DcelDataSet(
             name='Medium (Diamond K4 - e)',
-            plannedSteps=[
+            plannedSteps=DcelSteps([
                 DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 70.0))),
                 DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 230.0))),
                 DcelStep('add_vertex', 'v3', position=CanvasPoint((280.0, 390.0))),
@@ -108,12 +108,12 @@ class VisualizerFrame(SizedFrame):
                 DcelStep('subdivide', 'v2', 'v4', newNode='v24'),
                 DcelStep('subdivide', 'v1', 'v2', newNode='v12'),
                 DcelStep('subdivide', 'v3', 'v4', newNode='v34'),
-            ],
+            ]),
         )
 
         largePreset: DcelDataSet = DcelDataSet(
             name='Large (2x3 Planar Grid)',
-            plannedSteps=[
+            plannedSteps=DcelSteps([
                 DcelStep('add_vertex', 'n1', position=CanvasPoint((120.0, 110.0))),
                 DcelStep('add_vertex', 'n2', position=CanvasPoint((280.0, 110.0))),
                 DcelStep('add_vertex', 'n3', position=CanvasPoint((440.0, 110.0))),
@@ -131,7 +131,7 @@ class VisualizerFrame(SizedFrame):
                 DcelStep('subdivide', 'n2', 'n5', newNode='n25'),
                 DcelStep('subdivide', 'n5', 'n6', newNode='n56'),
                 DcelStep('subdivide', 'n4', 'n5', newNode='n45'),
-            ],
+            ]),
         )
 
         return [emptyPreset, smallPreset, mediumPreset, largePreset]
@@ -159,6 +159,9 @@ class VisualizerFrame(SizedFrame):
         self._statusBar.SetStatusWidths([-3, -1])
 
         self.Layout()
+        splitterWidth: int = self._splitter.GetClientSize().width
+        if splitterWidth > 0:
+            self._splitter.SetSashPosition(int(splitterWidth * SPLITTER_SASH_RATIO))
 
     def _buildPlaybackRow(self, parent: SizedPanel):
         """
@@ -260,7 +263,7 @@ class VisualizerFrame(SizedFrame):
         """
         self._currentDatasetIndex = datasetIndex
         self._currentStepIndex = 0
-        self._operations = list(self._datasets[datasetIndex].plannedSteps)
+        self._operations = DcelSteps(list(self._datasets[datasetIndex].plannedSteps))
         self._positionOverrides.clear()
 
         totalSteps: int = len(self._operations)
@@ -269,12 +272,12 @@ class VisualizerFrame(SizedFrame):
 
         self._refreshState()
 
-    def _getAllSteps(self) -> List[DcelStep]:
+    def _getAllSteps(self) -> DcelSteps:
         """
         Return active ordered list of DCEL building steps.
 
         Returns:
-            List of DcelStep operation specifications.
+            DcelSteps operation specifications.
         """
         return self._operations
 
@@ -509,7 +512,7 @@ class VisualizerFrame(SizedFrame):
             return
 
         newStep: DcelStep = DcelStep('add_vertex', nodeName, position=CanvasPoint((clickX, clickY)))
-        self._operations = self._operations[:self._currentStepIndex] + [newStep]
+        self._operations = DcelSteps(list(self._operations[:self._currentStepIndex]) + [newStep])
         self._currentStepIndex = len(self._operations)
         self._refreshState()
 
@@ -559,7 +562,7 @@ class VisualizerFrame(SizedFrame):
         posX: float = (120.0 + (count % 4) * 120.0) * NODE_SPREAD_FACTOR
         posY: float = (120.0 + (count // 4) * 120.0) * NODE_SPREAD_FACTOR
         newStep: DcelStep = DcelStep('add_vertex', nodeName, position=CanvasPoint((posX, posY)))
-        self._operations = self._operations[:self._currentStepIndex] + [newStep]
+        self._operations = DcelSteps(list(self._operations[:self._currentStepIndex]) + [newStep])
         self._currentStepIndex = len(self._operations)
         self._refreshState()
 
@@ -594,7 +597,7 @@ class VisualizerFrame(SizedFrame):
             return
 
         newStep: DcelStep = DcelStep('add_edge', uNode, v=vNode)
-        self._operations = self._operations[:self._currentStepIndex] + [newStep]
+        self._operations = DcelSteps(list(self._operations[:self._currentStepIndex]) + [newStep])
         self._currentStepIndex = len(self._operations)
         self._refreshState()
 
@@ -618,7 +621,7 @@ class VisualizerFrame(SizedFrame):
             _event: wx CommandEvent.
         """
         self._currentStepIndex = 0
-        self._operations = list(self._datasets[self._currentDatasetIndex].plannedSteps)
+        self._operations = DcelSteps(list(self._datasets[self._currentDatasetIndex].plannedSteps))
         self._positionOverrides.clear()
         self._refreshState()
 
@@ -726,6 +729,6 @@ class VisualizerFrame(SizedFrame):
             return
 
         newStep: DcelStep = DcelStep('subdivide', uSelection, v=vSelection, newNode=newName)
-        self._operations = self._operations[:self._currentStepIndex] + [newStep]
+        self._operations = DcelSteps(list(self._operations[:self._currentStepIndex]) + [newStep])
         self._currentStepIndex = len(self._operations)
         self._refreshState()

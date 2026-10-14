@@ -1,45 +1,13 @@
 
-from typing import List
+from dataclasses import dataclass
 
-from tests.demo.dcelvisualizer.DcelStep import DcelStep
+from tests.demo.dcelvisualizer.DcelStep import DcelSteps
 
 
+@dataclass(frozen=True)
 class DcelDataSet:
     """
     Encapsulates a planar graph preset and its planned building steps.
     """
-
-    def __init__(
-        self,
-        name: str,
-        plannedSteps: List[DcelStep],
-    ):
-        """
-        Initialize dataset configuration.
-
-        Args:
-            name: Human-readable dataset name.
-            plannedSteps: Sequence of DcelStep operations starting from an empty DCEL.
-        """
-        self._name: str = name
-        self._plannedSteps: List[DcelStep] = plannedSteps
-
-    @property
-    def name(self) -> str:
-        """
-        Get the dataset name.
-
-        Returns:
-            Dataset name string.
-        """
-        return self._name
-
-    @property
-    def plannedSteps(self) -> List[DcelStep]:
-        """
-        Get pre-configured building steps.
-
-        Returns:
-            List of DcelStep operation specifications.
-        """
-        return self._plannedSteps
+    name:         str
+    plannedSteps: DcelSteps

@@ -160,4 +160,3 @@ class Orthogonalization:
                     if self.flow_dict[node][f][he_id] == 1:
                         count_right_angle += 1
         return count_right_angle + self.flow_network.cost
-
