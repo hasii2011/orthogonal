@@ -1,7 +1,10 @@
 
 from typing import Dict
+from typing import Iterator
 from typing import Mapping
 from typing import Optional
+from typing import Self
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -15,8 +18,10 @@ import networkx as nx
 from networkx import Graph
 
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
+from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.geometry.Geometry2D import Geometry2D
 from orthogonal.geometry.Geometry2D import NodeCoordinate
+from orthogonal.TopologyTypes import FaceId
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
 
@@ -61,24 +66,63 @@ class Planarization:
                 raise OrthogonalException('The graph has edges that cross each other')
             self.embedding = self._convertPosToEmbedding(G, normalizedPos)
 
-        self.G: Graph = G.copy()
-        self.pos: NodePositions = normalizedPos  # is only used to find the ext_face now.
-        self.dcel: DoublyConnectedEdgeList = DoublyConnectedEdgeList(G, self.embedding)
-        self.ext_face   = self._getExternalFace()
+        self._G:            Graph                   = G.copy()
+        self._pos:          NodePositions           = normalizedPos  # is only used to find the ext_face now.
+        self._dcel:         DoublyConnectedEdgeList = DoublyConnectedEdgeList(G, self.embedding)
+        self._externalFace: Face                    = self._getExternalFace()
 
-    def dfsFaceOrder(self):  # dfs dual graph, starts at ext_face
-        def dfs_face(face, marked):
+    @property
+    def G(self) -> Graph:
+        """
+        Get the copy of the input graph.
+        """
+        return self._G
+
+    @property
+    def pos(self) -> NodePositions:
+        """
+        Get the node positions dictionary used for topological orientation.
+        """
+        return self._pos
+
+    @property
+    def dcel(self) -> DoublyConnectedEdgeList:
+        """
+        Get the Doubly-Connected Edge List representation of the planar embedding.
+        """
+        return self._dcel
+
+    @property
+    def externalFace(self) -> Face:
+        """
+        Get the identified unbounded external face.
+        """
+        return self._externalFace
+
+    def dfsFaceOrder(self) -> Iterator[Face]:
+        """
+        Yield all planar embedding faces in depth-first search order across the dual graph,
+        starting at the unbounded external face.
+
+        Yields:
+            Face: Each visited Face in DFS dual-graph traversal order.
+        """
+        def dfsFace(face: Face, marked: Set[FaceId]) -> Iterator[Face]:
             marked.add(face.id)
             yield face
-            for neighbor_face in set(face.surroundFaces()):
-                if neighbor_face.id not in marked:
-                    yield from dfs_face(neighbor_face, marked)
-        yield from dfs_face(self.ext_face, set())
+            for neighborFace in set(face.surroundFaces()):
+                if neighborFace.id not in marked:
+                    yield from dfsFace(neighborFace, marked)
 
-    def copy(self):
-        return self.__class__(self.G, self.pos)
+        yield from dfsFace(self._externalFace, set())
 
-    def _getExternalFace(self):
+    def clone(self) -> Self:
+        """
+        Create an independent clone of this planarization instance.
+        """
+        return self.__class__(self._G, self._pos)
+
+    def _getExternalFace(self) -> Face:
         def leftMost(G: Graph, pos: NodePositions):
             cornerNode = min(pos, key=lambda k: (pos[k].x, pos[k].y))
             other = max(
@@ -92,10 +136,11 @@ class Planarization:
             return sorted([cornerNode, other], key=lambda node:
                           (pos[node].y, pos[node].x))
 
-        if len(self.pos) < 2:
-            return list(self.dcel.faceDict.values())[0]
-        down, up = leftMost(self.G, self.pos)
-        return self.dcel.halfEdgeDict[up, down].incidentFace
+        if len(self._pos) < 2:
+            return list(self._dcel.faceDict.values())[0]
+        down, up = leftMost(self._G, self._pos)
+
+        return self._dcel.halfEdgeDict[up, down].incidentFace
 
     def _numberOfCrossings(self, G: Graph, pos: NodePositions, printIt: bool = True) -> int:
         """

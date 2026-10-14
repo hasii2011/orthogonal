@@ -21,6 +21,8 @@ from matplotlib.pyplot import subplots as plotSubplots
 from matplotlib.pyplot import show as plotShow
 from matplotlib.pyplot import tight_layout as plotTightLayout
 
+from orthogonal.geometry.Geometry2D import NodeCoordinate
+from orthogonal.TopologyTypes import NodeId
 from orthogonal.topologyShapeMetric.Compaction import Compaction
 from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
@@ -106,7 +108,8 @@ class TestGML(ProjectTestBase):
         fqFileName: str   = TestGML.retrieveResourcePath('case1.gml')
         graph:      Graph = Graph(read_gml(fqFileName))
 
-        compact: Compaction = self._generate(graph, {node: eval(node) for node in graph})
+        positions: Dict[NodeId, NodeCoordinate] = self._extractPositionsFromNodeNames(graph)
+        compact:   Compaction                   = self._generate(graph, positions)
 
         compact.draw()
         self._verifyImage('testCase1', CASE1_PNG)
@@ -115,7 +118,9 @@ class TestGML(ProjectTestBase):
 
         fqFileName: str   = TestGML.retrieveResourcePath("case1BiConnected.gml")
         G:          Graph = Graph(read_gml(fqFileName))
-        compact: Compaction = self._generate(G, {node: eval(node) for node in G})
+
+        positions: Dict[NodeId, NodeCoordinate] = self._extractPositionsFromNodeNames(G)
+        compact:   Compaction                   = self._generate(G, positions)
 
         compact.draw()
         self._verifyImage('testCase1BiConnected', CASE1_BICONNECTED_PNG)
@@ -124,7 +129,9 @@ class TestGML(ProjectTestBase):
 
         fqFileName: str        = TestGML.retrieveResourcePath("case2.gml")
         G:          Graph      = Graph(read_gml(fqFileName))
-        compact:    Compaction = self._generate(G, {node: eval(node) for node in G})
+
+        positions: Dict[NodeId, NodeCoordinate] = self._extractPositionsFromNodeNames(G)
+        compact:   Compaction                   = self._generate(G, positions)
 
         compact.draw()
         self._verifyImage('testCase2', CASE2_PNG)
@@ -137,7 +144,9 @@ class TestGML(ProjectTestBase):
 
         fqFileName: str        = TestGML.retrieveResourcePath("case2BiConnected.gml")
         G:          Graph      = Graph(read_gml(fqFileName))
-        compact:    Compaction = self._generate(G, {node: eval(node) for node in G})
+
+        positions: Dict[NodeId, NodeCoordinate] = self._extractPositionsFromNodeNames(G)
+        compact:   Compaction                   = self._generate(G, positions)
 
         compact.draw()
         self._verifyImage('testCase2BiConnected', CASE2_BICONNECTED_PNG)
@@ -151,7 +160,8 @@ class TestGML(ProjectTestBase):
             for node in G:
                 self.logger.debug(f'{node=}')
 
-        compact: Compaction = self._generate(G, {node: eval(node) for node in G})
+        positions: Dict[NodeId, NodeCoordinate] = self._extractPositionsFromNodeNames(G)
+        compact:   Compaction                   = self._generate(G, positions)
 
         for flowKey in compact.flow_dict.keys():
             valueDict = compact.flow_dict[flowKey]
@@ -250,6 +260,19 @@ class TestGML(ProjectTestBase):
         )
 
         self.assertIsNone(diffResult, failureMessage)
+
+    @classmethod
+    def _extractPositionsFromNodeNames(cls, graph: Graph) -> Dict[NodeId, NodeCoordinate]:
+        """
+        Extract initial (x, y) node coordinates encoded as string tuples in node names.
+        """
+        positions: Dict[NodeId, NodeCoordinate] = {}
+        for nodeName in graph.nodes:
+            coordString: str = str(nodeName).strip('()')
+            xString, yString = coordString.split(',')
+            positions[nodeName] = NodeCoordinate(x=int(xString.strip()), y=int(yString.strip()))
+
+        return positions
 
     def _generate(self, G, pos=None) -> Compaction:
 

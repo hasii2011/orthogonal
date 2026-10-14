@@ -58,7 +58,7 @@ class Orthogonalization:
             flowNetwork.addVertexNode(vertex.id)
 
         for face in self._planar.dcel.faceDict.values():
-            flowNetwork.addFaceNode(face.id, len(face), face is self._planar.ext_face)
+            flowNetwork.addFaceNode(face.id, len(face), face is self._planar.externalFace)
 
         for vertex in self._planar.dcel.vertexDict.values():
             for he in vertex.surroundHalfEdges():

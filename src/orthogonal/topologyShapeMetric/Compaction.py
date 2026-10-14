@@ -26,7 +26,7 @@ class Compaction:
             self.planar = orthogonalization.planar
             self.flow_dict = orthogonalization.flowDict
         else:
-            self.planar = orthogonalization.planar.copy()
+            self.planar = orthogonalization.planar.clone()
             self.flow_dict = copy.deepcopy(orthogonalization.flowDict)
 
         self.bend_point_processor()
@@ -127,7 +127,7 @@ class Compaction:
                     he = self.planar.dcel.halfEdgeDict[he_id]
                     lf, rf = he.twin.incidentFace, he.incidentFace
                     lf_id = lf.id
-                    rf_id = rf.id if rf.id != self.planar.ext_face.id else 'end'
+                    rf_id = rf.id if rf.id != self.planar.externalFace.id else 'end'
                     hv_flow.add_edge(lf_id, rf_id, he_id)
             return hv_flow
 
@@ -158,15 +158,15 @@ class Compaction:
         hor_flow = build_flow(1)  # up -> bottom
         ver_flow = build_flow(0)  # left -> right
 
-        hor_flow_dict = solve(hor_flow, self.planar.ext_face.id, 'end')
-        ver_flow_dict = solve(ver_flow, self.planar.ext_face.id, 'end')
+        hor_flow_dict = solve(hor_flow, self.planar.externalFace.id, 'end')
+        ver_flow_dict = solve(ver_flow, self.planar.externalFace.id, 'end')
 
         for he in self.planar.dcel.halfEdgeDict.values():
             if self.edge_side[he.id] in (0, 1):
                 side = self.edge_side[he.id]
 
                 rf = he.incidentFace
-                rf_id = 'end' if rf.id == self.planar.ext_face.id else rf.id
+                rf_id = 'end' if rf.id == self.planar.externalFace.id else rf.id
                 lf_id = he.twin.incidentFace.id
 
                 if side == 0:
