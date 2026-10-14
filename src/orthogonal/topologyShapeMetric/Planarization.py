@@ -109,7 +109,7 @@ class Planarization:
         for nodeA, nodeB in G.edges:
             for nodeC, nodeD in G.edges:
                 if nodeA not in (nodeC, nodeD) and nodeB not in (nodeC, nodeD):
-                    if self._isCross(pos[nodeA], pos[nodeB], pos[nodeC], pos[nodeD]):
+                    if self.isCross(pos[nodeA], pos[nodeB], pos[nodeC], pos[nodeD]):
                         count += 1
                         if printIt is True:
                             self.logger.info(nodeA, nodeB, nodeC, nodeD)
@@ -132,7 +132,22 @@ class Planarization:
         emd.check_structure()
         return emd
 
-    def _isCross(self, pa: NodeCoordinate, pb: NodeCoordinate, pc: NodeCoordinate, pd: NodeCoordinate) -> bool:
+    @classmethod
+    def crossProduct(cls, v1: NodeCoordinate, v2: NodeCoordinate) -> int:
+        """
+        Compute the 2D cross product (determinant) of vectors v1 and v2.
+
+        Args:
+            v1: First vector as a NodeCoordinate (dx, dy).
+            v2: Second vector as a NodeCoordinate (dx, dy).
+
+        Returns:
+            Signed area of the parallelogram spanned by v1 and v2.
+        """
+        return v1.x * v2.y - v1.y * v2.x
+
+    @classmethod
+    def isCross(cls, pa: NodeCoordinate, pb: NodeCoordinate, pc: NodeCoordinate, pd: NodeCoordinate) -> bool:
         """
         Determine whether line segment (pa, pb) intersects line segment (pc, pd).
 
@@ -145,16 +160,17 @@ class Planarization:
         Returns:
             True if the two line segments cross, False otherwise.
         """
-        def crossProduct(v1: NodeCoordinate, v2: NodeCoordinate) -> int:
-            return v1.x * v2.y - v1.y * v2.x
-
         ca: NodeCoordinate = NodeCoordinate(pa.x - pc.x, pa.y - pc.y)
         cb: NodeCoordinate = NodeCoordinate(pb.x - pc.x, pb.y - pc.y)
         cd: NodeCoordinate = NodeCoordinate(pd.x - pc.x, pd.y - pc.y)
 
-        return crossProduct(ca, cd) >= 0 > self._orientation(pa, pb, pc) * self._orientation(pa, pb, pd) and crossProduct(cd, cb) >= 0
+        return (
+            cls.crossProduct(ca, cd) >= 0 > cls.orientation(pa, pb, pc) * cls.orientation(pa, pb, pd)
+            and cls.crossProduct(cd, cb) >= 0
+        )
 
-    def _orientation(self, pa: NodeCoordinate, pb: NodeCoordinate, p: NodeCoordinate) -> int:
+    @classmethod
+    def orientation(cls, pa: NodeCoordinate, pb: NodeCoordinate, p: NodeCoordinate) -> int:
         """
         Compute the signed orientation of point p relative to the directed line segment pa -> pb.
 
