@@ -1,7 +1,6 @@
 
 from typing import Dict
 from typing import Mapping
-from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -16,13 +15,10 @@ import networkx as nx
 from networkx import Graph
 
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
+from orthogonal.geometry.Geometry2D import Geometry2D
+from orthogonal.geometry.Geometry2D import NodeCoordinate
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.topologyShapeMetric.OrthogonalException import OrthogonalException
-
-
-class NodeCoordinate(NamedTuple):
-    x: int
-    y: int
 
 
 type RawCoordinate    = Tuple[int, int]
@@ -109,7 +105,7 @@ class Planarization:
         for nodeA, nodeB in G.edges:
             for nodeC, nodeD in G.edges:
                 if nodeA not in (nodeC, nodeD) and nodeB not in (nodeC, nodeD):
-                    if self.isCross(pos[nodeA], pos[nodeB], pos[nodeC], pos[nodeD]):
+                    if Geometry2D.isCross(pos[nodeA], pos[nodeB], pos[nodeC], pos[nodeD]):
                         count += 1
                         if printIt is True:
                             self.logger.info(nodeA, nodeB, nodeC, nodeD)
@@ -131,57 +127,3 @@ class Planarization:
                 last = neigh
         emd.check_structure()
         return emd
-
-    @classmethod
-    def crossProduct(cls, v1: NodeCoordinate, v2: NodeCoordinate) -> int:
-        """
-        Compute the 2D cross product (determinant) of vectors v1 and v2.
-
-        Args:
-            v1: First vector as a NodeCoordinate (dx, dy).
-            v2: Second vector as a NodeCoordinate (dx, dy).
-
-        Returns:
-            Signed area of the parallelogram spanned by v1 and v2.
-        """
-        return v1.x * v2.y - v1.y * v2.x
-
-    @classmethod
-    def isCross(cls, pa: NodeCoordinate, pb: NodeCoordinate, pc: NodeCoordinate, pd: NodeCoordinate) -> bool:
-        """
-        Determine whether line segment (pa, pb) intersects line segment (pc, pd).
-
-        Args:
-            pa: First endpoint of segment AB.
-            pb: Second endpoint of segment AB.
-            pc: First endpoint of segment CD.
-            pd: Second endpoint of segment CD.
-
-        Returns:
-            True if the two line segments cross, False otherwise.
-        """
-        ca: NodeCoordinate = NodeCoordinate(pa.x - pc.x, pa.y - pc.y)
-        cb: NodeCoordinate = NodeCoordinate(pb.x - pc.x, pb.y - pc.y)
-        cd: NodeCoordinate = NodeCoordinate(pd.x - pc.x, pd.y - pc.y)
-
-        return (
-            cls.crossProduct(ca, cd) >= 0 > cls.orientation(pa, pb, pc) * cls.orientation(pa, pb, pd)
-            and cls.crossProduct(cd, cb) >= 0
-        )
-
-    @classmethod
-    def orientation(cls, pa: NodeCoordinate, pb: NodeCoordinate, p: NodeCoordinate) -> int:
-        """
-        Compute the signed orientation of point p relative to the directed line segment pa -> pb.
-
-        Args:
-            pa: Origin point of the directed line segment.
-            pb: Destination point of the directed line segment.
-            p: Query point to evaluate orientation for.
-
-        Returns:
-            0 if pa, pb, and p are collinear (all 3 lie on the same straight line).
-            Positive integer (> 0) if p lies to the left of directed segment pa -> pb (counter-clockwise).
-            Negative integer (< 0) if p lies to the right of directed segment pa -> pb (clockwise).
-        """
-        return (pa.y - pb.y) * (p.x - pb.x) - (p.y - pb.y) * (pa.x - pb.x)
