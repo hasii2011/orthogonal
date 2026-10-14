@@ -62,13 +62,13 @@ class VertexShapeEvtHandler(ShapeEvtHandler):
         if not draw:
             return
 
-        from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
+        from tests.demo.dcelvisualizer.VisualizerFrame import VisualizerFrame
 
         newX: float = float(x) + self._dragOffsetX
         newY: float = float(y) + self._dragOffsetY
         topFrame: Window = self._canvas.GetTopLevelParent()
 
-        assert isinstance(topFrame, DcelVisualizerFrame), 'Top-level parent must be DcelVisualizerFrame'
+        assert isinstance(topFrame, VisualizerFrame), 'Top-level parent must be VisualizerFrame'
 
         topFrame.onVertexDragged(self._nodeId, newX, newY)
 
@@ -87,13 +87,13 @@ class VertexShapeEvtHandler(ShapeEvtHandler):
 
         shape: Optional[Shape] = self.GetShape()
         if shape is not None:
-            from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
+            from tests.demo.dcelvisualizer.VisualizerFrame import VisualizerFrame
 
             newX:     float = float(x) + self._dragOffsetX
             newY:     float = float(y) + self._dragOffsetY
             topFrame: Window = self._canvas.GetTopLevelParent()
 
-            assert isinstance(topFrame, DcelVisualizerFrame), 'Top-level parent must be DcelVisualizerFrame'
+            assert isinstance(topFrame, VisualizerFrame), 'Top-level parent must be VisualizerFrame'
 
-            visualizerFrame: DcelVisualizerFrame = topFrame
+            visualizerFrame: VisualizerFrame = topFrame
             CallAfter(lambda: visualizerFrame.onVertexMoved(self._nodeId, newX, newY))

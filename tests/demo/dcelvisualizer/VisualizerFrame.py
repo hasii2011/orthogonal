@@ -30,10 +30,10 @@ from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
-from tests.demo.dcelvisualizer.DcelCanvasPanel import NODE_SPREAD_FACTOR
-from tests.demo.dcelvisualizer.DcelCanvasPanel import DcelCanvasPanel
+from tests.demo.dcelvisualizer.CanvasPanel import NODE_SPREAD_FACTOR
+from tests.demo.dcelvisualizer.CanvasPanel import CanvasPanel
 from tests.demo.dcelvisualizer.DcelDataSet import DcelDataSet
-from tests.demo.dcelvisualizer.DcelInspectorPanel import DcelInspectorPanel
+from tests.demo.dcelvisualizer.InspectorPanel import InspectorPanel
 from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
 from tests.demo.dcelvisualizer.VisualizerTypes import NodePositions
 
@@ -44,7 +44,7 @@ DEFAULT_FRAME_HEIGHT:  int   = 800
 SPLITTER_SASH_RATIO:   float = 2.0 / 3.0
 DEFAULT_SASH_POSITION: int   = int(DEFAULT_FRAME_WIDTH * SPLITTER_SASH_RATIO)
 
-class DcelVisualizerFrame(SizedFrame):
+class VisualizerFrame(SizedFrame):
     """
     Main application frame for DCEL visualization and interactive stepping.
     """
@@ -148,8 +148,8 @@ class DcelVisualizerFrame(SizedFrame):
         self._splitter: SplitterWindow = SplitterWindow(mainPane, ID_ANY)
         self._splitter.SetSizerProps(expand=True, proportion=1)
 
-        self._canvasPanel:    DcelCanvasPanel    = DcelCanvasPanel(self._splitter)
-        self._inspectorPanel: DcelInspectorPanel = DcelInspectorPanel(self._splitter)
+        self._canvasPanel:    CanvasPanel    = CanvasPanel(self._splitter)
+        self._inspectorPanel: InspectorPanel = InspectorPanel(self._splitter)
 
         self._splitter.SplitVertically(self._canvasPanel, self._inspectorPanel, DEFAULT_SASH_POSITION)
         self._splitter.SetSashGravity(SPLITTER_SASH_RATIO)

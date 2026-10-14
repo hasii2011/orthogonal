@@ -9,7 +9,7 @@ stepping through addNodeBetween() operations.
 from wx import App
 from wx.lib.ogl import OGLInitialize
 
-from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
+from tests.demo.dcelvisualizer.VisualizerFrame import VisualizerFrame
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     """
     app: App = App(False)
     OGLInitialize()
-    frame: DcelVisualizerFrame = DcelVisualizerFrame()
+    frame: VisualizerFrame = VisualizerFrame()
     frame.Show(True)
     app.MainLoop()
 

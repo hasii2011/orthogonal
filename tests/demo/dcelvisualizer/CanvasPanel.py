@@ -38,9 +38,9 @@ from tests.demo.dcelvisualizer.VisualizerTypes import CycleNodes
 from tests.demo.dcelvisualizer.VisualizerTypes import EdgeShapeEntry
 from tests.demo.dcelvisualizer.VisualizerTypes import FaceShapeEntry
 
-from tests.demo.dcelvisualizer.DcelShapeCanvas import DcelShapeCanvas
-from tests.demo.dcelvisualizer.shapes.DcelVertexShape import DcelVertexShape
-from tests.demo.dcelvisualizer.shapes.DcelBadgeShape import DcelBadgeShape
+from tests.demo.dcelvisualizer.VisualizerCanvas import VisualizerCanvas
+from tests.demo.dcelvisualizer.shapes.VertexShape import VertexShape
+from tests.demo.dcelvisualizer.shapes.BadgeShape import BadgeShape
 from tests.demo.dcelvisualizer.VertexShapeEvtHandler import VertexShapeEvtHandler
 
 NODE_SPREAD_FACTOR:       float = 1.35
@@ -74,7 +74,7 @@ EDGE_LABEL_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
 FACE_BADGE_BACKGROUND_COLOUR: Colour = Colour(241, 245, 249)
 FACE_BADGE_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
 
-class DcelCanvasPanel(SizedPanel):
+class CanvasPanel(SizedPanel):
     """
     Canvas panel hosting wx.lib.ogl.ShapeCanvas for vector graph rendering.
     """
@@ -88,8 +88,8 @@ class DcelCanvasPanel(SizedPanel):
         """
         super().__init__(parent, ID_ANY)
 
-        self._diagram: Diagram         = Diagram()
-        self._canvas:  DcelShapeCanvas = DcelShapeCanvas(self, ID_ANY)
+        self._diagram: Diagram          = Diagram()
+        self._canvas:  VisualizerCanvas = VisualizerCanvas(self, ID_ANY)
 
         # noinspection PyUnresolvedReferences
         self._canvas.SetSizerProps(expand=True, proportion=1, border=('all', 0))
@@ -97,8 +97,8 @@ class DcelCanvasPanel(SizedPanel):
         self._canvas.SetBackgroundColour(CANVAS_BACKGROUND_COLOUR)
         self._diagram.SetCanvas(self._canvas)
 
-        self._positions: NodePositions                 = NodePositions({})
-        self._shapeMap:  Dict[NodeId, DcelVertexShape] = {}
+        self._positions: NodePositions              = NodePositions({})
+        self._shapeMap:  Dict[NodeId, VertexShape]  = {}
 
         self._edgeShapes: List[EdgeShapeEntry] = []
         self._faceShapes: List[FaceShapeEntry] = []
@@ -148,10 +148,10 @@ class DcelCanvasPanel(SizedPanel):
         for nodeId, _vertexInstance in dcel.vertexDict.items():
 
             pos: CanvasPoint = positions.get(nodeId, CanvasPoint((DEFAULT_NODE_X * NODE_SPREAD_FACTOR, DEFAULT_NODE_Y * NODE_SPREAD_FACTOR)))
-            circle: DcelVertexShape = DcelVertexShape(VERTEX_CIRCLE_DIAMETER)
+            circle: VertexShape = VertexShape(VERTEX_CIRCLE_DIAMETER)
             circle.SetX(pos[0])
-            circle.SetY(pos[1])
             circle.AddText(str(nodeId))
+            circle.SetY(pos[1])
             circle.SetFont(Font(VERTEX_FONT_SIZE, FONTFAMILY_SWISS, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD))
             circle.SetTextColour('WHITE')
 
@@ -188,8 +188,8 @@ class DcelCanvasPanel(SizedPanel):
             vId: NodeId = halfEdge.twin.origin.id
 
             if uId in self._shapeMap and vId in self._shapeMap:
-                c1: DcelVertexShape = self._shapeMap[uId]
-                c2: DcelVertexShape = self._shapeMap[vId]
+                c1: VertexShape = self._shapeMap[uId]
+                c2: VertexShape = self._shapeMap[vId]
 
                 posU: CanvasPoint = positions.get(uId, CanvasPoint((0.0, 0.0)))
                 posV: CanvasPoint = positions.get(vId, CanvasPoint((0.0, 0.0)))
@@ -219,7 +219,7 @@ class DcelCanvasPanel(SizedPanel):
                 c1.AddLine(line, c2)
                 self._diagram.AddShape(line)
 
-                edgeLabel: DcelBadgeShape = DcelBadgeShape(EDGE_LABEL_WIDTH, EDGE_LABEL_HEIGHT)
+                edgeLabel: BadgeShape = BadgeShape(EDGE_LABEL_WIDTH, EDGE_LABEL_HEIGHT)
                 edgeLabel.SetCornerRadius(EDGE_LABEL_CORNER_RADIUS)
                 edgeLabel.SetX(midX)
                 edgeLabel.SetY(midY)
@@ -297,7 +297,7 @@ class DcelCanvasPanel(SizedPanel):
                 else:
                     offsetY = FACE_BADGE_OFFSET_Y
                 isOuter: bool = (faceId == outerFaceId)
-                faceBadge: DcelBadgeShape = self._createFaceBadge(
+                faceBadge: BadgeShape = self._createFaceBadge(
                     faceId,
                     faceInstance,
                     faceCenter[0],
@@ -349,7 +349,7 @@ class DcelCanvasPanel(SizedPanel):
         x: float,
         y: float,
         isOuter: bool,
-    ) -> DcelBadgeShape:
+    ) -> BadgeShape:
         """
         Create and configure a styled face badge shape with tooltip.
 
@@ -361,9 +361,9 @@ class DcelCanvasPanel(SizedPanel):
             isOuter: True if this face is the unbounded outer face.
 
         Returns:
-            Configured DcelBadgeShape instance.
+            Configured BadgeShape instance.
         """
-        faceBadge: DcelBadgeShape = DcelBadgeShape(FACE_BADGE_WIDTH, FACE_BADGE_HEIGHT)
+        faceBadge: BadgeShape = BadgeShape(FACE_BADGE_WIDTH, FACE_BADGE_HEIGHT)
         faceBadge.SetCornerRadius(FACE_BADGE_CORNER_RADIUS)
         faceBadge.SetX(x)
         faceBadge.SetY(y)
@@ -400,7 +400,7 @@ class DcelCanvasPanel(SizedPanel):
         self._positions[nodeId] = CanvasPoint((newX, newY))
 
         if nodeId in self._shapeMap:
-            circle: DcelVertexShape = self._shapeMap[nodeId]
+            circle: VertexShape = self._shapeMap[nodeId]
             circle.SetX(newX)
             circle.SetY(newY)
 

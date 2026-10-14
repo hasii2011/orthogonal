@@ -14,10 +14,10 @@ from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
 
-INSPECTOR_FONT_SIZE:  int = 12
+INSPECTOR_FONT_SIZE: int = 12
 
 
-class DcelInspectorPanel(SizedPanel):
+class InspectorPanel(SizedPanel):
     """
     Notebook panel displaying tabular inspection of DCEL Vertices, Half-Edges, and Faces.
     """
@@ -70,7 +70,11 @@ class DcelInspectorPanel(SizedPanel):
         rowIndex: int = 0
         for nodeKey, vertexInstance in sorted(dcel.vertexDict.items(), key=lambda pair: str(pair[0])):
             self._vertexList.InsertItem(rowIndex, str(nodeKey))
-            incidentStr: str = str(vertexInstance.incidentEdge.id) if vertexInstance.hasIncidentEdge else 'Uninitialized'
+            incidentStr: str
+            if vertexInstance.hasIncidentEdge:
+                incidentStr = str(vertexInstance.incidentEdge.id)
+            else:
+                incidentStr = 'Uninitialized'
             self._vertexList.SetItem(rowIndex, 1, incidentStr)
             rowIndex += 1
 
@@ -90,7 +94,11 @@ class DcelInspectorPanel(SizedPanel):
         rowIndex = 0
         for faceKey, faceInstance in sorted(dcel.faceDict.items(), key=lambda pair: str(pair[0])):
             self._faceList.InsertItem(rowIndex, str(faceKey))
-            incidentEdgeStr: str = str(faceInstance.incidentEdge.id) if faceInstance.hasIncidentEdge else 'Uninitialized'
+            incidentEdgeStr: str
+            if faceInstance.hasIncidentEdge:
+                incidentEdgeStr = str(faceInstance.incidentEdge.id)
+            else:
+                incidentEdgeStr = 'Uninitialized'
             self._faceList.SetItem(rowIndex, 1, incidentEdgeStr)
             cycleStr: str = ' → '.join(str(n) for n in faceInstance.nodes_id)
             self._faceList.SetItem(rowIndex, 2, f'[{cycleStr}]')

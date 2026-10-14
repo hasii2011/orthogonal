@@ -9,11 +9,11 @@ from wx import MouseEvent
 from wx.lib.ogl import Shape
 from wx.lib.ogl import ShapeCanvas
 
-from tests.demo.dcelvisualizer.shapes.DcelVertexShape import DcelVertexShape
-from tests.demo.dcelvisualizer.shapes.DcelBadgeShape import DcelBadgeShape
+from tests.demo.dcelvisualizer.shapes.VertexShape import VertexShape
+from tests.demo.dcelvisualizer.shapes.BadgeShape import BadgeShape
 
 
-class DcelShapeCanvas(ShapeCanvas):
+class VisualizerCanvas(ShapeCanvas):
     """
     ShapeCanvas subclass that relays empty-space left clicks to the top-level frame.
     """
@@ -40,7 +40,7 @@ class DcelShapeCanvas(ShapeCanvas):
         logicalPos: Point = self.CalcUnscrolledPosition(evt.GetPosition())
         shape: Optional[Shape]
         shape, _ = self.FindShape(float(logicalPos.x), float(logicalPos.y))
-        if isinstance(shape, (DcelVertexShape, DcelBadgeShape)):
+        if isinstance(shape, (VertexShape, BadgeShape)):
             tooltipText: str = shape.tooltipText
             if self._currentToolTipText != tooltipText:
                 self._currentToolTipText = tooltipText
@@ -60,10 +60,10 @@ class DcelShapeCanvas(ShapeCanvas):
             y: Logical Y coordinate of click.
             keys: Modifier key bitmask.
         """
-        from tests.demo.dcelvisualizer.DcelVisualizerFrame import DcelVisualizerFrame
+        from tests.demo.dcelvisualizer.VisualizerFrame import VisualizerFrame
 
         topFrame: Window = self.GetTopLevelParent()
 
-        assert isinstance(topFrame, DcelVisualizerFrame), 'Top-level parent must be DcelVisualizerFrame'
+        assert isinstance(topFrame, VisualizerFrame), 'Top-level parent must be VisualizerFrame'
 
         topFrame.onCanvasClick(float(x), float(y))

@@ -1,20 +1,21 @@
 
-from wx.lib.ogl import CircleShape
+from wx.lib.ogl import RectangleShape
 
 
-class DcelVertexShape(CircleShape):
+class BadgeShape(RectangleShape):
     """
-    OGL circle shape representing a DCEL graph vertex, with an explicit typed tooltipText property.
+    OGL rectangle badge shape with an explicit typed public tooltipText property for visualizer tooltips.
     """
 
-    def __init__(self, diameter: float):
+    def __init__(self, width: float, height: float):
         """
-        Construct a DcelVertexShape.
+        Construct a BadgeShape.
 
         Args:
-            diameter: Diameter of the circle in pixels.
+            width: Width of the badge in pixels.
+            height: Height of the badge in pixels.
         """
-        super().__init__(diameter)
+        super().__init__(width, height)
         self._tooltipText: str = ''
 
     @property
