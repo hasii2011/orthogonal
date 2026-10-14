@@ -96,7 +96,7 @@ class Compaction:
                     side = (side + 2) % 4
 
         # update other face's edge side based on ext_face's edge side
-        faces_dfs = list(self.planar.dfs_face_order())
+        faces_dfs = list(self.planar.dfsFaceOrder())
 
         # all faces in dfs order
         has_updated = {faces_dfs[0].id}
@@ -179,7 +179,7 @@ class Compaction:
 
     def layout(self):
         pos: dict = {}
-        for face in self.planar.dfs_face_order():
+        for face in self.planar.dfsFaceOrder():
             for i, u in enumerate(face.nodes_id):
                 if not pos:
                     pos[u] = (0, 0)  # initial point
