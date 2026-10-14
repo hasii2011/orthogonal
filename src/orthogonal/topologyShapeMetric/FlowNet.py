@@ -7,6 +7,7 @@ from networkx import MultiDiGraph
 from networkx import min_cost_flow
 
 from orthogonal.TopologyTypes import FaceId
+from orthogonal.TopologyTypes import FlowDict
 from orthogonal.TopologyTypes import FlowEdgeKey
 from orthogonal.TopologyTypes import NodeId
 
@@ -76,22 +77,22 @@ class FlowNet(MultiDiGraph):
         """
         self.add_node(faceId, demand=(2 * degree + 4) if isExternal else (2 * degree - 4))
 
-    def minCostFlow(self) -> dict:
+    def minCostFlow(self) -> FlowDict:
         """
         Compute the minimum cost flow for the network.
 
         Returns:
-            Dictionary of edge flows fulfilling demand at minimum cost.
+            FlowDict of edge flows fulfilling demand at minimum cost.
         """
         baseDict, newMdg = self.__split()
-        flowDict: dict = min_cost_flow(newMdg)
+        flowDict: FlowDict = FlowDict(min_cost_flow(newMdg))
         for u, v, key in self.edges:
             flowDict[u][v][key] += baseDict[u][v][key]
 
         self._cost = self.costOfFlow(flowDict)
         return flowDict
 
-    def costOfFlow(self, flowDict: dict) -> int:
+    def costOfFlow(self, flowDict: FlowDict) -> int:
         """
         Calculate the total cost of the flow assignment.
 
@@ -106,7 +107,7 @@ class FlowNet(MultiDiGraph):
             cost += flowDict[u][v][key] * self[u][v][key]['weight']
         return cost
 
-    def __getDemand(self, flowDict: dict, node: NodeId | FaceId) -> int:
+    def __getDemand(self, flowDict: FlowDict, node: NodeId | FaceId) -> int:
         """
         Calculate the net flow demand (inflow minus outflow) for a node.
 
@@ -127,14 +128,14 @@ class FlowNet(MultiDiGraph):
         )
         return inFlow - outFlow
 
-    def __split(self) -> Tuple[dict, MultiDiGraph]:
+    def __split(self) -> Tuple[FlowDict, MultiDiGraph]:
         """
         Transform the network with non-zero lower bounds into a zero lower-bound circulation graph.
 
         Returns:
             Tuple of base lower-bound flows and transformed MultiDiGraph.
         """
-        baseDict: dict = defaultdict(lambda: defaultdict(dict))
+        baseDict: FlowDict = FlowDict(defaultdict(lambda: defaultdict(dict)))
         newMdg: MultiDiGraph = MultiDiGraph()
 
         for u, v, key in self.edges:

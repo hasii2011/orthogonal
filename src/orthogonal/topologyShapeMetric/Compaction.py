@@ -22,12 +22,12 @@ class Compaction:
         self.logger: Logger = getLogger(__name__)
 
         self._orthogonalization: Orthogonalization = orthogonalization
-        if orthogonalization.flow_network.cost == 0:
+        if orthogonalization.flowNetwork.cost == 0:
             self.planar = orthogonalization.planar
-            self.flow_dict = orthogonalization.flow_dict
+            self.flow_dict = orthogonalization.flowDict
         else:
             self.planar = orthogonalization.planar.copy()
-            self.flow_dict = copy.deepcopy(orthogonalization.flow_dict)
+            self.flow_dict = copy.deepcopy(orthogonalization.flowDict)
 
         self.bend_point_processor()
         self.edge_side = self.face_side_processor()

@@ -6,6 +6,7 @@ from unittest import main as unitTestMain
 from tests.ProjectTestBase import ProjectTestBase
 
 from orthogonal.topologyShapeMetric.FlowNet import FlowNet
+from orthogonal.TopologyTypes import FlowDict
 
 
 class TestFlowNet(ProjectTestBase):
@@ -102,10 +103,10 @@ class TestFlowNet(ProjectTestBase):
         flowNet.addFaceToFaceEdge('f1', 'f2', 'e1')
         flowNet.addFaceToFaceEdge('f2', 'f3', 'e2')
 
-        mockFlowDict: dict = {
+        mockFlowDict: FlowDict = FlowDict({
             'f1': {'f2': {'e1': 3}},
             'f2': {'f3': {'e2': 2}}
-        }
+        })
         calculatedCost: int = flowNet.costOfFlow(mockFlowDict)
         self.assertEqual(5, calculatedCost, 'Total cost should equal sum of flow times weight (3*1 + 2*1)')
 
