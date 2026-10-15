@@ -43,6 +43,12 @@ from tests.demo.dcelvisualizer.shapes.VertexShape import VertexShape
 from tests.demo.dcelvisualizer.shapes.BadgeShape import BadgeShape
 from tests.demo.dcelvisualizer.VertexShapeEvtHandler import VertexShapeEvtHandler
 
+from tests.demo.CanvasConstants import BORDER_LIGHT_GREY
+from tests.demo.CanvasConstants import CANVAS_BACKGROUND_COLOUR
+from tests.demo.CanvasConstants import DEFAULT_NODE_COLOUR
+from tests.demo.CanvasConstants import INSERTED_NODE_COLOUR
+from tests.demo.CanvasConstants import VERTEX_FONT_SIZE
+
 NODE_SPREAD_FACTOR:       float = 1.35
 DEFAULT_NODE_X:           float = 250.0
 DEFAULT_NODE_Y:           float = 200.0
@@ -62,17 +68,13 @@ FACE_BADGE_OFFSET_Y:      float = 18.0
 
 MIN_EDGE_DISTANCE:        float = 0.001
 
-VERTEX_FONT_SIZE:     int = 12
 EDGE_LABEL_FONT_SIZE: int = 12
 FACE_BADGE_FONT_SIZE: int = 12
 
-CANVAS_BACKGROUND_COLOUR:     Colour = Colour(255, 255, 255)
-INSERTED_NODE_COLOUR:         Colour = Colour(244, 63, 94)
-DEFAULT_NODE_COLOUR:          Colour = Colour(96, 165, 250)
 EDGE_LABEL_BACKGROUND_COLOUR: Colour = Colour(255, 255, 255)
-EDGE_LABEL_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
+EDGE_LABEL_BORDER_COLOUR:     Colour = BORDER_LIGHT_GREY
 FACE_BADGE_BACKGROUND_COLOUR: Colour = Colour(241, 245, 249)
-FACE_BADGE_BORDER_COLOUR:     Colour = Colour(203, 213, 225)
+FACE_BADGE_BORDER_COLOUR:     Colour = BORDER_LIGHT_GREY
 
 class CanvasPanel(SizedPanel):
     """
