@@ -18,6 +18,8 @@ from wx import FONTWEIGHT_BOLD
 from wx import Font
 from wx import ID_ANY
 from wx import Pen
+from wx import TRANSPARENT_BRUSH
+from wx import TRANSPARENT_PEN
 from wx import Window
 
 from wx.lib.ogl import ARROW_ARROW
@@ -119,7 +121,7 @@ class OrthoCanvasPanel(SizedPanel):
     @property
     def showDualFaces(self) -> bool:
         """
-        True if dual face centroid badges should be rendered.
+        True if dual face center badges should be rendered.
         """
         return self._showDualFaces
 
@@ -176,7 +178,7 @@ class OrthoCanvasPanel(SizedPanel):
 
     def dragVertex(self, nodeId: NodeId, newX: float, newY: float):
         """
-        Update vertex position, incident edge lines, dual face centroids, and circulation arcs in-place while dragging.
+        Update vertex position, incident edge lines, dual face centers, and circulation arcs in-place while dragging.
 
         Args:
             nodeId: Identifier of the vertex being dragged.
@@ -197,7 +199,7 @@ class OrthoCanvasPanel(SizedPanel):
                 if endPoints is not None:
                     line.SetEnds(endPoints[0], endPoints[1], endPoints[2], endPoints[3])
 
-        # Recalculate face centroids affected by moved node
+        # Recalculate face centers affected by moved node
         for faceId, cycleNodes, isExternal, faceBadge in self._faceBadgeEntries:
             if faceId in self._facePositions:
                 continue
@@ -331,7 +333,7 @@ class OrthoCanvasPanel(SizedPanel):
         planar: Planarization = self._orthogonal.planar
         flowDict: FlowDict = self._orthogonal.flowDict
 
-        faceCentroidDict: Dict[FaceId, CanvasPoint] = self._computeFaceCentroids(planar)
+        faceCenterDict: Dict[FaceId, CanvasPoint] = self._computeFaceCenters(planar)
 
         # 1. Primal Layer: Vertices
         if self._showPrimalGraph:
@@ -380,17 +382,20 @@ class OrthoCanvasPanel(SizedPanel):
                     self._primalEdgeLines.append((u, v, edgeLine))
 
         # 2. Dual Layer: Faces
-        if self._showDualFaces:
-            for face in planar.dcel.faceDict.values():
-                faceId: FaceId = face.id
-                isExternal: bool = (face is planar.externalFace)
-                degree: int = len(face)
-                demandVal: int = (2 * degree + 4) if isExternal else (2 * degree - 4)
+        for face in planar.dcel.faceDict.values():
+            faceId: FaceId = face.id
+            isExternal: bool = (face is planar.externalFace)
+            degree: int = len(face)
+            demandVal: int = (2 * degree + 4) if isExternal else (2 * degree - 4)
 
-                centroid: CanvasPoint = faceCentroidDict.get(faceId, CanvasPoint((250.0, 100.0)))
-                faceBadge: BadgeShape = BadgeShape(FACE_BADGE_WIDTH, FACE_BADGE_HEIGHT)
-                faceBadge.SetX(centroid[0])
-                faceBadge.SetY(centroid[1])
+            faceCenter: CanvasPoint = faceCenterDict.get(faceId, CanvasPoint((250.0, 100.0)))
+            badgeWidth: float = FACE_BADGE_WIDTH if self._showDualFaces else 4.0
+            badgeHeight: float = FACE_BADGE_HEIGHT if self._showDualFaces else 4.0
+            faceBadge: BadgeShape = BadgeShape(badgeWidth, badgeHeight)
+            faceBadge.SetX(faceCenter[0])
+            faceBadge.SetY(faceCenter[1])
+
+            if self._showDualFaces:
                 badgeColour: Colour = EXTERNAL_FACE_BADGE_COLOUR if isExternal else INTERNAL_FACE_BADGE_COLOUR
                 faceBadge.SetPen(Pen(Colour(148, 163, 184), 1))
                 faceBadge.SetBrush(Brush(badgeColour))
@@ -401,27 +406,31 @@ class OrthoCanvasPanel(SizedPanel):
                 faceBadge.AddText(labelText)
                 typeLabel: str = 'External Face' if isExternal else 'Internal Face'
                 faceBadge.tooltipText = f'{typeLabel}: {faceId}\nDegree: {degree}\nDemand: {demandVal}'
+            else:
+                faceBadge.SetPen(TRANSPARENT_PEN)
+                faceBadge.SetBrush(TRANSPARENT_BRUSH)
+                faceBadge.SetDraggable(False)
 
-                faceEvtHandler: OrthoShapeEvtHandler = OrthoShapeEvtHandler(
-                    faceId,
-                    self._canvas,
-                    self.dragFace,
-                    self.onFaceMoved,
-                )
-                faceEvtHandler.SetShape(faceBadge)
-                faceEvtHandler.SetPreviousHandler(faceBadge.GetEventHandler())
-                faceBadge.SetEventHandler(faceEvtHandler)
+            faceEvtHandler: OrthoShapeEvtHandler = OrthoShapeEvtHandler(
+                faceId,
+                self._canvas,
+                self.dragFace,
+                self.onFaceMoved,
+            )
+            faceEvtHandler.SetShape(faceBadge)
+            faceEvtHandler.SetPreviousHandler(faceBadge.GetEventHandler())
+            faceBadge.SetEventHandler(faceEvtHandler)
 
-                faceBadge.Show(True)
-                self._diagram.AddShape(faceBadge)
-                faceBadge.SetCanvas(self._canvas)
-                self._faceBadgeDict[faceId] = faceBadge
+            faceBadge.Show(True)
+            self._diagram.AddShape(faceBadge)
+            faceBadge.SetCanvas(self._canvas)
+            self._faceBadgeDict[faceId] = faceBadge
 
-                cycleNodes: List[NodeId] = [v.id for v in face.surroundVertices()]
-                self._faceBadgeEntries.append((faceId, cycleNodes, isExternal, faceBadge))
+            cycleNodes: List[NodeId] = [v.id for v in face.surroundVertices()]
+            self._faceBadgeEntries.append((faceId, cycleNodes, isExternal, faceBadge))
 
         # 3. FlowNet Layer: Arcs
-        if self._showFlowNetArcs and self._showPrimalGraph and self._showDualFaces:
+        if self._showFlowNetArcs and self._showPrimalGraph:
             # Vertex to Face arcs
             for vertexId in self._vertexShapeDict:
                 for faceId in self._faceBadgeDict:
@@ -457,13 +466,13 @@ class OrthoCanvasPanel(SizedPanel):
 
         # 4. Solved Orthogonal Shape: Angle Wedges & Bend Badges
         if self._showAngleBends and self._showPrimalGraph:
-            self._renderAngleAndBendBadges(planar, flowDict, faceCentroidDict)
+            self._renderAngleAndBendBadges(planar, flowDict, faceCenterDict)
 
         self._diagram.ShowAll(True)
         self._canvas.Draw()
         self._canvas.Refresh()
 
-    def _renderAngleAndBendBadges(self, planar: Planarization, flowDict: FlowDict, faceCentroids: Dict[FaceId, CanvasPoint]):
+    def _renderAngleAndBendBadges(self, planar: Planarization, flowDict: FlowDict, faceCenters: Dict[FaceId, CanvasPoint]):
         """
         Render corner angle badges near each vertex pointing towards its incident face.
         """
@@ -480,8 +489,8 @@ class OrthoCanvasPanel(SizedPanel):
                     continue
 
                 angleDegrees: int = flowUnits * 90
-                # Vector towards face centroid
-                fcX, fcY = faceCentroids.get(faceId, CanvasPoint((vx, vy - 60.0)))
+                # Vector towards face center
+                fcX, fcY = faceCenters.get(faceId, CanvasPoint((vx, vy - 60.0)))
                 deltaX: float = fcX - vx
                 deltaY: float = fcY - vy
                 dist: float = sqrt(deltaX * deltaX + deltaY * deltaY)
@@ -510,11 +519,11 @@ class OrthoCanvasPanel(SizedPanel):
                 angleBadge.SetCanvas(self._canvas)
                 self._angleBadgeEntries.append((vertexId, faceId, angleBadge, flowUnits))
 
-    def _computeFaceCentroids(self, planar: Planarization) -> Dict[FaceId, CanvasPoint]:
+    def _computeFaceCenters(self, planar: Planarization) -> Dict[FaceId, CanvasPoint]:
         """
-        Compute 2D canvas coordinates for each face centroid.
+        Compute 2D canvas coordinates for each face center.
         """
-        centroids: Dict[FaceId, CanvasPoint] = {}
+        faceCenters: Dict[FaceId, CanvasPoint] = {}
         minX: float = 999999.0
         maxX: float = -999999.0
         minY: float = 999999.0
@@ -529,19 +538,19 @@ class OrthoCanvasPanel(SizedPanel):
         for face in planar.dcel.faceDict.values():
             faceId: FaceId = face.id
             if faceId in self._facePositions:
-                centroids[faceId] = self._facePositions[faceId]
+                faceCenters[faceId] = self._facePositions[faceId]
                 continue
 
             if face is planar.externalFace:
                 # Place external face badge above the graph bounding box
                 midX: float = (minX + maxX) / 2.0 if minX <= maxX else 300.0
                 extY: float = max(40.0, minY - 70.0) if minY <= maxY else 50.0
-                centroids[faceId] = CanvasPoint((midX, extY))
+                faceCenters[faceId] = CanvasPoint((midX, extY))
                 continue
 
             cycleVertices: List[Vertex] = list(face.surroundVertices())
             if not cycleVertices:
-                centroids[faceId] = CanvasPoint((300.0, 300.0))
+                faceCenters[faceId] = CanvasPoint((300.0, 300.0))
                 continue
 
             sumX: float = 0.0
@@ -555,8 +564,8 @@ class OrthoCanvasPanel(SizedPanel):
                     validCount += 1
 
             if validCount > 0:
-                centroids[faceId] = CanvasPoint((sumX / validCount, sumY / validCount))
+                faceCenters[faceId] = CanvasPoint((sumX / validCount, sumY / validCount))
             else:
-                centroids[faceId] = CanvasPoint((300.0, 300.0))
+                faceCenters[faceId] = CanvasPoint((300.0, 300.0))
 
-        return centroids
+        return faceCenters

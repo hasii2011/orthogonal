@@ -31,8 +31,8 @@ from orthogonal.TopologyTypes import NodeId
 
 from orthogonal.doublyConnectedEdgeList.Face import Face
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
+from tests.demo.CanvasTypes import CanvasPoint
 
-from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
 from tests.demo.dcelvisualizer.VisualizerTypes import NodePositions
 from tests.demo.dcelvisualizer.VisualizerTypes import CycleNodes
 from tests.demo.dcelvisualizer.VisualizerTypes import EdgeShapeEntry

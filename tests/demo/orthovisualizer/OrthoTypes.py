@@ -2,17 +2,14 @@
 Type definitions for the Orthogonalization and FlowNet visualizer.
 """
 
-from typing import Dict
 from typing import NamedTuple
-from typing import NewType
-from typing import Tuple
 
 from orthogonal.TopologyTypes import FaceId
 from orthogonal.TopologyTypes import FlowEdgeKey
 from orthogonal.TopologyTypes import NodeId
 
-CanvasPoint   = NewType('CanvasPoint',   Tuple[float, float])
-NodePositions = NewType('NodePositions', Dict[NodeId, CanvasPoint])
+from tests.demo.CanvasTypes import CanvasPoint
+from tests.demo.CanvasTypes import NodePositions
 
 
 class AngleEntry(NamedTuple):

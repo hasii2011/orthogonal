@@ -29,12 +29,15 @@ from wx.lib.sized_controls import SizedPanel
 
 from orthogonal.TopologyTypes import NodeId
 from orthogonal.doublyConnectedEdgeList.DoublyConnectedEdgeList import DoublyConnectedEdgeList
+from tests.demo.CanvasTypes import CanvasPoint
 from tests.demo.dcelvisualizer.CanvasPanel import NODE_SPREAD_FACTOR
 from tests.demo.dcelvisualizer.CanvasPanel import CanvasPanel
 from tests.demo.dcelvisualizer.DcelDataSet import DcelDataSet
+from tests.demo.dcelvisualizer.DcelDataSet import createDefaultDataSets
 from tests.demo.dcelvisualizer.InspectorPanel import InspectorPanel
-from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
+
 from tests.demo.dcelvisualizer.VisualizerTypes import NodePositions
+from tests.demo.dcelvisualizer.VisualizerTypes import StepState
 
 from tests.demo.dcelvisualizer.DcelStep import DcelStep
 from tests.demo.dcelvisualizer.DcelStep import DcelSteps
@@ -55,7 +58,7 @@ class VisualizerFrame(SizedFrame):
         """
         super().__init__(None, ID_ANY, 'DCEL Visualizer - wxPython ogl', size=Size(DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT))
 
-        self._datasets: List[DcelDataSet] = self._createDatasets()
+        self._datasets: List[DcelDataSet] = createDefaultDataSets()
         self._currentDatasetIndex: int = 0
         self._currentStepIndex: int = 0
         self._operations: DcelSteps = DcelSteps(list(self._datasets[0].plannedSteps))
@@ -66,75 +69,6 @@ class VisualizerFrame(SizedFrame):
 
         self._initUi()
         self._loadDataset(0)
-
-    def _createDatasets(self) -> List[DcelDataSet]:
-        """
-        Construct preset datasets: Empty (Blank Canvas), Small (K3), Medium, and Large.
-
-        Returns:
-            List of DcelDataSet instances.
-        """
-        emptyPreset: DcelDataSet = DcelDataSet(
-            name='Empty (Blank Canvas)',
-            plannedSteps=DcelSteps([]),
-        )
-
-        smallPreset: DcelDataSet = DcelDataSet(
-            name='Small (Triangle K3)',
-            plannedSteps=DcelSteps([
-                DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 90.0))),
-                DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 370.0))),
-                DcelStep('add_vertex', 'v3', position=CanvasPoint((100.0, 370.0))),
-                DcelStep('add_edge', 'v1', 'v2'),
-                DcelStep('add_edge', 'v2', 'v3'),
-                DcelStep('add_edge', 'v3', 'v1'),
-                DcelStep('subdivide', 'v1', 'v2', newNode='v12'),
-                DcelStep('subdivide', 'v2', 'v3', newNode='v23'),
-            ]),
-        )
-
-        mediumPreset: DcelDataSet = DcelDataSet(
-            name='Medium (Diamond K4 - e)',
-            plannedSteps=DcelSteps([
-                DcelStep('add_vertex', 'v1', position=CanvasPoint((280.0, 70.0))),
-                DcelStep('add_vertex', 'v2', position=CanvasPoint((460.0, 230.0))),
-                DcelStep('add_vertex', 'v3', position=CanvasPoint((280.0, 390.0))),
-                DcelStep('add_vertex', 'v4', position=CanvasPoint((100.0, 230.0))),
-                DcelStep('add_edge', 'v1', 'v2'),
-                DcelStep('add_edge', 'v2', 'v3'),
-                DcelStep('add_edge', 'v3', 'v4'),
-                DcelStep('add_edge', 'v4', 'v1'),
-                DcelStep('add_edge', 'v2', 'v4'),
-                DcelStep('subdivide', 'v2', 'v4', newNode='v24'),
-                DcelStep('subdivide', 'v1', 'v2', newNode='v12'),
-                DcelStep('subdivide', 'v3', 'v4', newNode='v34'),
-            ]),
-        )
-
-        largePreset: DcelDataSet = DcelDataSet(
-            name='Large (2x3 Planar Grid)',
-            plannedSteps=DcelSteps([
-                DcelStep('add_vertex', 'n1', position=CanvasPoint((120.0, 110.0))),
-                DcelStep('add_vertex', 'n2', position=CanvasPoint((280.0, 110.0))),
-                DcelStep('add_vertex', 'n3', position=CanvasPoint((440.0, 110.0))),
-                DcelStep('add_vertex', 'n4', position=CanvasPoint((120.0, 350.0))),
-                DcelStep('add_vertex', 'n5', position=CanvasPoint((280.0, 350.0))),
-                DcelStep('add_vertex', 'n6', position=CanvasPoint((440.0, 350.0))),
-                DcelStep('add_edge', 'n1', 'n2'),
-                DcelStep('add_edge', 'n2', 'n3'),
-                DcelStep('add_edge', 'n4', 'n5'),
-                DcelStep('add_edge', 'n5', 'n6'),
-                DcelStep('add_edge', 'n1', 'n4'),
-                DcelStep('add_edge', 'n2', 'n5'),
-                DcelStep('add_edge', 'n3', 'n6'),
-                DcelStep('subdivide', 'n1', 'n2', newNode='n12'),
-                DcelStep('subdivide', 'n2', 'n5', newNode='n25'),
-                DcelStep('subdivide', 'n5', 'n6', newNode='n56'),
-                DcelStep('subdivide', 'n4', 'n5', newNode='n45'),
-            ]),
-        )
-
-        return [emptyPreset, smallPreset, mediumPreset, largePreset]
 
     def _initUi(self):
         """
@@ -370,7 +304,7 @@ class VisualizerFrame(SizedFrame):
     def _computeDcelAtStep(
         self,
         stepIndex: int,
-    ) -> Tuple[DoublyConnectedEdgeList, NodePositions, Optional[NodeId], str]:
+    ) -> StepState:
         """
         Reconstruct DCEL from an empty state by replaying steps up to stepIndex.
 
@@ -378,14 +312,15 @@ class VisualizerFrame(SizedFrame):
             stepIndex: Target step count.
 
         Returns:
-            Tuple of (dcel, positions, lastInsertedNode, lastActionDescription).
+            StepState encapsulating dcel, positions, lastInsertedNode, and lastAction.
         """
         dcel: DoublyConnectedEdgeList
         positions: NodePositions
         lastInserted: Optional[NodeId]
         lastAction: str
         _, dcel, positions, lastInserted, lastAction = self._replaySteps(stepIndex)
-        return dcel, positions, lastInserted, lastAction
+
+        return StepState(dcel, positions, lastInserted, lastAction)
 
     def _refreshState(self):
         """
@@ -401,13 +336,10 @@ class VisualizerFrame(SizedFrame):
         self._btnStepForward.Enable(self._currentStepIndex < totalSteps)
         self._btnStepAll.Enable(self._currentStepIndex < totalSteps)
 
-        dcel: DoublyConnectedEdgeList
-        positions: NodePositions
-        insertedNode: Optional[NodeId]
-        lastAction: str
-        dcel, positions, insertedNode, lastAction = self._computeDcelAtStep(self._currentStepIndex)
+        stepState: StepState = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = stepState.dcel
 
-        self._canvasPanel.renderDcel(dcel, positions, insertedNode)
+        self._canvasPanel.renderDcel(dcel, stepState.positions, stepState.insertedNode)
         self._inspectorPanel.updateTables(dcel)
 
         self._updateAdhocChoices(dcel)
@@ -418,7 +350,7 @@ class VisualizerFrame(SizedFrame):
         numF: int = len(dcel.faceDict)
         eulerVal: int = numV - numE + numF
 
-        self._statusBar.SetStatusText(f'Step {self._currentStepIndex}/{totalSteps}: {lastAction}', 0)
+        self._statusBar.SetStatusText(f'Step {self._currentStepIndex}/{totalSteps}: {stepState.lastAction}', 0)
         self._statusBar.SetStatusText(f'V={numV} E={numE} F={numF} (V-E+F={eulerVal})', 1)
 
     def onDatasetChanged(self, _event: CommandEvent):
@@ -438,8 +370,7 @@ class VisualizerFrame(SizedFrame):
         Returns:
             Next available node identifier.
         """
-        dcel: DoublyConnectedEdgeList
-        dcel, _, _, _ = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = self._computeDcelAtStep(self._currentStepIndex).dcel
         idx: int = 1
         while f'v{idx}' in dcel.vertexDict:
             idx += 1
@@ -505,8 +436,7 @@ class VisualizerFrame(SizedFrame):
         if not nodeName:
             nodeName = self._getNextVertexName()
 
-        dcel: DoublyConnectedEdgeList
-        dcel, _, _, _ = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = self._computeDcelAtStep(self._currentStepIndex).dcel
         if nodeName in dcel.vertexDict:
             self._statusBar.SetStatusText(f'Vertex {nodeName!r} already exists', 0)
             return
@@ -551,9 +481,9 @@ class VisualizerFrame(SizedFrame):
         if not nodeName:
             nodeName = self._getNextVertexName()
 
-        dcel: DoublyConnectedEdgeList
-        positions: NodePositions
-        dcel, positions, _, _ = self._computeDcelAtStep(self._currentStepIndex)
+        stepState: StepState = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = stepState.dcel
+        positions: NodePositions = stepState.positions
         if nodeName in dcel.vertexDict:
             self._statusBar.SetStatusText(f'Vertex {nodeName!r} already exists', 0)
             return
@@ -609,8 +539,7 @@ class VisualizerFrame(SizedFrame):
             _event: wx CommandEvent.
         """
         selectedU: str = self._adhocUChoice.GetStringSelection()
-        dcel: DoublyConnectedEdgeList
-        dcel, _, _, _ = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = self._computeDcelAtStep(self._currentStepIndex).dcel
         self._updateAdhocVChoices(dcel, selectedU)
 
     def onReset(self, _event: CommandEvent):
@@ -715,8 +644,8 @@ class VisualizerFrame(SizedFrame):
         if uSelection == vSelection:
             return
 
-        dcel: DoublyConnectedEdgeList
-        dcel, _, _, _ = self._computeDcelAtStep(self._currentStepIndex)
+        dcel: DoublyConnectedEdgeList = self._computeDcelAtStep(self._currentStepIndex).dcel
+
         if (uSelection, vSelection) not in dcel.halfEdgeDict:
             self._statusBar.SetStatusText(f'Cannot subdivide: edge ({uSelection}, {vSelection}) does not exist in current DCEL', 0)
             return

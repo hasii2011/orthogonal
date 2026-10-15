@@ -5,7 +5,7 @@ from typing import NewType
 from typing import Optional
 
 from orthogonal.TopologyTypes import NodeId
-from tests.demo.dcelvisualizer.VisualizerTypes import CanvasPoint
+from tests.demo.CanvasTypes import CanvasPoint
 
 
 @dataclass(frozen=True)
