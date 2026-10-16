@@ -38,7 +38,7 @@ from orthogonal.topologyShapeMetric.Orthogonalization import Orthogonalization
 from orthogonal.topologyShapeMetric.Planarization import Planarization
 
 from tests.demo.orthovisualizer.OrthoCanvas import OrthoCanvas
-from tests.demo.orthovisualizer.OrthoVertexEvtHandler import OrthoShapeEvtHandler
+from tests.demo.orthovisualizer.OrthoVertexEvtHandler import OrthoVertexEvtHandler
 from tests.demo.dcelvisualizer.shapes.BadgeShape import BadgeShape
 from tests.demo.dcelvisualizer.shapes.VertexShape import VertexShape
 from tests.demo.orthovisualizer.OrthoTypes import CanvasPoint
@@ -334,6 +334,7 @@ class OrthoCanvasPanel(SizedPanel):
         flowDict: FlowDict = self._orthogonal.flowDict
 
         faceCenterDict: Dict[FaceId, CanvasPoint] = self._computeFaceCenters(planar)
+        evtHandler:     OrthoVertexEvtHandler
 
         # 1. Primal Layer: Vertices
         if self._showPrimalGraph:
@@ -351,7 +352,7 @@ class OrthoCanvasPanel(SizedPanel):
                 vertexShape.AddText(str(vertexId))
                 vertexShape.tooltipText = f'Vertex: {vertexId}\nDemand/Supply: -4 (2pi)\nPos: ({int(posX)}, {int(posY)})'
 
-                evtHandler: OrthoShapeEvtHandler = OrthoShapeEvtHandler(
+                evtHandler = OrthoVertexEvtHandler(
                     vertexId,
                     self._canvas,
                     self.dragVertex,
@@ -411,15 +412,15 @@ class OrthoCanvasPanel(SizedPanel):
                 faceBadge.SetBrush(TRANSPARENT_BRUSH)
                 faceBadge.SetDraggable(False)
 
-            faceEvtHandler: OrthoShapeEvtHandler = OrthoShapeEvtHandler(
+            evtHandler = OrthoVertexEvtHandler(
                 faceId,
                 self._canvas,
                 self.dragFace,
                 self.onFaceMoved,
             )
-            faceEvtHandler.SetShape(faceBadge)
-            faceEvtHandler.SetPreviousHandler(faceBadge.GetEventHandler())
-            faceBadge.SetEventHandler(faceEvtHandler)
+            evtHandler.SetShape(faceBadge)
+            evtHandler.SetPreviousHandler(faceBadge.GetEventHandler())
+            faceBadge.SetEventHandler(evtHandler)
 
             faceBadge.Show(True)
             self._diagram.AddShape(faceBadge)

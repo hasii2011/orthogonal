@@ -166,7 +166,12 @@ class CanvasPanel(SizedPanel):
             self._diagram.AddShape(circle)
             circle.SetCanvas(self._canvas)
 
-            evtHandler: VertexShapeEvtHandler = VertexShapeEvtHandler(nodeId, self._canvas)
+            evtHandler: VertexShapeEvtHandler = VertexShapeEvtHandler(
+                nodeId,
+                self._canvas,
+                self._onVertexDragged,
+                self._onVertexMoved,
+            )
             evtHandler.SetShape(circle)
             evtHandler.SetPreviousHandler(circle.GetEventHandler())
 
@@ -448,3 +453,28 @@ class CanvasPanel(SizedPanel):
 
         self._canvas.Draw()
         self._canvas.Refresh()
+
+    def _onVertexDragged(self, elementId: NodeId | FaceId, newX: float, newY: float):
+        """
+        Callback invoked during drag to update node and incident elements in-place.
+
+        Args:
+            elementId: NodeId of the dragged vertex.
+            newX: New X canvas coordinate.
+            newY: New Y canvas coordinate.
+        """
+        self.dragVertex(str(elementId), newX, newY)
+
+    def _onVertexMoved(self, elementId: NodeId | FaceId, newX: float, newY: float):
+        """
+        Callback invoked when drag ends to notify the top-level frame of the committed position.
+
+        Args:
+            elementId: NodeId of the dragged vertex.
+            newX: New X canvas coordinate.
+            newY: New Y canvas coordinate.
+        """
+        topFrame: Window = self.GetTopLevelParent()
+        if hasattr(topFrame, 'onVertexMoved'):
+            topFrame.onVertexMoved(str(elementId), newX, newY)
+
